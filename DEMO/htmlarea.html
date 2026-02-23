@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cyber Crime Reporting</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <!-- Login Page -->
+  <section id="login-page" class="page active">
+    <div class="login-container">
+      <h1>Cyber Crime Portal</h1>
+      <p>Login to continue</p>
+      <div class="login-options">
+        <button onclick="goToReport()">Login as Guest</button>
+        <button onclick="goToReport()">Login as Anti-Crimes</button>
+        <button onclick="goToReport()">Login as Personal Account</button>
+      </div>
+      <div class="social-login">
+        <p>Or login with:</p>
+        <button class="google">Google</button>
+        <button class="gmail">Gmail</button>
+        <button class="mobile">Mobile</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- Report Page -->
+  <section id="report-page" class="page">
+    <div class="report-container">
+      <h1>Report Cyber Crime</h1>
+      <form id="crimeForm">
+        <label>Crime Place:</label>
+        <input type="text" required>
+
+        <label>Date:</label>
+        <input type="date" required>
+
+        <label>Time:</label>
+        <input type="time" required>
+
+        <label>Description:</label>
+        <textarea rows="4" required></textarea>
+
+        <label>Upload Evidence (Max 500MB):</label>
+        <input type="file" id="fileUpload" multiple>
+
+        <button type="submit">Submit Report</button>
+      </form>
+    </div>
+  </section>
+
+  <script src="script.js"></script>
+</body>
+</html>
