@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Officer Dashboard | CyberSecure</title>
+    <link rel="stylesheet" href="admin_dashboard.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+
+    <div class="dashboard-wrapper">
+        <aside class="sidebar">
+            <div class="logo">Cyber<span>Secure</span></div>
+            <nav>
+                <a href="#" class="nav-item active"><i class="fas fa-chart-line"></i> Dashboard</a>
+                
+                <a href="admin_login.html" class="nav-item logout"><i class="fas fa-sign-out-alt"></i> Logout</a>
+            </nav>
+        </aside>
+
+        <main class="content-area">
+            <header class="top-bar">
+                <h1>Crime <span class="cyan-glow">Monitoring Portal</span></h1>
+                <div class="officer-badge">Officer ID: FIA-786</div>
+            </header>
+
+            <section class="stats-grid">
+                <div class="stat-card"><h3>Total Cases</h3><p id="totalCount">2</p></div>
+                <div class="stat-card cyan-border"><h3>Pending</h3><p>1</p></div>
+                <div class="stat-card green-border"><h3>Resolved</h3><p>1</p></div>
+            </section>
+
+            <div class="table-container">
+                <table id="complaintTable">
+                    <thead>
+                        <tr>
+                            <th>Case ID</th>
+                            <th>Victim Name</th>
+                            <th>Crime Type</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr id="row1">
+                            <td>#CS-101</td>
+                            <td>Zeeshan Ali</td>
+                            <td>Identity Theft</td>
+                            <td>
+                                <select class="status-select" onchange="changeStatusColor(this)">
+                                    <option value="incomplete" class="opt-red">Incomplete</option>
+                                    <option value="progress" class="opt-orange" selected>In Progress</option>
+                                    <option value="completed" class="opt-green">Completed</option>
+                                </select>
+                            </td>
+                            <td>
+                                <div class="action-btns">
+                                    <button class="review-btn">Review</button>
+                                    <button class="del-btn" onclick="deleteComplaint('row1')"><i class="fas fa-trash"></i></button>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr id="row2">
+                            <td>#CS-102</td>
+                            <td>Mariam Khan</td>
+                            <td>Bank Fraud</td>
+                            <td>
+                                <select class="status-select" onchange="changeStatusColor(this)">
+                                    <option value="incomplete" class="opt-red">Incomplete</option>
+                                    <option value="progress" class="opt-orange">In Progress</option>
+                                    <option value="completed" class="opt-green" selected>Completed</option>
+                                </select>
+                            </td>
+                            <td>
+                                <div class="action-btns">
+                                    <button class="review-btn">Review</button>
+                                    <button class="del-btn" onclick="deleteComplaint('row2')"><i class="fas fa-trash"></i></button>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </main>
+    </div>
+
+    <script src="dashboard_script.js"></script>
+</body>
+</html>

@@ -2,105 +2,148 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Cyber Crime Reporting System</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    
-    <!-- CSS -->
+    <title>CyberSecure - National Cyber Crime Portal</title>
     <link rel="stylesheet" href="style.css">
-
-    <!-- Google Font -->
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
 <body>
 
-    <!-- NAVBAR -->
+    <div class="top-ticker">
+        
+    </div>
+
     <header>
-        <div class="container nav">
+        <div class="container nav-wrapper">
             <div class="logo">Cyber<span>Secure</span></div>
             <nav>
                 <ul>
-                    <li><a href="#">Home</a></li>
-                    <li><a href="#">About</a></li>
-                    <li><a href="#">Services</a></li>
-                    <li><a href="#">Contact</a></li>
-                    <li><a class="btn-nav" href="#">Report Crime</a></li>
+                    <li><a href="#home">Home</a></li>
+                    <li><a href="#about">About Agency</a></li>
+                    <li><a href="#services">Services</a></li>
+                    <li><a href="#statistics">Statistics</a></li>
+                    <li><a href="#contact">Contact</a></li>
+                    <li><a href="../Demo/complaint_form.html" class="nav-report">Report Crime</a></li>
                 </ul>
             </nav>
         </div>
     </header>
 
-    <!-- HERO SECTION -->
-    <section class="hero">
-        <div class="container hero-content">
-            <div class="left">
-                <h1>We Provide Cyber Solutions For Your Security</h1>
-                <p>Secure your digital world with advanced cyber protection systems.</p>
-                <div class="hero-buttons">
-                    <a href="#" class="btn-primary">Get Started</a>
-                    <a href="#" class="btn-secondary">Contact Us</a>
-                </div>
-            </div>
-
-            <div class="right">
-                <img src="https://cdn-icons-png.flaticon.com/512/3064/3064197.png" alt="Cyber Security">
-            </div>
-        </div>
-    </section>
-
-    <!-- SERVICES -->
-    <section class="services">
+    <section id="home" class="hero-section">
         <div class="container">
-            <h2>Cyber Security Solutions</h2>
-
-            <div class="cards">
-
-                <div class="card">
-                    <img src="https://cdn-icons-png.flaticon.com/512/2913/2913465.png">
-                    <h3>Computer Security</h3>
-                    <p>Protect your system from malware & threats.</p>
+            <div class="glass-card main-hero">
+                <div class="hero-text">
+                    <h1>National Portal for <span class="cyan-glow">Cyber Security</span></h1>
+                    <p>Dedicated to safeguarding the digital frontiers of our nation with advanced monitoring and response systems.</p>
+                    <div class="hero-btns">
+                        <a href="#about" class="btn-fill">Learn More</a>
+                        <a href="#services" class="btn-outline">Our Mission</a>
+                    </div>
                 </div>
-
-                <div class="card">
-                    <img src="https://cdn-icons-png.flaticon.com/512/2991/2991148.png">
-                    <h3>Data Protection</h3>
-                    <p>Secure your sensitive information online.</p>
+                <div class="hero-visual">
+                    <div class="shield-container">
+                        <i class="fas fa-shield-halved"></i>
+                        <div class="pulse-ring"></div>
+                    </div>
                 </div>
-
-                <div class="card">
-                    <img src="https://cdn-icons-png.flaticon.com/512/483/483408.png">
-                    <h3>Threat Monitoring</h3>
-                    <p>24/7 monitoring & cyber defense system.</p>
-                </div>
-
             </div>
         </div>
     </section>
 
-    <!-- ABOUT -->
-    <section class="about">
-        <div class="container about-content">
-            <div class="about-left">
-                <img src="https://images.unsplash.com/photo-1550751827-4bd374c3f58b">
+    <section id="statistics" class="stats-bar">
+        <div class="container stats-grid">
+            <div class="stat-box">
+                <h2 class="counter">4,500+</h2>
+                <p>Complaints Resolved</p>
             </div>
-
-            <div class="about-right">
-                <h2>24/7 Cyber Security Operation Center</h2>
-                <p>We detect, prevent and respond to cyber threats in real time.</p>
-
-                <ul>
-                    <li>Malware Detection</li>
-                    <li>Cloud Security</li>
-                    <li>Threat Intelligence</li>
-                    <li>Server Protection</li>
-                </ul>
-
-                <a href="#" class="btn-primary">Get Started</a>
+            <div class="stat-box">
+                <h2 class="counter">24/7</h2>
+                <p>Live Monitoring</p>
+            </div>
+            <div class="stat-box">
+                <h2 class="counter">1.2M</h2>
+                <p>Citizens Protected</p>
             </div>
         </div>
     </section>
 
-    <!-- JS -->
-    <script src="script.js"></script>
+    <section id="services" class="section-padding">
+        <div class="container">
+            <h2 class="section-title">Our <span class="cyan-glow">Core Domains</span></h2>
+            <div class="services-grid">
+                <div class="card">
+                    <i class="fas fa-search-dollar"></i>
+                    <h3>Financial Fraud</h3>
+                    <p>Investigating online banking scams and credit card theft.</p>
+                </div>
+                <div class="card">
+                    <i class="fas fa-user-lock"></i>
+                    <h3>Privacy Protection</h3>
+                    <p>Addressing cyber harassment and identity theft cases.</p>
+                </div>
+                <div class="card">
+                    <i class="fas fa-microchip"></i>
+                    <h3>Digital Forensics</h3>
+                    <p>Evidence recovery and malware analysis for legal proceedings.</p>
+                </div>
+            </div>
+        </div>
+    </section>
 
+    <section id="about" class="about-section section-padding">
+        <div class="container">
+            <div class="about-flex">
+                <div class="about-content">
+                    <h2>Mission & <span class="cyan-glow">Vision</span></h2>
+                    <p>As the premier cyber defense agency, we strive to create a resilient digital ecosystem through public-private partnerships and advanced legislative frameworks.</p>
+                    <ul class="mission-list">
+                        <li><i class="fas fa-check-double"></i> Real-time Threat Intelligence</li>
+                        <li><i class="fas fa-check-double"></i> Cyber Awareness Campaigns</li>
+                        <li><i class="fas fa-check-double"></i> National Incident Response</li>
+                    </ul>
+                </div>
+                <div class="about-deco">
+                    <i class="fas fa-fingerprint"></i>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer>
+        <div class="container footer-grid">
+            <div class="footer-info">
+                <div class="logo">Cyber<span>Secure</span></div>
+                <p>Working towards a secure digital future for every citizen.</p>
+            </div>
+            <div class="footer-links">
+                <h4>Quick Links</h4>
+                <a href="#">Privacy Policy</a>
+                <a href="#">Terms of Use</a>
+                <a href="#">Official Gazette</a>
+            </div>
+            <div class="footer-social">
+                <h4>Connect</h4>
+                <div class="social-icons">
+                    <a href="#"><i class="fab fa-facebook"></i></a>
+                    <a href="#"><i class="fab fa-twitter"></i></a>
+                    <a href="#"><i class="fab fa-linkedin"></i></a>
+                </div>
+            </div>
+        </div>
+        <div class="copyright">
+            &copy; 2026 CyberSecure Agency | Government of Pakistan Portal
+        </div>
+    </footer>
+
+    <script>
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                document.querySelector(this.getAttribute('href')).scrollIntoView({
+                    behavior: 'smooth'
+                });
+            });
+        });
+    </script>
 </body>
 </html>

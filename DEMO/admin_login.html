@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Anti-Crime Login | CyberSecure</title>
+    <link rel="stylesheet" href="admin_style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+
+    <div class="login-wrapper">
+        <div class="login-box">
+            <div class="logo">Cyber<span>Secure</span></div>
+            <h2>Anti-Crime <span class="cyan-glow">Authority</span></h2>
+            <p>Authorized Personnel Only</p>
+
+            <form id="adminLoginForm" onsubmit="validateLogin(event)">
+                <div class="input-field">
+                    <i class="fas fa-user-shield"></i>
+                    <input type="text" id="officerID" placeholder="Officer ID" required>
+                </div>
+                <div class="input-field">
+                    <i class="fas fa-lock"></i>
+                    <input type="password" id="accessKey" placeholder="Access Key" required>
+                </div>
+                
+                <div class="security-check">
+                    <label class="checkbox-container">
+                        <input type="checkbox" required>
+                        <span class="checkmark"></span>
+                        I confirm this is a secure terminal
+                    </label>
+                </div>
+
+                <button type="submit" class="login-btn">Initialize Session</button>
+            </form>
+
+            <button type="button" class="btn-outline-admin" onclick="location.href='admin_register.html'">Enroll New Officer</button>
+
+            <p class="auth-note">New to the department? Contact Admin for Branch Code.</p>
+            
+            <a href="htmlarea.html" class="back-link">← Return to Main Portal</a>
+        </div>
+    </div>
+
+    <script>
+        function validateLogin(event) {
+            event.preventDefault(); // Page refresh rokne ke liye
+            
+            const id = document.getElementById('officerID').value;
+            const key = document.getElementById('accessKey').value;
+
+            // Filhal demo logic: Agar fields empty nahi hain to login allow karega
+            if(id.trim() !== "" && key.trim() !== "") {
+                console.log("Authentication Successful...");
+                window.location.href = 'admin_dashboard.html';
+            } else {
+                alert("Invalid Credentials! Please check your ID and Key.");
+            }
+        }
+    </script>
+</body>
+</html>

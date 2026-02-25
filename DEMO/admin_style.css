@@ -1,0 +1,181 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap');
+
+:root {
+    --cyan: #00d2ff;
+    --dark-bg: #050a10;
+    --glass: rgba(255, 255, 255, 0.03);
+    --border: rgba(0, 210, 255, 0.15);
+}
+
+body {
+    background-color: var(--dark-bg);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    margin: 0;
+    font-family: 'Poppins', sans-serif;
+    color: white;
+}
+
+/* Main Container matching image_7b98a2.png */
+.login-box {
+    background: var(--dark-bg);
+    border: 1px solid var(--border);
+    padding: 60px 40px;
+    border-radius: 30px;
+    width: 100%;
+    max-width: 450px;
+    text-align: center;
+    box-shadow: inset 0 0 20px rgba(0, 210, 255, 0.05);
+}
+
+.logo { font-size: 32px; font-weight: 800; margin-bottom: 5px; }
+.logo span { color: var(--cyan); }
+
+h2 { font-size: 24px; margin: 10px 0; font-weight: 600; }
+.cyan-glow { 
+    color: var(--cyan); 
+    text-shadow: 0 0 15px rgba(0, 210, 255, 0.6); 
+}
+
+p { color: #888; font-size: 14px; margin-bottom: 30px; }
+
+/* Input Group Styling matching image_7b98a2.png */
+.input-field {
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    margin-bottom: 25px;
+    padding: 20px;
+    text-align: left;
+    position: relative;
+}
+
+.input-field label {
+    display: block;
+    font-size: 12px;
+    color: #555;
+    margin-bottom: 15px;
+    margin-left: 35px;
+}
+
+.input-field i {
+    position: absolute;
+    left: 20px;
+    bottom: 25px;
+    color: var(--cyan);
+    font-size: 18px;
+}
+
+.input-field input {
+    width: calc(100% - 40px);
+    margin-left: 35px;
+    background: transparent;
+    border: none;
+    color: white;
+    outline: none;
+    font-size: 16px;
+}
+
+/* Checkbox Styling */
+.security-check {
+    margin: 20px 0;
+    font-size: 14px;
+    color: #ccc;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+}
+
+.security-check input {
+    accent-color: var(--cyan);
+    width: 16px;
+    height: 16px;
+}
+
+/* Button matching image_5f5734.png and image_7b98a2.png */
+.login-btn {
+    width: 100%;
+    background: var(--cyan);
+    color: black;
+    border: none;
+    padding: 15px;
+    border-radius: 10px;
+    font-weight: 700;
+    font-size: 16px;
+    cursor: pointer;
+    transition: 0.3s ease;
+    text-transform: capitalize;
+}
+
+.login-btn:hover {
+    box-shadow: 0 0 25px rgba(0, 210, 255, 0.5);
+    transform: translateY(-2px);
+}
+
+.back-link {
+    display: inline-block;
+    margin-top: 30px;
+    color: #444;
+    text-decoration: none;
+    font-size: 13px;
+    transition: 0.3s;
+}
+
+.back-link:hover { color: var(--cyan); }
+.secret-field {
+    border: 1px solid rgba(255, 0, 0, 0.3) !important; /* Redish tint for security field */
+    background: rgba(255, 0, 0, 0.02) !important;
+}
+
+.reg-text {
+    margin-top: 20px;
+    font-size: 13px;
+}
+
+.reg-text a {
+    text-decoration: none;
+    font-weight: 600;
+}
+
+.required {
+    color: #ff4444;
+}
+
+/* Enroll Officer Button - Outline Style */
+.btn-outline-admin {
+    width: 100%;
+    background: transparent;
+    color: var(--cyan);
+    border: 2px solid var(--cyan);
+    padding: 14px;
+    border-radius: 10px;
+    font-weight: 700;
+    font-size: 16px;
+    cursor: pointer;
+    margin-top: 15px; /* Login button se gap ke liye */
+    transition: all 0.3s ease;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.btn-outline-admin:hover {
+    background: rgba(0, 210, 255, 0.1);
+    box-shadow: 0 0 20px rgba(0, 210, 255, 0.4);
+    transform: translateY(-2px);
+}
+
+/* Auth Note styling */
+.auth-note {
+    margin-top: 20px;
+    font-size: 12px;
+    color: #666;
+    font-style: italic;
+}
+
+/* Ensure Login Button and Signup Button have spacing */
+#adminLoginForm {
+    margin-bottom: 10px;
+}

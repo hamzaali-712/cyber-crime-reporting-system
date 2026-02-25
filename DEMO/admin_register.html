@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Officer Registration | CyberSecure</title>
+    <link rel="stylesheet" href="admin_style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <div class="login-box">
+        <div class="logo">Cyber<span>Secure</span></div>
+        <h2>Officer <span class="cyan-glow">Enrollment</span></h2>
+        
+        <form id="registerForm">
+            <div class="input-field">
+                <label>Officer ID</label>
+                <i class="fas fa-id-badge"></i>
+                <input type="text" id="newID" placeholder="e.g. FIA-102" required>
+            </div>
+
+            <div class="input-field secret-field">
+                <label>Branch Secret Code <span class="required">*</span></label>
+                <i class="fas fa-key-skeleton"></i>
+                <input type="password" id="branchCode" placeholder="Enter Admin Secret Code" required>
+            </div>
+
+            <div class="input-field">
+                <label>Set Access Key</label>
+                <i class="fas fa-lock"></i>
+                <input type="password" id="newPass" required>
+            </div>
+
+            <button type="submit" class="login-btn">Register Officer</button>
+        </form>
+        <a href="admin_login.html" class="back-link">← Back to Login</a>
+    </div>
+
+    <script>
+        document.getElementById('registerForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const code = document.getElementById('branchCode').value;
+            
+            // Hardcoded Secret Code (Jo sirf aapko/admin ko pata ho)
+            const ADMIN_SECRET = "PAKISTAN"; 
+
+            if(code === ADMIN_SECRET) {
+                alert("Verification Successful! Officer Account Created.");
+                window.location.href = "admin_login.html";
+            } else {
+                alert("Access Denied: Invalid Branch Secret Code!");
+            }
+        });
+    </script>
+</body>
+</html>
