@@ -35,7 +35,6 @@ document.addEventListener("DOMContentLoaded", function() {
             redirectWithAnimation("../Demo/super_admin_login.html");
         };
     }
-    
 
     // 4. Go to Website (Naya Button Logic)
     // Ye 4th button ko select karega jo aapne abhi HTML mein add kiya hai

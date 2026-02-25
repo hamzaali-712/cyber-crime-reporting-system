@@ -13,7 +13,7 @@ document.getElementById('superLoginForm').addEventListener('submit', function(e)
     } else {
         // Failure: Error message
         alert("Access Denied: Invalid Username or Password.");
-        
+
         // Input fields clear karna
         document.getElementById('superPass').value = "";
     }

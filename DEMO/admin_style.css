@@ -12,13 +12,14 @@ body {
     display: flex;
     justify-content: center;
     align-items: center;
-    height: 100vh;
+    min-height: 100vh;
     margin: 0;
     font-family: 'Poppins', sans-serif;
     color: white;
+    padding: 20px;
 }
 
-/* Main Container matching image_7b98a2.png */
+/* Main Container */
 .login-box {
     background: var(--dark-bg);
     border: 1px solid var(--border);
@@ -34,14 +35,14 @@ body {
 .logo span { color: var(--cyan); }
 
 h2 { font-size: 24px; margin: 10px 0; font-weight: 600; }
-.cyan-glow { 
-    color: var(--cyan); 
-    text-shadow: 0 0 15px rgba(0, 210, 255, 0.6); 
+.cyan-glow {
+    color: var(--cyan);
+    text-shadow: 0 0 15px rgba(0, 210, 255, 0.6);
 }
 
 p { color: #888; font-size: 14px; margin-bottom: 30px; }
 
-/* Input Group Styling matching image_7b98a2.png */
+/* Input Group Styling */
 .input-field {
     background: rgba(255, 255, 255, 0.02);
     border: 1px solid var(--border);
@@ -95,7 +96,7 @@ p { color: #888; font-size: 14px; margin-bottom: 30px; }
     height: 16px;
 }
 
-/* Button matching image_5f5734.png and image_7b98a2.png */
+/* Login Button */
 .login-btn {
     width: 100%;
     background: var(--cyan);
@@ -125,8 +126,9 @@ p { color: #888; font-size: 14px; margin-bottom: 30px; }
 }
 
 .back-link:hover { color: var(--cyan); }
+
 .secret-field {
-    border: 1px solid rgba(255, 0, 0, 0.3) !important; /* Redish tint for security field */
+    border: 1px solid rgba(255, 0, 0, 0.3) !important;
     background: rgba(255, 0, 0, 0.02) !important;
 }
 
@@ -155,7 +157,7 @@ p { color: #888; font-size: 14px; margin-bottom: 30px; }
     font-weight: 700;
     font-size: 16px;
     cursor: pointer;
-    margin-top: 15px; /* Login button se gap ke liye */
+    margin-top: 15px;
     transition: all 0.3s ease;
     text-transform: uppercase;
     letter-spacing: 1px;
@@ -178,4 +180,133 @@ p { color: #888; font-size: 14px; margin-bottom: 30px; }
 /* Ensure Login Button and Signup Button have spacing */
 #adminLoginForm {
     margin-bottom: 10px;
+}
+
+
+/* =============================================
+   RESPONSIVE MEDIA QUERIES
+   ============================================= */
+
+/* Large tablets / small desktops (769px - 1024px) */
+@media (max-width: 1024px) {
+    .login-box {
+        padding: 50px 35px;
+        max-width: 420px;
+    }
+
+    .logo { font-size: 28px; }
+    h2 { font-size: 22px; }
+}
+
+/* Tablets (481px - 768px) */
+@media (max-width: 768px) {
+    body {
+        align-items: flex-start;
+        padding: 30px 20px;
+    }
+
+    .login-box {
+        padding: 45px 30px;
+        border-radius: 20px;
+        max-width: 100%;
+    }
+
+    .logo { font-size: 26px; }
+    h2 { font-size: 20px; }
+    p { font-size: 13px; margin-bottom: 25px; }
+
+    .input-field {
+        padding: 16px;
+        margin-bottom: 20px;
+    }
+
+    .input-field label { font-size: 11px; margin-bottom: 12px; }
+    .input-field i { font-size: 16px; bottom: 20px; }
+    .input-field input { font-size: 15px; }
+
+    .login-btn, .btn-outline-admin {
+        padding: 13px;
+        font-size: 15px;
+    }
+
+    .security-check { font-size: 13px; }
+}
+
+/* Mobile phones (max 480px) */
+@media (max-width: 480px) {
+    body {
+        padding: 20px 12px;
+    }
+
+    .login-box {
+        padding: 35px 20px;
+        border-radius: 16px;
+    }
+
+    .logo { font-size: 22px; }
+    h2 { font-size: 18px; }
+    p { font-size: 12px; margin-bottom: 20px; }
+
+    .input-field {
+        padding: 14px;
+        margin-bottom: 16px;
+        border-radius: 10px;
+    }
+
+    .input-field label {
+        font-size: 11px;
+        margin-bottom: 10px;
+        margin-left: 28px;
+    }
+
+    .input-field i {
+        left: 14px;
+        bottom: 18px;
+        font-size: 15px;
+    }
+
+    .input-field input {
+        width: calc(100% - 32px);
+        margin-left: 28px;
+        font-size: 14px;
+    }
+
+    .login-btn {
+        padding: 12px;
+        font-size: 14px;
+        border-radius: 8px;
+    }
+
+    .btn-outline-admin {
+        padding: 11px;
+        font-size: 13px;
+        letter-spacing: 0.5px;
+        border-radius: 8px;
+        margin-top: 12px;
+    }
+
+    .security-check {
+        font-size: 12px;
+        gap: 8px;
+        margin: 15px 0;
+    }
+
+    .back-link { font-size: 12px; margin-top: 20px; }
+    .reg-text { font-size: 12px; }
+    .auth-note { font-size: 11px; }
+}
+
+/* Very small screens (max 360px) */
+@media (max-width: 360px) {
+    .login-box {
+        padding: 28px 14px;
+    }
+
+    .logo { font-size: 20px; }
+    h2 { font-size: 16px; }
+
+    .login-btn, .btn-outline-admin {
+        font-size: 13px;
+        padding: 10px;
+    }
 }
