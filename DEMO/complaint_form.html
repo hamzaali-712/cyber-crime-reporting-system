@@ -136,16 +136,34 @@
     const crimeForm = document.getElementById('crimeForm');
     const customAlert = document.getElementById('customAlert');
     const doneBtn = document.getElementById('doneBtn');
+    
+    // 1. Enrolled Officers ki list (Yahan aap mazeed IDs add kar sakte hain)
+    const enrolledOfficers = [
+        "Officer FIA-102 (Ahmed Khan)",
+        "Officer FIA-786 (Zeeshan Ali)",
+        "Officer FIA-305 (Sana Malik)",
+        "Officer FIA-992 (Hamza Sheikh)",
+        "Officer FIA-441 (Mariam Raza)"
+    ];
 
-    // Submit hone par popup dikhana
+    // Submit hone par popup dikhana aur random officer assign karna
     crimeForm.addEventListener('submit', function(e) {
         e.preventDefault(); 
+        
+        // 2. Random Officer select karne ka logic
+        const randomIndex = Math.floor(Math.random() * enrolledOfficers.length);
+        const assignedOfficer = enrolledOfficers[randomIndex];
+
+        // 3. Popup ka text update karna
+        const modalPara = customAlert.querySelector('p');
+        modalPara.innerHTML = `Your complaint has been successfully registered with CyberSecure and assigned to <br><strong>${assignedOfficer}</strong>.`;
+
         customAlert.style.display = 'flex'; // Dialogue box show ho jayega
     });
 
     // Done click karne par redirect karna
     doneBtn.addEventListener('click', function() {
-        window.location.href = 'htmlarea.html'; // Aapki main file ka rasta
+        window.location.href = 'htmlarea.html'; 
     });
 
     // File size check (500MB limit)

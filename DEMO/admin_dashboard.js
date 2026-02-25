@@ -1,53 +1,59 @@
-/**
- * Dashboard Management Logic
- * Handles Complaint deletion and Status Color changes
- */
+document.addEventListener('DOMContentLoaded', function() {
+    // 1. Check karein kaunsa officer login hai
+    // Note: Aap login page par localStorage.setItem('loggedInOfficer', id) set karein
+    const loggedInOfficer = localStorage.getItem('loggedInOfficer') || "FIA-786"; 
+    document.getElementById('displayOfficerID').innerText = "Officer ID: " + loggedInOfficer;
 
-// Function to delete a row with animation
-function deleteComplaint(rowId) {
-    if (confirm("Are you sure you want to permanently delete this record?")) {
-        const row = document.getElementById(rowId);
-        
-        if (row) {
-            row.style.transition = '0.3s';
-            row.style.opacity = '0';
-            row.style.transform = 'translateX(20px)';
-            
-            setTimeout(() => {
-                row.remove();
-                console.log(`Record ${rowId} removed from temporary session.`);
-                // Note: Real database connection yahan total count update karegi
-            }, 300);
-        }
-    }
-}
-
-// Function to change dropdown border color based on status
-function changeStatusColor(select) {
-    const val = select.value;
-    
-    // Status ke mutabiq colors set karna
-    switch(val) {
-        case 'completed':
-            select.style.borderColor = '#00c851'; // Green
-            select.style.boxShadow = '0 0 5px rgba(0, 200, 81, 0.2)';
-            break;
-        case 'incomplete':
-            select.style.borderColor = '#ff4444'; // Red
-            select.style.boxShadow = '0 0 5px rgba(255, 68, 68, 0.2)';
-            break;
-        case 'progress':
-            select.style.borderColor = '#ffbb33'; // Orange/Yellow
-            select.style.boxShadow = '0 0 5px rgba(255, 187, 51, 0.2)';
-            break;
-        default:
-            select.style.borderColor = 'rgba(0, 210, 255, 0.15)';
-    }
-}
-
-// Page load par saare dropdowns ka initial color set karne ke liye
-document.addEventListener('DOMContentLoaded', () => {
-    document.querySelectorAll('.status-select').forEach(select => {
-        changeStatusColor(select);
-    });
+    renderOfficerComplaints(loggedInOfficer);
 });
+
+function renderOfficerComplaints(officerID) {
+    const tableBody = document.getElementById('complaintTableBody');
+    const allComplaints = JSON.parse(localStorage.getItem('allComplaints')) || [];
+
+    // Sirf is officer ke cases filter karein
+    const filteredData = allComplaints.filter(c => c.officer === officerID);
+
+    tableBody.innerHTML = '';
+    let pending = 0;
+    let resolved = 0;
+
+    filteredData.forEach((item, index) => {
+        if(item.status === 'completed') resolved++; else pending++;
+
+        const row = `
+            <tr>
+                <td>${item.id}</td>
+                <td>${item.name}</td>
+                <td>${item.category}</td>
+                <td>
+                    <select class="status-select" onchange="updateCaseStatus(${index}, this, '${officerID}')">
+                        <option value="progress" ${item.status !== 'completed' ? 'selected' : ''}>In Progress</option>
+                        <option value="completed" ${item.status === 'completed' ? 'selected' : ''}>Completed</option>
+                    </select>
+                </td>
+                <td>
+                    <div class="action-btns">
+                        <button class="review-btn" onclick="alert('Reviewing Case: ${item.id}')">Review</button>
+                        <button class="del-btn" onclick="deleteCase(${index}, '${officerID}')"><i class="fas fa-trash"></i></button>
+                    </div>
+                </td>
+            </tr>`;
+        tableBody.innerHTML += row;
+    });
+
+    // Update Stats Cards
+    document.getElementById('totalCount').innerText = filteredData.length;
+    document.getElementById('pendingCount').innerText = pending;
+    document.getElementById('resolvedCount').innerText = resolved;
+}
+
+function updateCaseStatus(index, select, officerID) {
+    let allComplaints = JSON.parse(localStorage.getItem('allComplaints')) || [];
+    // Pura filter karke index nikalna zaroori hai
+    allComplaints.find(c => c.officer === officerID && allComplaints.indexOf(c) === index); 
+    // Simplified for demo:
+    allComplaints[index].status = select.value;
+    localStorage.setItem('allComplaints', JSON.stringify(allComplaints));
+    renderOfficerComplaints(officerID);
+}

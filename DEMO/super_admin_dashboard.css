@@ -1,0 +1,86 @@
+:root {
+    --cyan: #00d2ff;
+    --dark-bg: #050a10;
+    --sidebar-bg: #080e15;
+    --card-bg: rgba(255, 255, 255, 0.03);
+    --border: rgba(0, 210, 255, 0.15);
+}
+
+body {
+    margin: 0; font-family: 'Poppins', sans-serif;
+    background: var(--dark-bg); color: white;
+}
+
+.dashboard-wrapper { display: flex; height: 100vh; }
+
+/* Sidebar */
+.sidebar {
+    width: 250px; background: var(--sidebar-bg);
+    border-right: 1px solid var(--border); padding: 30px 20px;
+}
+.logo { font-size: 26px; font-weight: 800; margin-bottom: 40px; }
+.logo span { color: var(--cyan); }
+.nav-item {
+    display: block; padding: 15px; color: #888; text-decoration: none;
+    margin-bottom: 10px; border-radius: 8px; transition: 0.3s;
+}
+.nav-item:hover, .nav-item.active { background: var(--card-bg); color: var(--cyan); border: 1px solid var(--border); }
+.logout { margin-top: 50px; color: #ff4444; }
+
+/* Content Area */
+.content-area { flex: 1; padding: 40px; overflow-y: auto; }
+
+/* Header Section - Master Admin Access aur Cards ke darmian padding yahan se control hogi */
+.top-bar {
+    margin-bottom: 50px; /* Is value ko barhane se "Master Admin Access" aur Stats ke darmian fasla barh jayega */
+}
+
+.officer-badge {
+    color: #888;
+    font-size: 14px;
+    margin-top: 5px;
+    display: block;
+}
+
+.cyan-glow { color: var(--cyan); text-shadow: 0 0 10px var(--cyan); }
+
+/* Stats Cards Section */
+.stats-grid { 
+    margin-bottom: 40px; 
+    display: flex; 
+    gap: 30px; /* Gap ko thora kam kiya hai taake responsive rahe, aap 95px bhi rakh sakte hain */
+}
+
+.stat-card { 
+    background: var(--card-bg); 
+    padding: 25px; /* Card ke andar ki padding barhai hai */
+    border-radius: 15px; 
+    width: 250px; 
+    border-left: 4px solid var(--cyan); 
+    box-shadow: 0 4px 15px rgba(0,0,0,0.2); /* Thora depth dene ke liye */
+}
+
+/* Specific borders for Super Admin Dashboard */
+.orange-border { border-left-color: #ffbb33 !important; }
+.green-border { border-left-color: #00c851 !important; }
+
+.stat-card h3 { font-size: 13px; color: #888; margin: 0; text-transform: uppercase; letter-spacing: 1px; }
+.stat-card p { font-size: 32px; font-weight: 700; margin-top: 10px; margin-bottom: 0; }
+
+/* Table Styling */
+.table-container { 
+    background: var(--card-bg); 
+    border-radius: 20px; 
+    border: 1px solid var(--border); 
+    padding: 30px; /* Table ke bahar ki internal padding */
+}
+
+table { width: 100%; border-collapse: collapse; text-align: left; }
+th { color: var(--cyan); padding: 15px; border-bottom: 1px solid var(--border); font-size: 14px; }
+td { padding: 15px; border-bottom: 1px solid rgba(255,255,255,0.05); font-size: 15px; }
+
+.status-badge { background: rgba(0, 200, 81, 0.1); color: #00c851; padding: 5px 12px; border-radius: 5px; font-size: 12px; }
+.del-btn { background: none; border: 1px solid #ff4444; color: #ff4444; padding: 7px 15px; border-radius: 5px; cursor: pointer; transition: 0.3s; }
+.del-btn:hover { background: #ff4444; color: white; }
+
+.empty-msg { text-align: center; padding: 40px; color: #555; display: none; font-style: italic; }

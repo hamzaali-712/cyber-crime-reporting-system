@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Master Access | CyberSecure</title>
+    <link rel="stylesheet" href="super_admin_login.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+
+    <div class="login-wrapper">
+        <div class="login-box">
+            <div class="logo">Cyber<span>Secure</span></div>
+            <h2>Master <span class="cyan-glow">Control</span></h2>
+            <p>Access restricted to Head of Department</p>
+
+            <form id="superLoginForm">
+                <div class="input-field">
+                    <i class="fas fa-user-shield"></i>
+                    <input type="text" id="superUser" placeholder="Username" required>
+                </div>
+                <div class="input-field">
+                    <i class="fas fa-key"></i>
+                    <input type="password" id="superPass" placeholder="Password" required>
+                </div>
+                
+                <div class="security-note">
+                    <i class="fas fa-info-circle"></i> Authorized Personnel Only
+                </div>
+
+                <button type="submit" class="login-btn">Authorize Access</button>
+            </form>
+            
+            <a href="htmlarea.html" class="back-link">← Return to Portal</a>
+        </div>
+    </div>
+
+    <script src="super_admin_login.js"></script>
+</body>
+</html>

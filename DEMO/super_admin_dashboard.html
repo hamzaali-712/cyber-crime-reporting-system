@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Super Admin | Personnel Management</title>
+    <link rel="stylesheet" href="super_admin_dashboard.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+
+    <div class="dashboard-wrapper">
+        <aside class="sidebar">
+            <div class="logo">Cyber<span>Secure</span></div>
+            <nav>
+                <a href="#" class="nav-item active"><i class="fas fa-users-cog"></i> Enrolled Officers</a>
+                <a href="super_admin_login.html" class="nav-item logout"><i class="fas fa-sign-out-alt"></i> Logout</a>
+            </nav>
+        </aside>
+
+        <main class="content-area">
+            <header class="top-bar">
+                <h1>Personnel <span class="cyan-glow">Enrollment Log</span></h1>
+                <div class="officer-badge">Master Admin Access</div>
+            </header>
+
+            <section class="stats-grid">
+                <div class="stat-card cyan-border">
+                    <h3>Total Registered Officers</h3>
+                    <p id="officerCount">0</p>
+                </div>
+                
+                <div class="stat-card orange-border">
+                    <h3>Total Received Complaints</h3>
+                    <p id="totalComplaintsCount">0</p>
+                </div>
+
+                <div class="stat-card green-border">
+                    <h3>Total Cases Solved</h3>
+                    <p id="solvedCasesCount">0</p>
+                </div>
+            </section>
+
+            <div class="table-container">
+                <h2 class="table-title"><i class="fas fa-list"></i> Managed Personnel</h2>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Officer ID</th>
+                            <th>Status</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="officerList">
+                        </tbody>
+                </table>
+                <div id="noOfficerMsg" class="empty-msg">No officers enrolled yet.</div>
+            </div>
+        </main>
+    </div>
+
+    <script src="super_admin_dashboard.js"></script>
+</body>
+</html>
