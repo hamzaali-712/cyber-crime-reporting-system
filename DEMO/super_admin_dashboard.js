@@ -1,4 +1,35 @@
 document.addEventListener('DOMContentLoaded', function() {
+
+    // ── Responsive Sidebar Toggle (Mobile) ──────────────────────────
+    const sidebar = document.querySelector('.sidebar');
+    const toggleBtn = document.querySelector('.sidebar-toggle');
+    const overlay = document.querySelector('.sidebar-overlay');
+
+    if (toggleBtn && sidebar) {
+        toggleBtn.addEventListener('click', function() {
+            sidebar.classList.toggle('open');
+            if (overlay) overlay.classList.toggle('active');
+        });
+    }
+
+    if (overlay) {
+        overlay.addEventListener('click', function() {
+            sidebar.classList.remove('open');
+            overlay.classList.remove('active');
+        });
+    }
+
+    // Close sidebar on nav-item click (mobile UX)
+    document.querySelectorAll('.nav-item').forEach(function(item) {
+        item.addEventListener('click', function() {
+            if (window.innerWidth <= 768) {
+                sidebar.classList.remove('open');
+                if (overlay) overlay.classList.remove('active');
+            }
+        });
+    });
+
+    // ── Original Logic ───────────────────────────────────────────────
     renderOfficers();
 });
 
@@ -6,10 +37,10 @@ document.addEventListener('DOMContentLoaded', function() {
 function renderOfficers() {
     const list = document.getElementById('officerList');
     const emptyMsg = document.getElementById('noOfficerMsg');
-    
+
     // Memory se officers ki list uthana
     const officers = JSON.parse(localStorage.getItem('enrolledOfficers')) || [];
-    
+
     // Clear current list
     list.innerHTML = '';
     document.getElementById('officerCount').innerText = officers.length;
@@ -45,8 +76,4 @@ function removeOfficer(index) {
         localStorage.setItem('enrolledOfficers', JSON.stringify(officers)); // Memory update karna
         renderOfficers(); // Table refresh karna
     }
-
-
-    
-    
 }

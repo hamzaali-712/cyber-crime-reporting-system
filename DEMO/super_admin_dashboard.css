@@ -17,6 +17,8 @@ body {
 .sidebar {
     width: 250px; background: var(--sidebar-bg);
     border-right: 1px solid var(--border); padding: 30px 20px;
+    flex-shrink: 0;
+    transition: transform 0.3s ease;
 }
 .logo { font-size: 26px; font-weight: 800; margin-bottom: 40px; }
 .logo span { color: var(--cyan); }
@@ -27,12 +29,37 @@ body {
 .nav-item:hover, .nav-item.active { background: var(--card-bg); color: var(--cyan); border: 1px solid var(--border); }
 .logout { margin-top: 50px; color: #ff4444; }
 
+/* Hamburger Toggle Button (hidden on desktop) */
+.sidebar-toggle {
+    display: none;
+    position: fixed;
+    top: 15px;
+    left: 15px;
+    z-index: 1000;
+    background: var(--sidebar-bg);
+    border: 1px solid var(--border);
+    color: var(--cyan);
+    padding: 8px 12px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 18px;
+}
+
+/* Sidebar Overlay (mobile) */
+.sidebar-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.6);
+    z-index: 98;
+}
+.sidebar-overlay.active { display: block; }
+
 /* Content Area */
 .content-area { flex: 1; padding: 40px; overflow-y: auto; }
 
-/* Header Section - Master Admin Access aur Cards ke darmian padding yahan se control hogi */
 .top-bar {
-    margin-bottom: 50px; /* Is value ko barhane se "Master Admin Access" aur Stats ke darmian fasla barh jayega */
+    margin-bottom: 50px;
 }
 
 .officer-badge {
@@ -45,22 +72,22 @@ body {
 .cyan-glow { color: var(--cyan); text-shadow: 0 0 10px var(--cyan); }
 
 /* Stats Cards Section */
-.stats-grid { 
-    margin-bottom: 40px; 
-    display: flex; 
-    gap: 30px; /* Gap ko thora kam kiya hai taake responsive rahe, aap 95px bhi rakh sakte hain */
+.stats-grid {
+    margin-bottom: 40px;
+    display: flex;
+    gap: 30px;
+    flex-wrap: wrap;
 }
 
-.stat-card { 
-    background: var(--card-bg); 
-    padding: 25px; /* Card ke andar ki padding barhai hai */
-    border-radius: 15px; 
-    width: 250px; 
-    border-left: 4px solid var(--cyan); 
-    box-shadow: 0 4px 15px rgba(0,0,0,0.2); /* Thora depth dene ke liye */
+.stat-card {
+    background: var(--card-bg);
+    padding: 25px;
+    border-radius: 15px;
+    width: 250px;
+    border-left: 4px solid var(--cyan);
+    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
 }
 
-/* Specific borders for Super Admin Dashboard */
 .orange-border { border-left-color: #ffbb33 !important; }
 .green-border { border-left-color: #00c851 !important; }
 
@@ -68,14 +95,15 @@ body {
 .stat-card p { font-size: 32px; font-weight: 700; margin-top: 10px; margin-bottom: 0; }
 
 /* Table Styling */
-.table-container { 
-    background: var(--card-bg); 
-    border-radius: 20px; 
-    border: 1px solid var(--border); 
-    padding: 30px; /* Table ke bahar ki internal padding */
+.table-container {
+    background: var(--card-bg);
+    border-radius: 20px;
+    border: 1px solid var(--border);
+    padding: 30px;
+    overflow-x: auto;
 }
 
-table { width: 100%; border-collapse: collapse; text-align: left; }
+table { width: 100%; border-collapse: collapse; text-align: left; min-width: 500px; }
 th { color: var(--cyan); padding: 15px; border-bottom: 1px solid var(--border); font-size: 14px; }
 td { padding: 15px; border-bottom: 1px solid rgba(255,255,255,0.05); font-size: 15px; }
 
@@ -84,3 +112,100 @@ td { padding: 15px; border-bottom: 1px solid rgba(255,255,255,0.05); font-size: 
 .del-btn:hover { background: #ff4444; color: white; }
 
 .empty-msg { text-align: center; padding: 40px; color: #555; display: none; font-style: italic; }
+
+
+/* =============================================
+   RESPONSIVE MEDIA QUERIES
+   ============================================= */
+
+/* Large tablets / small desktops (769px - 1024px) */
+@media (max-width: 1024px) {
+    .sidebar { width: 200px; padding: 25px 15px; }
+    .logo { font-size: 22px; }
+    .content-area { padding: 30px 25px; }
+
+    .stat-card { width: 180px; padding: 20px; }
+    .stat-card p { font-size: 26px; }
+    .stats-grid { gap: 20px; }
+}
+
+/* Tablets (481px - 768px) */
+@media (max-width: 768px) {
+    .dashboard-wrapper { flex-direction: column; height: auto; min-height: 100vh; }
+
+    /* Sidebar becomes off-canvas drawer */
+    .sidebar {
+        position: fixed;
+        top: 0; left: 0;
+        height: 100%;
+        width: 240px;
+        z-index: 99;
+        transform: translateX(-100%);
+        padding: 25px 15px;
+        overflow-y: auto;
+    }
+    .sidebar.open { transform: translateX(0); }
+
+    .sidebar-toggle { display: block; }
+
+    .content-area {
+        padding: 70px 20px 30px;
+        width: 100%;
+        box-sizing: border-box;
+    }
+
+    .top-bar { margin-bottom: 30px; }
+
+    .stats-grid {
+        gap: 15px;
+        margin-bottom: 25px;
+    }
+
+    .stat-card {
+        width: calc(50% - 8px);
+        padding: 18px;
+        box-sizing: border-box;
+    }
+
+    .stat-card p { font-size: 26px; }
+
+    .table-container { padding: 20px 15px; border-radius: 14px; }
+    th, td { padding: 12px 10px; font-size: 13px; }
+}
+
+/* Mobile phones (max 480px) */
+@media (max-width: 480px) {
+    .content-area { padding: 65px 12px 20px; }
+
+    .top-bar { margin-bottom: 20px; }
+
+    .cyan-glow { font-size: 20px; }
+    .officer-badge { font-size: 12px; }
+
+    .stats-grid { gap: 12px; margin-bottom: 20px; }
+
+    .stat-card {
+        width: calc(50% - 6px);
+        padding: 15px;
+    }
+
+    .stat-card h3 { font-size: 11px; letter-spacing: 0.5px; }
+    .stat-card p { font-size: 22px; }
+
+    .table-container { padding: 12px 10px; border-radius: 10px; }
+
+    th { font-size: 12px; padding: 10px 8px; }
+    td { font-size: 12px; padding: 10px 8px; }
+
+    .del-btn { padding: 5px 10px; font-size: 12px; }
+    .status-badge { font-size: 11px; padding: 4px 8px; }
+}
+
+/* Very small screens (max 360px) */
+@media (max-width: 360px) {
+    .stat-card { width: 100%; }
+
+    .del-btn { font-size: 11px; padding: 5px 8px; }
+
+    th, td { font-size: 11px; padding: 8px 6px; }
+}

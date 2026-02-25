@@ -1,7 +1,38 @@
 document.addEventListener('DOMContentLoaded', function() {
+
+    // ── Responsive Sidebar Toggle (Mobile) ──────────────────────────
+    const sidebar = document.querySelector('.sidebar');
+    const toggleBtn = document.querySelector('.sidebar-toggle');
+    const overlay = document.querySelector('.sidebar-overlay');
+
+    if (toggleBtn && sidebar) {
+        toggleBtn.addEventListener('click', function() {
+            sidebar.classList.toggle('open');
+            if (overlay) overlay.classList.toggle('active');
+        });
+    }
+
+    if (overlay) {
+        overlay.addEventListener('click', function() {
+            sidebar.classList.remove('open');
+            overlay.classList.remove('active');
+        });
+    }
+
+    // Close sidebar on nav-item click (mobile UX)
+    document.querySelectorAll('.nav-item').forEach(function(item) {
+        item.addEventListener('click', function() {
+            if (window.innerWidth <= 768) {
+                sidebar.classList.remove('open');
+                if (overlay) overlay.classList.remove('active');
+            }
+        });
+    });
+
+    // ── Original Logic ───────────────────────────────────────────────
+
     // 1. Check karein kaunsa officer login hai
-    // Note: Aap login page par localStorage.setItem('loggedInOfficer', id) set karein
-    const loggedInOfficer = localStorage.getItem('loggedInOfficer') || "FIA-786"; 
+    const loggedInOfficer = localStorage.getItem('loggedInOfficer') || "FIA-786";
     document.getElementById('displayOfficerID').innerText = "Officer ID: " + loggedInOfficer;
 
     renderOfficerComplaints(loggedInOfficer);
@@ -51,7 +82,7 @@ function renderOfficerComplaints(officerID) {
 function updateCaseStatus(index, select, officerID) {
     let allComplaints = JSON.parse(localStorage.getItem('allComplaints')) || [];
     // Pura filter karke index nikalna zaroori hai
-    allComplaints.find(c => c.officer === officerID && allComplaints.indexOf(c) === index); 
+    allComplaints.find(c => c.officer === officerID && allComplaints.indexOf(c) === index);
     // Simplified for demo:
     allComplaints[index].status = select.value;
     localStorage.setItem('allComplaints', JSON.stringify(allComplaints));

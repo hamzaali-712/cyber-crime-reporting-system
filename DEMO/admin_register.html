@@ -43,20 +43,20 @@
     </div>
 
     <script>
-        document.getElementById('registerForm').addEventListener('submit', function(e) {
-            e.preventDefault();
-            const code = document.getElementById('branchCode').value;
-            
-            // Hardcoded Secret Code (Jo sirf aapko/admin ko pata ho)
-            const ADMIN_SECRET = "PAKISTAN"; 
+    document.getElementById('registerForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        const code = document.getElementById('branchCode').value;
+        
+        // Hardcoded Secret Code (Jo sirf aapko/admin ko pata ho)
+        const ADMIN_SECRET = "PAKISTAN"; 
 
-            if(code === ADMIN_SECRET) {
-                alert("Verification Successful! Officer Account Created.");
-                window.location.href = "admin_login.html";
-            } else {
-                alert("Access Denied: Invalid Branch Secret Code!");
-            }
-        });
-    </script>
+        if(code === ADMIN_SECRET) {
+            alert("Verification Successful! Officer Account Created.");
+            window.location.href = "admin_login.html";
+        } else {
+            alert("Access Denied: Invalid Branch Secret Code!");
+        }
+    });
+</script>
 </body>
 </html>
