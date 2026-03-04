@@ -1,0 +1,23 @@
+// storage.rules
+// CyberSecure – Evidence Upload
+// Deploy:  firebase deploy --only storage
+
+rules_version = '2';
+service firebase.storage {
+  match /b/{bucket}/o {
+
+    // evidence/{incident_id}/{filename}
+    match /evidence/{incidentId}/{filename} {
+      // Anyone can upload evidence (public complaint portal)
+      allow write : if request.resource.size  <= 500 * 1024 * 1024
+                    && (
+                         request.resource.contentType.matches('image/.*')
+                      || request.resource.contentType.matches('video/.*')
+                    );
+
+      // Only authenticated admins can read / delete
+      allow read, delete : if request.auth != null
+                           && request.auth.token.admin == true;
+    }
+  }
+}
