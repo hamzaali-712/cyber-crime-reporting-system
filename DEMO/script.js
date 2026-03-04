@@ -1,3 +1,21 @@
+// config code 
+const firebaseConfig = {
+  apiKey: "AIzaSyAZzPW2xoWZ4lFTA0NS1Xgw3RZ-JT0p6iM",
+  authDomain: "cybercrimereporting-a41d2.firebaseapp.com",
+  databaseURL: "https://cybercrimereporting-a41d2-default-rtdb.firebaseio.com",
+  projectId: "cybercrimereporting-a41d2",
+  storageBucket: "cybercrimereporting-a41d2.firebasestorage.app",
+  messagingSenderId: "866034951271",
+  appId: "1:866034951271:web:745d9a5800e20b1173e0c2",
+  measurementId: "G-5NRMQN53RN"
+};
+
+// initialize Firebase
+firebase.initializeApp(firebaseConfig);
+const db = firebase.database(); 
+
+
+
 document.addEventListener("DOMContentLoaded", function() {
     const loader = document.getElementById("loader-wrapper");
 

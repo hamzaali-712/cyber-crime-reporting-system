@@ -21,7 +21,7 @@
         <main class="content-area">
             <header class="top-bar">
                 <h1>Personnel <span class="cyan-glow">Enrollment Log</span></h1>
-                <div class="officer-badge">Master Admin Access</div>
+                <span class="officer-badge">Master Admin Access</span>
             </header>
 
             <section class="stats-grid">
@@ -51,14 +51,17 @@
                             <th>Action</th>
                         </tr>
                     </thead>
-                    <tbody id="officerList">
-                        </tbody>
+                    <tbody id="officerList"></tbody>
                 </table>
                 <div id="noOfficerMsg" class="empty-msg">No officers enrolled yet.</div>
             </div>
         </main>
     </div>
 
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
+    
+    <script src="script.js"></script>
     <script src="super_admin_dashboard.js"></script>
 </body>
 </html>

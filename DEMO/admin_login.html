@@ -1,64 +1,147 @@
+
+
 <!DOCTYPE html>
+
 <html lang="en">
+
 <head>
+
     <meta charset="UTF-8">
+
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
     <title>Anti-Crime Login | CyberSecure</title>
+
     <link rel="stylesheet" href="admin_style.css">
+
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+
 </head>
+
 <body>
 
+
+
     <div class="login-wrapper">
+
         <div class="login-box">
+
             <div class="logo">Cyber<span>Secure</span></div>
+
             <h2>Anti-Crime <span class="cyan-glow">Authority</span></h2>
+
             <p>Authorized Personnel Only</p>
 
-            <form id="adminLoginForm" onsubmit="validateLogin(event)">
+
+
+            <form id="adminLoginForm">
+
                 <div class="input-field">
+
                     <i class="fas fa-user-shield"></i>
+
                     <input type="text" id="officerID" placeholder="Officer ID" required>
-                </div>
-                <div class="input-field">
-                    <i class="fas fa-lock"></i>
-                    <input type="password" id="accessKey" placeholder="Access Key" required>
-                </div>
-                
-                <div class="security-check">
-                    <label class="checkbox-container">
-                        <input type="checkbox" required>
-                        <span class="checkmark"></span>
-                        I confirm this is a secure terminal
-                    </label>
+
                 </div>
 
+                <div class="input-field">
+
+                    <i class="fas fa-lock"></i>
+
+                    <input type="password" id="accessKey" placeholder="Access Key" required>
+
+                </div>
+
+               
+
+                <div class="security-check">
+
+                    <label class="checkbox-container">
+
+                        <input type="checkbox" required>
+
+                        <span class="checkmark"></span>
+
+                        I confirm this is a secure terminal
+
+                    </label>
+
+                </div>
+
+
+
                 <button type="submit" class="login-btn">Initialize Session</button>
+
             </form>
+
+
 
             <button type="button" class="btn-outline-admin" onclick="location.href='admin_register.html'">Enroll New Officer</button>
 
+
+
             <p class="auth-note">New to the department? Contact Admin for Branch Code.</p>
-            
+
+           
+
             <a href="htmlarea.html" class="back-link">← Return to Main Portal</a>
+
         </div>
+
     </div>
 
-    <script>
-        function validateLogin(event) {
-            event.preventDefault(); // Page refresh rokne ke liye
-            
-            const id = document.getElementById('officerID').value;
-            const key = document.getElementById('accessKey').value;
 
-            // Filhal demo logic: Agar fields empty nahi hain to login allow karega
-            if(id.trim() !== "" && key.trim() !== "") {
-                console.log("Authentication Successful...");
-                window.location.href = 'admin_dashboard.html';
+
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
+
+
+
+    <script src="script.js"></script>
+
+
+
+    <script>
+    const loginForm = document.getElementById('adminLoginForm');
+
+    loginForm.addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        const inputID = document.getElementById('officerID').value.trim();
+        const inputKey = document.getElementById('accessKey').value.trim();
+
+        // 1. Firebase se officer check karein
+        db.ref('officers/' + inputID).once('value')
+        .then((snapshot) => {
+            if (snapshot.exists()) {
+                const officerData = snapshot.val();
+                
+                // 2. Access Key matching
+                if (officerData.accessKey === inputKey) {
+                    
+                    // ZAROORI: Dashboard ke liye ID save karein
+                    localStorage.setItem('loggedInOfficerID', inputID);
+                    localStorage.setItem('loggedInOfficerName', officerData.officerName);
+
+                    alert("Welcome, " + officerData.officerName + "!");
+                    
+                    // 3. Redirection
+                    window.location.replace('admin_dashboard.html'); 
+                } else {
+                    alert("Error: Incorrect Access Key!");
+                }
             } else {
-                alert("Invalid Credentials! Please check your ID and Key.");
+                alert("Error: Officer ID not found in database!");
             }
-        }
-    </script>
+        })
+        .catch((error) => {
+            console.error("Login Error:", error);
+            alert("Database connection error!");
+        });
+    });
+</script>
+
 </body>
+
 </html>

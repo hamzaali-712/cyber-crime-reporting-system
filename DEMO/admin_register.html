@@ -15,19 +15,18 @@
             <div class="input-field">
                 <label>Officer ID</label>
                 <i class="fas fa-id-badge"></i>
-                <input type="text" id="newID" placeholder="e.g. FIA-102" required>
+                <input type="text" id="officerID" placeholder="e.g. FIA-102" required>
             </div>
 
-
-                <div class="input-field">
+            <div class="input-field">
                 <label>Officer Name</label>
-                <i class="fas fa-id-badge"></i>
-                <input type="text" id="newID" placeholder="eg. Ali Ahmad" required>
+                <i class="fas fa-user"></i>
+                <input type="text" id="officerName" placeholder="eg. Ali Ahmad" required>
             </div>
 
             <div class="input-field secret-field">
                 <label>Branch Secret Code <span class="required">*</span></label>
-                <i class="fas fa-key-skeleton"></i>
+                <i class="fas fa-key"></i>
                 <input type="password" id="branchCode" placeholder="Enter Admin Secret Code" required>
             </div>
 
@@ -42,21 +41,42 @@
         <a href="admin_login.html" class="back-link">← Back to Login</a>
     </div>
 
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
+
+    <script src="script.js"></script>
+
     <script>
     document.getElementById('registerForm').addEventListener('submit', function(e) {
         e.preventDefault();
-        const code = document.getElementById('branchCode').value;
         
-        // Hardcoded Secret Code (Jo sirf aapko/admin ko pata ho)
-        const ADMIN_SECRET = "PAKISTAN"; 
+        const code = document.getElementById('branchCode').value;
+        const ADMIN_SECRET = "PAKISTAN"; // Aapka secret code
 
         if(code === ADMIN_SECRET) {
-            alert("Verification Successful! Officer Account Created.");
-            window.location.href = "admin_login.html";
+            // 1. Data collect karein
+            const oID = document.getElementById('officerID').value;
+            const oName = document.getElementById('officerName').value;
+            const oPass = document.getElementById('newPass').value;
+
+            // 2. Firebase 'officers' node mein save karein
+            db.ref('officers/' + oID).set({
+                officerID: oID,
+                officerName: oName,
+                accessKey: oPass,
+                enrolledAt: new Date().toLocaleString()
+            })
+            .then(() => {
+                alert("Success: Officer " + oName + " Enrolled in Database!");
+                window.location.href = "admin_login.html";
+            })
+            .catch((error) => {
+                alert("Error: " + error.message);
+            });
         } else {
             alert("Access Denied: Invalid Branch Secret Code!");
         }
     });
-</script>
+    </script>
 </body>
 </html>

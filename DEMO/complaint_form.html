@@ -23,15 +23,15 @@
                     <div class="input-grid">
                         <div class="input-group">
                             <label>Full Name <span class="required">*</span></label>
-                            <input type="text" placeholder="Enter your full name" required>
+                            <input type="text" id="fullName" placeholder="Enter your full name" required>
                         </div>
                         <div class="input-group">
                             <label>CNIC <span class="required">*</span></label>
-                            <input type="text" placeholder="12345-1234567-1" required>
+                            <input type="text" id="cnic" placeholder="12345-1234567-1" required>
                         </div>
                         <div class="input-group">
                             <label>Gender <span class="required">*</span></label>
-                            <select required>
+                            <select id="gender" required>
                                 <option value="">Select Option</option>
                                 <option value="male">Male</option>
                                 <option value="female">Female</option>
@@ -40,15 +40,15 @@
                         </div>
                         <div class="input-group">
                             <label>Mobile Number <span class="required">*</span></label>
-                            <input type="tel" placeholder="Enter mobile number" required>
+                            <input type="tel" id="mobile" placeholder="Enter mobile number" required>
                         </div>
                         <div class="input-group">
                             <label>Email Address</label>
-                            <input type="email" placeholder="Enter email address">
+                            <input type="email" id="email" placeholder="Enter email address">
                         </div>
                         <div class="input-group">
                             <label>Occupation</label>
-                            <select>
+                            <select id="occupation">
                                 <option value="">Select Option</option>
                                 <option value="student">Student</option>
                                 <option value="employed">Employed</option>
@@ -63,13 +63,13 @@
                     <div class="input-grid single-col">
                         <div class="input-group">
                             <label>Postal Address</label>
-                            <input type="text" placeholder="Enter your postal address">
+                            <input type="text" id="address" placeholder="Enter your postal address">
                         </div>
                     </div>
                     <div class="input-grid">
                         <div class="input-group">
                             <label>City <span class="required">*</span></label>
-                            <select required>
+                            <select id="city" required>
                                 <option value="">Select Option</option>
                                 <option value="islamabad">Islamabad</option>
                                 <option value="lahore">Lahore</option>
@@ -78,7 +78,7 @@
                         </div>
                         <div class="input-group">
                             <label>Crime Category <span class="required">*</span></label>
-                            <select required>
+                            <select id="category" required>
                                 <option value="">Select Option</option>
                                 <option value="hacking">Hacking</option>
                                 <option value="harassment">Cyber Harassment</option>
@@ -88,31 +88,30 @@
                     </div>
                     <div class="input-group">
                         <label>Crime Details <span class="required">*</span></label>
-                        <textarea rows="5" placeholder="Brief details of the crime and persons involved (Max 3400 characters)" required></textarea>
+                        <textarea id="details" rows="5" placeholder="Brief details of the crime (Max 3400 characters)" required></textarea>
                     </div>
                 </div>
 
-        <div class="form-section">
-    <h3><i class="fas fa-file-upload"></i> Evidence Upload</h3>
-    <p class="upload-note">Please upload any screenshots, images, or videos related to the crime (Max total size: 500MB).</p>
-    
-    <div class="input-grid">
-        <div class="input-group">
-            <label>Upload Images (PNG, JPG)</label>
-            <div class="file-input-wrapper">
-                <input type="file" id="evidenceImages" accept="image/*" multiple onchange="validateFileSize(this)">
-                <i class="fas fa-images"></i>
-            </div>
-        </div>
-        <div class="input-group">
-            <label>Upload Video (MP4, MKV)</label>
-            <div class="file-input-wrapper">
-                <input type="file" id="evidenceVideo" accept="video/*" onchange="validateFileSize(this)">
-                <i class="fas fa-video"></i>
-            </div>
-        </div>
-    </div>
-</div>
+                <div class="form-section">
+                    <h3><i class="fas fa-file-upload"></i> Evidence Upload</h3>
+                    <p class="upload-note">Please upload any screenshots or videos (Max total size: 500MB).</p>
+                    <div class="input-grid">
+                        <div class="input-group">
+                            <label>Upload Images (PNG, JPG)</label>
+                            <div class="file-input-wrapper">
+                                <input type="file" id="evidenceImages" accept="image/*" multiple onchange="validateFileSize(this)">
+                                <i class="fas fa-images"></i>
+                            </div>
+                        </div>
+                        <div class="input-group">
+                            <label>Upload Video (MP4, MKV)</label>
+                            <div class="file-input-wrapper">
+                                <input type="file" id="evidenceVideo" accept="video/*" onchange="validateFileSize(this)">
+                                <i class="fas fa-video"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
 
                 <div class="form-footer">
                     <button type="submit" class="submit-btn">Submit Complaint</button>
@@ -122,62 +121,90 @@
     </div>
 
     <div id="customAlert" class="modal-overlay">
-    <div class="modal-content">
-        <div class="success-icon">
-            <i class="fas fa-check-circle"></i>
+        <div class="modal-content">
+            <div class="success-icon">
+                <i class="fas fa-check-circle"></i>
+            </div>
+            <h2>Report Submitted</h2>
+            <p id="assignedText">Your complaint has been successfully registered.</p>
+            <button id="doneBtn" class="modal-btn">Done</button>
         </div>
-        <h2>Report Submitted</h2>
-        <p>Your complaint has been successfully registered with CyberSecure.</p>
-        <button id="doneBtn" class="modal-btn">Done</button>
     </div>
-</div>
 
-<script>
-    const crimeForm = document.getElementById('crimeForm');
-    const customAlert = document.getElementById('customAlert');
-    const doneBtn = document.getElementById('doneBtn');
-    
-    // 1. Enrolled Officers ki list (Yahan aap mazeed IDs add kar sakte hain)
-    const enrolledOfficers = [
-        "Officer FIA-102 (Ahmed Khan)",
-        "Officer FIA-786 (Zeeshan Ali)",
-        "Officer FIA-305 (Sana Malik)",
-        "Officer FIA-992 (Hamza Sheikh)",
-        "Officer FIA-441 (Mariam Raza)"
-    ];
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
 
-    // Submit hone par popup dikhana aur random officer assign karna
-    crimeForm.addEventListener('submit', function(e) {
-        e.preventDefault(); 
-        
-        // 2. Random Officer select karne ka logic
-        const randomIndex = Math.floor(Math.random() * enrolledOfficers.length);
-        const assignedOfficer = enrolledOfficers[randomIndex];
+    <script src="script.js"></script>
 
-        // 3. Popup ka text update karna
-        const modalPara = customAlert.querySelector('p');
-        modalPara.innerHTML = `Your complaint has been successfully registered with CyberSecure and assigned to <br><strong>${assignedOfficer}</strong>.`;
+    <script>
+        const crimeForm = document.getElementById('crimeForm');
+        const customAlert = document.getElementById('customAlert');
+        const doneBtn = document.getElementById('doneBtn');
 
-        customAlert.style.display = 'flex'; // Dialogue box show ho jayega
-    });
+        crimeForm.addEventListener('submit', function(e) {
+            e.preventDefault();
 
-    // Done click karne par redirect karna
-    doneBtn.addEventListener('click', function() {
-        window.location.href = 'htmlarea.html'; 
-    });
+            // 1. Database se officers ki list fetch karein
+            db.ref('officers').once('value').then((snapshot) => {
+                let assignedOfficerName = "General Queue";
+                let assignedOfficerID = "Pending";
 
-    // File size check (500MB limit)
-    function validateFileSize(input) {
-        if (input.files.length > 0) {
-            const fileSize = input.files[0].size / 1024 / 1024; 
-            if (fileSize > 500) {
-                alert("File size exceeds 500MB!");
-                input.value = "";
+                if (snapshot.exists()) {
+                    const officers = [];
+                    snapshot.forEach((child) => {
+                        officers.push(child.val());
+                    });
+
+                    // Randomly aik officer choose karein
+                    const randomIdx = Math.floor(Math.random() * officers.length);
+                    assignedOfficerName = officers[randomIdx].officerName;
+                    assignedOfficerID = officers[randomIdx].officerID;
+                }
+
+                // 2. Form ka data collect karein
+                const formData = {
+                    fullName: document.getElementById('fullName').value,
+                    cnic: document.getElementById('cnic').value,
+                    gender: document.getElementById('gender').value,
+                    mobile: document.getElementById('mobile').value,
+                    email: document.getElementById('email').value,
+                    occupation: document.getElementById('occupation').value,
+                    address: document.getElementById('address').value,
+                    city: document.getElementById('city').value,
+                    category: document.getElementById('category').value,
+                    details: document.getElementById('details').value,
+                    assignedTo: assignedOfficerName,
+                    assignedID: assignedOfficerID,
+                    status: "Pending",
+                    timestamp: new Date().toLocaleString()
+                };
+
+                // 3. Complaint ko Firebase mein save karein
+                return db.ref('complaints').push(formData).then(() => {
+                    // Success UI update
+                    const modalPara = document.getElementById('assignedText');
+                    modalPara.innerHTML = `Complaint registered successfully and assigned to:<br><strong>${assignedOfficerName} (${assignedOfficerID})</strong>`;
+                    customAlert.style.display = 'flex';
+                });
+            }).catch((error) => {
+                console.error("Critical Error:", error);
+                alert("Database Error! Please ensure officers are enrolled first.");
+            });
+        });
+
+        doneBtn.addEventListener('click', function() {
+            window.location.href = 'htmlarea.html';
+        });
+
+        function validateFileSize(input) {
+            if (input.files.length > 0) {
+                const fileSize = input.files[0].size / 1024 / 1024;
+                if (fileSize > 500) {
+                    alert("File size exceeds 500MB!");
+                    input.value = "";
+                }
             }
         }
-    }
-</script>
-    
-
+    </script>
 </body>
 </html>

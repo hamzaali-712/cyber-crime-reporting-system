@@ -1,79 +1,77 @@
 document.addEventListener('DOMContentLoaded', function() {
+    // Firebase se data fetch karna shuru karein
+    renderOfficersFromFirebase();
+    renderStatsFromFirebase();
 
-    // ── Responsive Sidebar Toggle (Mobile) ──────────────────────────
+    // Sidebar Logic (as it was)
     const sidebar = document.querySelector('.sidebar');
     const toggleBtn = document.querySelector('.sidebar-toggle');
     const overlay = document.querySelector('.sidebar-overlay');
 
     if (toggleBtn && sidebar) {
-        toggleBtn.addEventListener('click', function() {
+        toggleBtn.addEventListener('click', () => {
             sidebar.classList.toggle('open');
             if (overlay) overlay.classList.toggle('active');
         });
     }
-
-    if (overlay) {
-        overlay.addEventListener('click', function() {
-            sidebar.classList.remove('open');
-            overlay.classList.remove('active');
-        });
-    }
-
-    // Close sidebar on nav-item click (mobile UX)
-    document.querySelectorAll('.nav-item').forEach(function(item) {
-        item.addEventListener('click', function() {
-            if (window.innerWidth <= 768) {
-                sidebar.classList.remove('open');
-                if (overlay) overlay.classList.remove('active');
-            }
-        });
-    });
-
-    // ── Original Logic ───────────────────────────────────────────────
-    renderOfficers();
 });
 
-// Function to fetch and display enrolled officers
-function renderOfficers() {
+// Firebase se real-time Officers list fetch karna
+function renderOfficersFromFirebase() {
     const list = document.getElementById('officerList');
     const emptyMsg = document.getElementById('noOfficerMsg');
 
-    // Memory se officers ki list uthana
-    const officers = JSON.parse(localStorage.getItem('enrolledOfficers')) || [];
+    db.ref('officers').on('value', (snapshot) => {
+        list.innerHTML = '';
+        let count = 0;
 
-    // Clear current list
-    list.innerHTML = '';
-    document.getElementById('officerCount').innerText = officers.length;
-
-    if (officers.length === 0) {
-        emptyMsg.style.display = 'block';
-        return;
-    }
-
-    emptyMsg.style.display = 'none';
-
-    // List render karna
-    officers.forEach((off, index) => {
-        const row = document.createElement('tr');
-        row.innerHTML = `
-            <td style="font-weight: 600;"><i class="fas fa-user-shield" style="color: #00d2ff; margin-right: 10px;"></i> ${off.id}</td>
-            <td><span class="status-badge">Authorized</span></td>
-            <td>
-                <button class="del-btn" onclick="removeOfficer(${index})">
-                    <i class="fas fa-trash-alt"></i> Remove Access
-                </button>
-            </td>
-        `;
-        list.appendChild(row);
+        if (snapshot.exists()) {
+            emptyMsg.style.display = 'none';
+            snapshot.forEach((child) => {
+                const off = child.val();
+                count++;
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td style="font-weight: 600;">
+                        <i class="fas fa-user-shield" style="color: #00d2ff; margin-right: 10px;"></i> 
+                        ${off.officerID}
+                    </td>
+                    <td><span class="status-badge">Authorized</span></td>
+                    <td>
+                        <button class="del-btn" onclick="removeOfficer('${child.key}')">
+                            <i class="fas fa-trash-alt"></i> Remove Access
+                        </button>
+                    </td>
+                `;
+                list.appendChild(row);
+            });
+        } else {
+            emptyMsg.style.display = 'block';
+        }
+        document.getElementById('officerCount').innerText = count;
     });
 }
 
-// Function to remove an officer
-function removeOfficer(index) {
+// Stats calculate karna
+function renderStatsFromFirebase() {
+    // Total Complaints ginna
+    db.ref('complaints').on('value', (snapshot) => {
+        const total = snapshot.numChildren() || 0;
+        document.getElementById('totalComplaintsCount').innerText = total;
+
+        let solved = 0;
+        snapshot.forEach((child) => {
+            if(child.val().status === 'Solved') solved++;
+        });
+        document.getElementById('solvedCasesCount').innerText = solved;
+    });
+}
+
+// Officer delete karna Firebase se
+function removeOfficer(id) {
     if (confirm("Are you sure you want to revoke this officer's access?")) {
-        let officers = JSON.parse(localStorage.getItem('enrolledOfficers')) || [];
-        officers.splice(index, 1); // List se delete karna
-        localStorage.setItem('enrolledOfficers', JSON.stringify(officers)); // Memory update karna
-        renderOfficers(); // Table refresh karna
+        db.ref('officers/' + id).remove()
+        .then(() => alert("Access Revoked!"))
+        .catch((error) => alert("Error: " + error.message));
     }
 }
