@@ -14,6 +14,7 @@ body {
     position: relative;
 }
 
+
 /* Dark overlay for readability */
 body::before {
     content: '';
@@ -22,7 +23,9 @@ body::before {
     background: rgba(0, 0, 0, 0.6);
     z-index: 1;
 }
-
+.CCP{
+    padding-bottom: 20px;
+}
 .container {
     position: relative;
     z-index: 2;
