@@ -1,0 +1,52 @@
+// firestore.rules
+// CyberSecure – Cyber Crime Reporting Portal
+//
+// Deploy with:  firebase deploy --only firestore:rules
+
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ── Personal Information ────────────────────────────────────────────────
+    // Anyone can create (submit a complaint).
+    // Only authenticated admins can read or update.
+    match /personal_information/{cnic} {
+      allow create: if isValidPersonal(request.resource.data);
+      allow read, update, delete: if isAdmin();
+    }
+
+    // ── Incident Details ────────────────────────────────────────────────────
+    match /incident_details/{incidentId} {
+      allow create: if isValidIncident(request.resource.data);
+      allow read, update, delete: if isAdmin();
+    }
+
+    // ── Evidence Uploads ────────────────────────────────────────────────────
+    match /evidence_uploads/{evidenceId} {
+      allow create: if request.resource.data.incident_id is string
+                    && request.resource.data.file_name is string;
+      allow read, update, delete: if isAdmin();
+    }
+
+    // ── Helper functions ────────────────────────────────────────────────────
+
+    function isAdmin() {
+      return request.auth != null
+          && request.auth.token.admin == true;
+    }
+
+    function isValidPersonal(data) {
+      return data.full_name  is string && data.full_name.size()  > 0
+          && data.cnic       is string && data.cnic.size()       > 0
+          && data.gender     is string
+          && data.mobile     is string && data.mobile.size()     > 0;
+    }
+
+    function isValidIncident(data) {
+      return data.personal_id    is string && data.personal_id.size()    > 0
+          && data.city           is string && data.city.size()           > 0
+          && data.crime_category is string && data.crime_category.size() > 0
+          && data.crime_details  is string && data.crime_details.size()  > 0;
+    }
+  }
+}
