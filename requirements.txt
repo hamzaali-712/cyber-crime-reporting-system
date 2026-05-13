@@ -20,7 +20,7 @@ reportlab>=4.0.0
 
 # File Handling and Validation
 python-magic>=0.4.27  # For MIME type detection
-clamav>=0.4.1  # For malware scanning (requires ClamAV installation)
+# clamav>=0.4.1  # Optional malware scanning package; not supported in Streamlit Cloud
 
 # Testing
 pytest>=7.4.0

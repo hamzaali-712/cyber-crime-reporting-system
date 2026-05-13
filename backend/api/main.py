@@ -26,6 +26,13 @@ from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer
 import io
 import uuid
 
+# Configure logging early for import-time errors
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+)
+logger = logging.getLogger(__name__)
+
 # Import services (with error handling)
 try:
     from services import db_service, ai_service, file_service
@@ -99,7 +106,7 @@ else:
 # Supabase client
 from supabase import create_client
 supabase_url = os.getenv("SUPABASE_URL")
-supabase_key = os.getenv("SUPABASE_ANON_KEY")
+supabase_key = os.getenv("SUPABASE_ANON_KEY") or os.getenv("SUPABASE_KEY")
 if supabase_url and supabase_key:
     try:
         supabase = create_client(supabase_url, supabase_key)

@@ -58,7 +58,7 @@ cyber-crime-reporting-system/
 - Python 3.9+
 - Supabase account
 - Groq API key
-- ClamAV (for malware scanning)
+- Optional local ClamAV for malware scanning (not required on Streamlit Cloud)
 
 ### Installation
 

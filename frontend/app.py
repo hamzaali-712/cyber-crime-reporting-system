@@ -143,9 +143,11 @@ def main():
             from pages.tracking import render_tracking_page
             render_tracking_page()
         elif page == "Cyber Law Guide":
-            show_law_guide()
+            from pages.law_guide import render_law_guide_page
+            render_law_guide_page()
         elif page == "Help & Support":
-            show_help_support()
+            from pages.help import render_help_page
+            render_help_page()
 
         # Footer
         st.markdown("""
@@ -208,6 +210,11 @@ def show_complaint_form():
         # Personal Information (Optional for anonymity)
         st.subheader("Personal Information (Optional)")
         anonymous = st.checkbox("Report Anonymously", value=True)
+
+        full_name = ""
+        phone = ""
+        cnic = ""
+        address = ""
 
         if not anonymous:
             col1, col2 = st.columns(2)
