@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Officer Registration | CyberSecure</title>
+    <link rel="stylesheet" href="admin_style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <div class="login-box">
+        <div class="logo">Cyber<span>Secure</span></div>
+        <h2>Officer <span class="cyan-glow">Enrollment</span></h2>
+        
+        <form id="registerForm">
+            <div class="input-field">
+                <label>Officer ID</label>
+                <i class="fas fa-id-badge"></i>
+                <input type="text" id="officerID" placeholder="e.g. FIA-102" required>
+            </div>
+
+            <div class="input-field">
+                <label>Officer Name</label>
+                <i class="fas fa-user"></i>
+                <input type="text" id="officerName" placeholder="eg. Ali Ahmad" required>
+            </div>
+
+            <div class="input-field secret-field">
+                <label>Branch Secret Code <span class="required">*</span></label>
+                <i class="fas fa-key"></i>
+                <input type="password" id="branchCode" placeholder="Enter Admin Secret Code" required>
+            </div>
+
+            <div class="input-field">
+                <label>Set Access Key</label>
+                <i class="fas fa-lock"></i>
+                <input type="password" id="newPass" required>
+            </div>
+
+            <button type="submit" class="login-btn">Register Officer</button>
+        </form>
+        <a href="admin_login.html" class="back-link">← Back to Login</a>
+    </div>
+
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
+
+    <script src="script.js"></script>
+
+    <script>
+    document.getElementById('registerForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        const code = document.getElementById('branchCode').value;
+        const ADMIN_SECRET = "PAKISTAN"; // Aapka secret code
+
+        if(code === ADMIN_SECRET) {
+            // 1. Data collect karein
+            const oID = document.getElementById('officerID').value;
+            const oName = document.getElementById('officerName').value;
+            const oPass = document.getElementById('newPass').value;
+
+            // 2. Firebase 'officers' node mein save karein
+            db.ref('officers/' + oID).set({
+                officerID: oID,
+                officerName: oName,
+                accessKey: oPass,
+                enrolledAt: new Date().toLocaleString()
+            })
+            .then(() => {
+                alert("Success: Officer " + oName + " Enrolled in Database!");
+                window.location.href = "admin_login.html";
+            })
+            .catch((error) => {
+                alert("Error: " + error.message);
+            });
+        } else {
+            alert("Access Denied: Invalid Branch Secret Code!");
+        }
+    });
+    </script>
+</body>
+</html>
