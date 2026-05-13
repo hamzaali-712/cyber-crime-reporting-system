@@ -1,0 +1,231 @@
+/* Cyber Crime Reporting System - Additional Styles */
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+/* Base styles */
+body {
+    font-family: 'Inter', sans-serif;
+    line-height: 1.6;
+}
+
+/* Header styles */
+.main-header {
+    background: linear-gradient(135deg, #1e3a8a, #3b82f6);
+    color: white;
+    padding: 3rem 2rem;
+    border-radius: 15px;
+    text-align: center;
+    margin-bottom: 2rem;
+    box-shadow: 0 10px 30px rgba(30, 58, 138, 0.3);
+}
+
+.main-header h1 {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+}
+
+.main-header p {
+    font-size: 1.1rem;
+    opacity: 0.9;
+}
+
+/* Form styles */
+.complaint-form {
+    background: #f8fafc;
+    padding: 2.5rem;
+    border-radius: 15px;
+    border: 1px solid #e2e8f0;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+}
+
+.complaint-form h3 {
+    color: #1e293b;
+    border-bottom: 2px solid #3b82f6;
+    padding-bottom: 0.5rem;
+    margin-bottom: 1.5rem;
+}
+
+/* Evidence section */
+.evidence-section {
+    background: #fef3c7;
+    padding: 2rem;
+    border-radius: 12px;
+    border-left: 5px solid #f59e0b;
+    margin: 1.5rem 0;
+    border: 1px solid #fde68a;
+}
+
+/* Law section */
+.law-section {
+    background: #ecfdf5;
+    padding: 2rem;
+    border-radius: 12px;
+    border-left: 5px solid #10b981;
+    border: 1px solid #d1fae5;
+}
+
+/* Button styles */
+.stButton>button {
+    background: linear-gradient(135deg, #1e40af, #3b82f6);
+    color: white;
+    border: none;
+    padding: 0.875rem 2rem;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 6px rgba(59, 130, 246, 0.2);
+}
+
+.stButton>button:hover {
+    background: linear-gradient(135deg, #1e3a8a, #2563eb);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 12px rgba(59, 130, 246, 0.3);
+}
+
+/* Input styles */
+.stTextInput>div>div>input,
+.stTextArea>div>textarea,
+.stSelectbox>div>div>select {
+    border-radius: 8px;
+    border: 2px solid #e2e8f0;
+    padding: 0.75rem;
+    font-size: 1rem;
+    transition: border-color 0.3s ease;
+}
+
+.stTextInput>div>div>input:focus,
+.stTextArea>div>textarea:focus,
+.stSelectbox>div>div>select:focus {
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+/* Expander styles */
+.streamlit-expanderHeader {
+    background: #f8fafc;
+    border-radius: 8px;
+    border: 1px solid #e2e8f0;
+    padding: 1rem;
+    font-weight: 600;
+    color: #1e293b;
+}
+
+.streamlit-expanderHeader:hover {
+    background: #f1f5f9;
+}
+
+/* Success/Error messages */
+.success-message {
+    background: #d1fae5;
+    color: #065f46;
+    padding: 1rem;
+    border-radius: 8px;
+    border: 1px solid #a7f3d0;
+    margin: 1rem 0;
+}
+
+.error-message {
+    background: #fee2e2;
+    color: #991b1b;
+    padding: 1rem;
+    border-radius: 8px;
+    border: 1px solid #fecaca;
+    margin: 1rem 0;
+}
+
+.info-message {
+    background: #dbeafe;
+    color: #1e40af;
+    padding: 1rem;
+    border-radius: 8px;
+    border: 1px solid #bfdbfe;
+    margin: 1rem 0;
+}
+
+/* Footer */
+.footer {
+    text-align: center;
+    padding: 3rem 2rem;
+    color: #64748b;
+    border-top: 1px solid #e2e8f0;
+    margin-top: 4rem;
+    background: #f8fafc;
+    border-radius: 12px;
+}
+
+.footer h4 {
+    color: #1e293b;
+    margin-bottom: 0.5rem;
+}
+
+/* Sidebar */
+.sidebar .sidebar-content {
+    background: #f8fafc;
+    padding: 1rem;
+}
+
+/* Progress bar */
+.stProgress > div > div > div > div {
+    background: linear-gradient(90deg, #3b82f6, #1e40af);
+}
+
+/* File uploader */
+.stFileUploader > div > div > div > div {
+    border: 2px dashed #cbd5e1;
+    border-radius: 8px;
+    padding: 2rem;
+    text-align: center;
+    transition: border-color 0.3s ease;
+}
+
+.stFileUploader > div > div > div > div:hover {
+    border-color: #3b82f6;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+    .main-header {
+        padding: 2rem 1rem;
+    }
+
+    .main-header h1 {
+        font-size: 2rem;
+    }
+
+    .complaint-form {
+        padding: 1.5rem;
+    }
+
+    .stButton>button {
+        padding: 0.75rem 1.5rem;
+        font-size: 0.9rem;
+    }
+}
+
+/* Animation */
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.fade-in {
+    animation: fadeIn 0.5s ease-out;
+}
+
+/* Loading spinner */
+.spinner {
+    border: 4px solid #f3f3f3;
+    border-top: 4px solid #3b82f6;
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    animation: spin 1s linear infinite;
+    margin: 0 auto;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
