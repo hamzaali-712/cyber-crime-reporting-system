@@ -1,11 +1,13 @@
 """
-Officer Panel - Operational Dashboard
+Officer Panel - Case Management Dashboard
+Includes AI Automation for Victim Communication.
 """
 
 import streamlit as st
 import json
 import os
 import sys
+import requests
 from pathlib import Path
 from datetime import datetime
 
@@ -33,12 +35,42 @@ def save_json(file_path, data):
     with open(file_path, 'w') as f:
         json.dump(data, f, indent=2, default=str)
 
+def draft_ai_email(case_details, decision, officer_notes):
+    """Uses AI to draft a professional email for the victim."""
+    try:
+        api_key = os.getenv("GROQ_API_KEY")
+        url = "https://api.groq.com/openai/v1/chat/completions"
+        headers = {"Authorization": f"Bearer {api_key}", "Content-Type": "application/json"}
+        
+        prompt = f"""
+        Draft a highly professional and empathetic email from the NCIA Cybercrime Wing to a victim.
+        Case Type: {case_details.get('complaint_reason')}
+        Decision: {decision}
+        Officer Remarks: {officer_notes}
+        
+        The email should be clear about the next steps and maintain a formal yet supportive government tone.
+        Do not use placeholders, write the final text.
+        """
+        
+        payload = {
+            "model": "llama-3.1-8b-instant",
+            "messages": [{"role": "system", "content": "You are a professional legal secretary."}, {"role": "user", "content": prompt}],
+            "temperature": 0.3
+        }
+        
+        response = requests.post(url, headers=headers, json=payload, timeout=10)
+        if response.status_code == 200:
+            return response.json()["choices"][0]["message"]["content"]
+    except:
+        return f"Case Update: {decision}\n\nRemarks: {officer_notes}"
+    return "Drafting failed."
+
 def render_officer_panel(set_page_config: bool = True):
     if set_page_config:
         try:
             st.set_page_config(page_title="Officer Dashboard", page_icon="👮", layout="wide")
         except:
-            pass # Already set by app.py
+            pass
     
     if not st.session_state.get('officer_logged_in'):
         st.error("❌ ACCESS DENIED.")
@@ -50,7 +82,7 @@ def render_officer_panel(set_page_config: bool = True):
     complaints = load_json(COMPLAINTS_FILE)
     decisions = load_json(OFFICER_DECISIONS_FILE)
     
-    tab1, tab2 = st.tabs(["📥 QUEUE", "✅ PROCESSED"])
+    tab1, tab2, tab3 = st.tabs(["📥 QUEUE", "✅ PROCESSED", "🤖 AI AUTOMATION"])
     
     with tab1:
         pending = [tid for tid in complaints if tid not in decisions]
@@ -74,35 +106,21 @@ def render_officer_panel(set_page_config: bool = True):
                             st.session_state.review_tid = tid
                             st.rerun()
 
+    # Manual Review Logic
     if st.session_state.get('review_tid'):
         tid = st.session_state.review_tid
         c = complaints[tid]
         st.markdown("---")
-        st.subheader(f"Case Review: {tid}")
-        st.info(c.get('description'))
+        st.subheader(f"Manual Review: {tid}")
         
         with st.form("action_form"):
             decision = st.selectbox("Decision:", ["Approve", "Solve", "Reject"])
-            notes = st.text_area("Remarks:")
+            notes = st.text_area("Internal Remarks:")
             if st.form_submit_button("SUBMIT DECISION"):
-                decisions[tid] = {
-                    "officer_id": officer_id,
-                    "decision": decision,
-                    "notes": notes,
-                    "timestamp": datetime.now().isoformat()
-                }
+                decisions[tid] = {"officer_id": officer_id, "decision": decision, "notes": notes, "timestamp": datetime.now().isoformat()}
                 save_json(OFFICER_DECISIONS_FILE, decisions)
-                
-                # Email
-                email = c.get('email')
-                if email:
-                    send_case_update_email(email, tid, decision, notes)
-                
                 st.session_state.review_tid = None
-                st.success("Decision logged.")
-                st.rerun()
-            if st.form_submit_button("CLOSE"):
-                st.session_state.review_tid = None
+                st.success("Logged.")
                 st.rerun()
 
     with tab2:
@@ -113,9 +131,45 @@ def render_officer_panel(set_page_config: bool = True):
             <div class="complaint-card">
                 <span class="status-pill {cls}">{d['decision']}</span>
                 <h4 style="margin: 5px 0;">{c.get('complaint_reason', 'N/A')}</h4>
-                <p style="font-size: 0.8rem; opacity: 0.7;">ID: {tid}</p>
+                <p style="font-size: 0.8rem; opacity: 0.7;">ID: {tid} | Note: {d['notes']}</p>
             </div>
             """, unsafe_allow_html=True)
+
+    with tab3:
+        st.subheader("🤖 AI AUTOMATED COMMUNICATION")
+        st.write("Use AI to draft professional updates for victims based on officer decisions.")
+        
+        processed_tids = list(decisions.keys())
+        if not processed_tids:
+            st.warning("No processed cases found to automate.")
+        else:
+            selected_tid = st.selectbox("Select Case to Notify:", processed_tids)
+            if selected_tid:
+                c = complaints.get(selected_tid)
+                d = decisions.get(selected_tid)
+                
+                st.markdown("---")
+                st.write(f"**Current Status:** {d['decision']}")
+                st.write(f"**Victim Email:** {c.get('email', 'N/A')}")
+                
+                if st.button("🪄 GENERATE AI DRAFT"):
+                    with st.spinner("AI is drafting response..."):
+                        draft = draft_ai_email(c, d['decision'], d['notes'])
+                        st.session_state.ai_draft = draft
+                
+                if st.session_state.get('ai_draft'):
+                    final_draft = st.text_area("Review AI Draft:", value=st.session_state.ai_draft, height=300)
+                    if st.button("📧 DISPATCH EMAIL TO VICTIM", type="primary"):
+                        email = c.get('email')
+                        if email:
+                            with st.spinner("Sending..."):
+                                if send_case_update_email(email, selected_tid, d['decision'], final_draft):
+                                    st.success("AI-Automated email dispatched successfully.")
+                                    st.session_state.ai_draft = None
+                                else:
+                                    st.error("Dispatch failed.")
+                        else:
+                            st.error("No victim email found.")
 
 if __name__ == "__main__":
     render_officer_panel()

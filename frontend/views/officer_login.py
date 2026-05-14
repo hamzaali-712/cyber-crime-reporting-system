@@ -1,5 +1,6 @@
 """
 Officer Login - Secure Authentication Node
+Internal Access Only (Signup Disabled)
 """
 
 import streamlit as st
@@ -29,6 +30,7 @@ def render_officer_login(set_page_config: bool = True):
 
     st.markdown('<div class="login-form">', unsafe_allow_html=True)
     st.markdown("### 🔐 OFFICER AUTHENTICATION")
+    st.info("System access is restricted to authorized personnel only.")
     
     # Check if already logged in
     if st.session_state.get('officer_logged_in'):
@@ -65,12 +67,6 @@ def verify_officer(officer_id, password):
     if officer_id in officers:
         return officers[officer_id].get("password") == password
     return False
-
-def is_officer_logged_in():
-    return st.session_state.get("officer_logged_in", False)
-
-def get_current_officer_id():
-    return st.session_state.get("officer_id")
 
 def logout_officer():
     st.session_state.officer_logged_in = False
