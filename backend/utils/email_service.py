@@ -10,80 +10,62 @@ logger = logging.getLogger(__name__)
 
 def send_case_update_email(recipient_email, tracking_id, status, notes):
     """
-    Sends a professional case update email to the user.
+    Sends a professional case update email.
+    Logs errors explicitly for debugging.
     """
     smtp_server = os.getenv('SMTP_SERVER')
-    smtp_port = int(os.getenv('SMTP_PORT', 587))
+    smtp_port = os.getenv('SMTP_PORT')
     smtp_user = os.getenv('SMTP_USERNAME')
     smtp_pass = os.getenv('SMTP_PASSWORD')
 
-    if not all([smtp_server, smtp_user, smtp_pass]):
-        logger.warning("SMTP settings not fully configured. Email not sent.")
+    # Basic configuration check
+    if not all([smtp_server, smtp_port, smtp_user, smtp_pass]):
+        logger.error(f"SMTP Configuration Missing. Server: {bool(smtp_server)}, User: {bool(smtp_user)}")
         return False
 
     try:
-        # Create message
+        smtp_port = int(smtp_port)
         msg = MIMEMultipart()
-        msg['From'] = f"Cyber Crime Reporting System <{smtp_user}>"
+        msg['From'] = f"Cyber Portal PK <{smtp_user}>"
         msg['To'] = recipient_email
-        msg['Subject'] = f"Case Update: {tracking_id} - {status.upper()}"
+        msg['Subject'] = f"CASE UPDATE: {tracking_id} [{status.upper()}]"
 
-        # Status color and icon
-        status_colors = {
-            "approved": "#10b981",
-            "solved": "#3b82f6",
-            "rejected": "#ef4444"
-        }
-        color = status_colors.get(status.lower(), "#64748b")
-
-        # HTML Body
+        # Content styling
+        color = "#3b82f6" if status.lower() == "approved" else "#10b981" if status.lower() == "solved" else "#ef4444"
+        
         html = f"""
-        <html>
-        <body style="font-family: 'Inter', sans-serif; background-color: #f8fafc; padding: 20px;">
-            <div style="max-width: 600px; margin: 0 auto; background-color: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); border: 1px solid #e2e8f0;">
-                <div style="background: linear-gradient(135deg, #1e3a8a, #3b82f6); color: white; padding: 30px; text-align: center;">
-                    <h1 style="margin: 0; font-size: 24px;">Cyber Crime Reporting System</h1>
-                    <p style="margin: 10px 0 0; opacity: 0.9;">Official Case Status Update</p>
-                </div>
-                <div style="padding: 40px; color: #1e293b;">
-                    <h2 style="margin-top: 0; color: #0f172a;">Case Update Notification</h2>
-                    <p>Dear Citizen,</p>
-                    <p>We are writing to inform you of an update regarding your complaint submitted to the Cyber Crime Reporting System.</p>
-                    
-                    <div style="background-color: #f1f5f9; padding: 20px; border-radius: 8px; margin: 25px 0;">
-                        <p style="margin: 0;"><strong>Tracking ID:</strong> <span style="font-family: monospace;">{tracking_id}</span></p>
-                        <p style="margin: 10px 0 0;"><strong>Current Status:</strong> <span style="color: {color}; font-weight: bold; text-transform: uppercase;">{status}</span></p>
-                    </div>
-
-                    <h3 style="color: #0f172a; border-bottom: 2px solid #f1f5f9; padding-bottom: 10px;">Officer Remarks:</h3>
-                    <p style="font-style: italic; color: #475569;">"{notes}"</p>
-
-                    <p style="margin-top: 30px;">You can track further progress by visiting our portal and entering your Tracking ID.</p>
-                    
-                    <div style="text-align: center; margin-top: 40px;">
-                        <a href="https://cyber-crime-reporting-system.streamlit.app" style="background-color: #1e40af; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: 600;">Visit Portal</a>
-                    </div>
-                </div>
-                <div style="background-color: #f8fafc; color: #64748b; padding: 20px; text-align: center; font-size: 12px; border-top: 1px solid #e2e8f0;">
-                    <p style="margin: 0;">&copy; 2026 Cyber Crime Reporting System - Pakistan. All rights reserved.</p>
-                    <p style="margin: 5px 0 0;">This is an automated notification. Please do not reply directly to this email.</p>
-                </div>
+        <div style="font-family: sans-serif; max-width: 600px; border: 1px solid #e2e8f0; border-radius: 10px; overflow: hidden;">
+            <div style="background: #1e3a8a; color: white; padding: 20px; text-align: center;">
+                <h2>Cyber Crime Reporting System</h2>
             </div>
-        </body>
-        </html>
+            <div style="padding: 30px;">
+                <p>Hello,</p>
+                <p>Your case <b>{tracking_id}</b> has been updated.</p>
+                <div style="background: #f8fafc; padding: 15px; border-left: 5px solid {color}; margin: 20px 0;">
+                    <p style="margin: 0;"><b>New Status:</b> <span style="color: {color};">{status.upper()}</span></p>
+                </div>
+                <p><b>Officer Remarks:</b></p>
+                <p style="color: #475569; font-style: italic;">"{notes}"</p>
+                <p style="margin-top: 30px;">Visit the portal and use your tracking ID for more details.</p>
+            </div>
+            <div style="background: #f1f5f9; padding: 15px; text-align: center; font-size: 12px; color: #64748b;">
+                This is an automated notification from the NCIA Cyber Portal.
+            </div>
+        </div>
         """
-
+        
         msg.attach(MIMEText(html, 'html'))
 
-        # Send email
-        with smtplib.SMTP(smtp_server, smtp_port) as server:
+        # Secure connection
+        with smtplib.SMTP(smtp_server, smtp_port, timeout=10) as server:
             server.starttls()
             server.login(smtp_user, smtp_pass)
             server.send_message(msg)
-
-        logger.info(f"Update email sent to {recipient_email} for case {tracking_id}")
+        
+        logger.info(f"Email sent successfully to {recipient_email}")
         return True
 
     except Exception as e:
-        logger.error(f"Failed to send email to {recipient_email}: {str(e)}")
+        logger.error(f"SMTP ERROR for {recipient_email}: {str(e)}")
+        # If it's a connection error, it might be due to a blocked port or wrong server
         return False

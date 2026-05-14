@@ -1,6 +1,5 @@
 """
-Officer Panel - View and Manage Cybercrime Reports
-Modern Premium Version
+Officer Panel - Case Management Dashboard
 """
 
 import streamlit as st
@@ -9,17 +8,12 @@ import os
 import sys
 from pathlib import Path
 from datetime import datetime
-import logging
 
-# Ensure local frontend imports work properly
 ROOT_DIR = Path(__file__).resolve().parent.parent.parent
 if str(ROOT_DIR) not in sys.path:
     sys.path.insert(0, str(ROOT_DIR))
 
-from views.officer_login import is_officer_logged_in, get_current_officer_id, logout_officer
 from backend.utils.email_service import send_case_update_email
-
-logger = logging.getLogger(__name__)
 
 # Database files
 COMPLAINTS_FILE = ROOT_DIR / "backend" / "data" / "complaints.json"
@@ -30,8 +24,7 @@ def load_json(file_path):
         try:
             with open(file_path, 'r') as f:
                 return json.load(f)
-        except Exception as e:
-            logger.error(f"Error loading {file_path}: {e}")
+        except:
             return {}
     return {}
 
@@ -42,203 +35,109 @@ def save_json(file_path, data):
 
 def render_officer_panel(set_page_config: bool = True):
     if set_page_config:
-        st.set_page_config(page_title="Officer Panel - Cyber System", page_icon="👮", layout="wide")
+        st.set_page_config(page_title="Officer Dashboard", page_icon="👮", layout="wide")
     
-    if not is_officer_logged_in():
-        st.error("❌ UNAUTHORIZED ACCESS DETECTED. PLEASE AUTHENTICATE.")
-        if st.button("RETURN TO LOGIN"):
+    if not st.session_state.get('officer_logged_in'):
+        st.error("❌ UNAUTHORIZED ACCESS.")
+        if st.button("GO TO LOGIN"):
             st.session_state.current_page = "officer_login"
             st.rerun()
         return
     
-    officer_id = get_current_officer_id()
-
-    # Header with logout
-    col1, col2 = st.columns([4, 1])
-    with col1:
-        st.markdown(f"## 👮 COMMAND CENTER: {officer_id}")
-    with col2:
-        if st.button("🚪 TERMINATE SESSION", use_container_width=True):
-            logout_officer()
-            st.rerun()
-
-    st.markdown("---")
-
-    # Tabs
-    tab1, tab2, tab3, tab4, tab5 = st.tabs([
-        "📋 PENDING QUEUE", 
-        "✅ ACTIVE CASES", 
-        "🛠️ SOLVED ARCHIVE", 
-        "❌ REJECTED FILES", 
-        "📊 ANALYTICS"
-    ])
+    officer_id = st.session_state.officer_id
+    st.markdown(f"### 👮 COMMAND CENTER | ID: `{officer_id}`")
+    
+    tab1, tab2, tab3 = st.tabs(["📥 PENDING", "✅ PROCESSED", "📊 ANALYTICS"])
     
     complaints = load_json(COMPLAINTS_FILE)
     decisions = load_json(OFFICER_DECISIONS_FILE)
-    
-    # ── Tab 1: Pending Reports ──
+
     with tab1:
-        st.subheader("Reports Awaiting Operational Decision")
-        pending = [(tid, c) for tid, c in complaints.items() if tid not in decisions]
-        
+        pending = [tid for tid in complaints if tid not in decisions]
         if not pending:
-            st.info("🎯 All reports processed. Operational queue is empty.")
+            st.info("No pending cases.")
         else:
-            for tid, c in pending:
+            for tid in pending:
+                c = complaints[tid]
                 with st.container():
-                    col_info, col_act = st.columns([3, 1])
-                    with col_info:
+                    col1, col2 = st.columns([4, 1])
+                    with col1:
                         st.markdown(f"""
-                        <div class="complaint-card cyber-glow">
-                            <h4>{c.get('complaint_reason', 'UNKNOWN')}</h4>
-                            <p><strong>NODE ID:</strong> {tid}</p>
-                            <p><strong>TIMESTAMP:</strong> {c.get('submitted_at', 'N/A')}</p>
-                            <p><span class="pending-badge">STATUS: PENDING</span></p>
+                        <div class="complaint-card">
+                            <span class="status-pill status-pending">PENDING</span>
+                            <h4 style="margin: 10px 0;">{c.get('complaint_reason')}</h4>
+                            <p style="font-size: 0.85rem; opacity: 0.8;">ID: {tid} | Date: {c.get('incident_date')}</p>
                         </div>
                         """, unsafe_allow_html=True)
-                    with col_act:
+                    with col2:
                         st.write("")
-                        if st.button("🔍 ANALYZE", key=f"rev_{tid}"):
-                            st.session_state.selected_complaint = tid
-                            st.session_state.selected_complaint_data = c
+                        if st.button("REVIEW", key=f"rev_{tid}", use_container_width=True):
+                            st.session_state.selected_case = tid
                             st.rerun()
 
-    # ── Review Detail Modal Logic ──
-    if st.session_state.get("selected_complaint"):
+    if st.session_state.get('selected_case'):
+        tid = st.session_state.selected_case
+        c = complaints[tid]
         st.markdown("---")
-        st.markdown("### 🔍 CASE ANALYSIS MODULE")
+        st.subheader(f"Case Review: {tid}")
         
-        tid = st.session_state.selected_complaint
-        c = st.session_state.selected_complaint_data
+        with st.expander("📄 VIEW FULL DETAILS", expanded=True):
+            st.write(f"**Type:** {c.get('complaint_reason')}")
+            st.write(f"**Description:** {c.get('description')}")
+            st.write(f"**Email:** {c.get('email', 'N/A')}")
         
-        col1, col2 = st.columns(2)
-        with col1:
-            st.write(f"**ID:** {tid}")
-            st.write(f"**Category:** {c.get('complaint_reason')}")
-            st.write(f"**Date:** {c.get('incident_date')}")
-        with col2:
-            st.write(f"**Complainant:** {c.get('full_name', 'ANONYMOUS')}")
-            st.write(f"**Contact:** {c.get('phone', 'N/A')}")
-            st.write(f"**Email:** {c.get('email', 'N/A')}") # Assuming email might be captured
-
-        st.markdown("**Incident Log:**")
-        st.info(c.get('description'))
-        
-        st.markdown("#### ⚡ OPERATIONAL DECISION")
-        decision = st.selectbox(
-            "Select Action Path:",
-            ["Select...", "Approve - Initiate Investigation", "Solve - Close Successfully", "Reject - Invalid Entry"]
-        )
-        
-        if decision != "Select...":
-            notes = st.text_area("Operational Notes:", placeholder="Provide details for the citizen and internal logs...")
+        # Decision Form
+        with st.form("decision_form"):
+            decision = st.selectbox("Action:", ["Approve", "Solve", "Reject"])
+            notes = st.text_area("Officer Remarks:", placeholder="Details for the citizen...")
             
-            c_email = c.get('email') # Check if email exists
-            if not c_email:
-                c_email = st.text_input("User Email (for notification):", placeholder="user@example.com")
-
-            col_sub, col_can = st.columns(2)
-            with col_sub:
-                if st.button("🚀 SUBMIT & NOTIFY", type="primary"):
-                    if not notes:
-                        st.error("NOTES REQUIRED FOR DECISION LOG.")
-                    else:
-                        # 1. Save Decision
-                        d_data = {
-                            "officer_id": officer_id,
-                            "tracking_id": tid,
-                            "decision": decision,
-                            "notes": notes,
-                            "decided_at": datetime.now().isoformat()
-                        }
-                        all_d = load_json(OFFICER_DECISIONS_FILE)
-                        all_d[tid] = d_data
-                        save_json(OFFICER_DECISIONS_FILE, all_d)
-                        
-                        # 2. Update Complaint
-                        all_c = load_json(COMPLAINTS_FILE)
-                        status_map = {"Approve": "approved", "Solve": "solved", "Reject": "rejected"}
-                        new_status = next((v for k, v in status_map.items() if k in decision), "pending")
-                        
-                        all_c[tid]["status"] = new_status
-                        save_json(COMPLAINTS_FILE, all_c)
-                        
-                        # 3. Email Notification
-                        if c_email:
-                            with st.spinner("Sending secure notification..."):
-                                send_case_update_email(c_email, tid, new_status, notes)
-                        
-                        st.success(f"✅ CASE {tid} UPDATED. NOTIFICATION DISPATCHED.")
-                        import time
-                        time.sleep(2)
-                        st.session_state.selected_complaint = None
-                        st.rerun()
+            sub_col, can_col = st.columns(2)
+            if sub_col.form_submit_button("SUBMIT & NOTIFY", use_container_width=True):
+                # Update records
+                decisions[tid] = {
+                    "officer_id": officer_id,
+                    "decision": decision,
+                    "notes": notes,
+                    "timestamp": datetime.now().isoformat()
+                }
+                save_json(OFFICER_DECISIONS_FILE, decisions)
+                
+                # Email notification
+                user_email = c.get('email')
+                if user_email:
+                    with st.spinner("Dispatching Notification..."):
+                        success = send_case_update_email(user_email, tid, decision, notes)
+                        if success:
+                            st.success("Notification sent.")
+                        else:
+                            st.error("Email dispatch failed. Check SMTP settings.")
+                
+                st.session_state.selected_case = None
+                st.rerun()
             
-            with col_can:
-                if st.button("❌ ABORT"):
-                    st.session_state.selected_complaint = None
-                    st.rerun()
+            if can_col.form_submit_button("CLOSE", use_container_width=True):
+                st.session_state.selected_case = None
+                st.rerun()
 
-    # ── Tab 2: Approved Cases ──
     with tab2:
-        st.subheader("Active Investigations")
-        for tid, c in complaints.items():
-            d = decisions.get(tid)
-            if d and "Approve" in d.get("decision", ""):
-                st.markdown(f"""
-                <div class="complaint-card" style="border-left: 6px solid var(--primary);">
-                    <h4>✅ {c.get('complaint_reason')}</h4>
-                    <p><strong>ID:</strong> {tid} | <strong>OFFICER:</strong> {d.get('officer_id')}</p>
-                    <p><span class="approved-badge">STATUS: INVESTIGATING</span></p>
-                    <p style="font-size:0.9rem; opacity:0.8;">{d.get('notes')}</p>
-                </div>
-                """, unsafe_allow_html=True)
-                if st.button("UPDATE STATUS", key=f"up_{tid}"):
-                    st.session_state.selected_complaint = tid
-                    st.session_state.selected_complaint_data = c
-                    st.rerun()
+        processed = [tid for tid in decisions]
+        for tid in processed:
+            d = decisions[tid]
+            c = complaints.get(tid, {})
+            status_cls = f"status-{d['decision'].lower()}"
+            st.markdown(f"""
+            <div class="complaint-card">
+                <span class="status-pill {status_cls}">{d['decision']}</span>
+                <h4 style="margin: 10px 0;">{c.get('complaint_reason', 'N/A')}</h4>
+                <p style="font-size: 0.85rem; opacity: 0.8;">ID: {tid} | Processed by: {d['officer_id']}</p>
+                <p style="font-style: italic; font-size: 0.8rem;">Note: {d['notes']}</p>
+            </div>
+            """, unsafe_allow_html=True)
 
-    # ── Tab 3: Solved ──
     with tab3:
-        for tid, c in complaints.items():
-            d = decisions.get(tid)
-            if d and "Solve" in d.get("decision", ""):
-                st.markdown(f"""
-                <div class="complaint-card" style="border-left: 6px solid var(--success);">
-                    <h4>🛠️ {c.get('complaint_reason')}</h4>
-                    <p><strong>ID:</strong> {tid} | <span class="solved-badge">RESOLVED</span></p>
-                    <p style="font-size:0.9rem; opacity:0.8;">{d.get('notes')}</p>
-                </div>
-                """, unsafe_allow_html=True)
-
-    # ── Tab 4: Rejected ──
-    with tab4:
-        for tid, c in complaints.items():
-            d = decisions.get(tid)
-            if d and "Reject" in d.get("decision", ""):
-                st.markdown(f"""
-                <div class="complaint-card" style="border-left: 6px solid var(--error);">
-                    <h4>❌ {c.get('complaint_reason')}</h4>
-                    <p><strong>ID:</strong> {tid} | <span class="rejected-badge">REJECTED</span></p>
-                    <p style="font-size:0.9rem; opacity:0.8;">{d.get('notes')}</p>
-                </div>
-                """, unsafe_allow_html=True)
-
-    # ── Tab 5: Stats ──
-    with tab5:
-        total = len(complaints)
-        pend = len(pending)
-        appr = len([x for x in decisions.values() if "Approve" in x.get('decision')])
-        solv = len([x for x in decisions.values() if "Solve" in x.get('decision')])
-        reje = len([x for x in decisions.values() if "Reject" in x.get('decision')])
-        
-        c1, c2, c3, c4 = st.columns(4)
-        c1.metric("TOTAL NODES", total)
-        c2.metric("PENDING", pend)
-        c3.metric("RESOLVED", solv)
-        c4.metric("REJECTED", reje)
-        
-        st.bar_chart({"Pending": pend, "Active": appr, "Solved": solv, "Rejected": reje})
+        st.metric("TOTAL REPORTS", len(complaints))
+        st.metric("RESOLVED", len(processed))
+        st.progress(len(processed)/len(complaints) if complaints else 0)
 
 if __name__ == "__main__":
     render_officer_panel()

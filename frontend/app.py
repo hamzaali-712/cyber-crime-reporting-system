@@ -1,6 +1,6 @@
 """
 Cyber Crime Reporting System - Main Streamlit Application
-Modern Premium Version
+High-Performance Version with AI Integration
 """
 
 import streamlit as st
@@ -10,7 +10,6 @@ import pathlib
 from dotenv import load_dotenv
 import logging
 from datetime import datetime
-import uuid
 
 # ── Path setup ────────────────────────────────────────────────────────────────
 FRONTEND_DIR = pathlib.Path(__file__).resolve().parent
@@ -27,7 +26,7 @@ logger = logging.getLogger(__name__)
 
 # ── Page config ───────────────────────────────────────────────────────────────
 st.set_page_config(
-    page_title="Cyber Crime Reporting System - Pakistan",
+    page_title="Cyber Crime Portal - PK",
     page_icon="🛡️",
     layout="wide",
     initial_sidebar_state="expanded"
@@ -35,89 +34,81 @@ st.set_page_config(
 
 # ── Custom CSS Loader ─────────────────────────────────────────────────────────
 def load_css():
-    """Load the premium cyber-themed CSS."""
     css_path = FRONTEND_DIR / "static" / "styles.css"
     if css_path.exists():
         with open(css_path) as f:
             st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
-    else:
-        # Fallback basic styles if file is missing
-        st.markdown("""
-        <style>
-        .main-header { background: #1e3a8a; color: white; padding: 2rem; border-radius: 10px; text-align: center; }
-        </style>
-        """, unsafe_allow_html=True)
 
 # ── Session management ────────────────────────────────────────────────────────
 def initialize_session():
-    """Initialize secure session state."""
-    defaults = {
-        'current_page': 'home',
-        'officer_logged_in': False,
-        'officer_id': None,
-        'selected_complaint': None,
-        'selected_complaint_data': None,
-        'show_registration': False,
-    }
-    for key, val in defaults.items():
-        if key not in st.session_state:
-            st.session_state[key] = val
+    if 'current_page' not in st.session_state:
+        st.session_state.current_page = 'home'
+    if 'officer_logged_in' not in st.session_state:
+        st.session_state.officer_logged_in = False
+    if 'officer_id' not in st.session_state:
+        st.session_state.officer_id = None
 
 def navigate_to(page_name: str):
-    """Navigate to a specific page."""
     st.session_state.current_page = page_name
     st.rerun()
 
-# ── Application Main ──────────────────────────────────────────────────────────
+# ── Main Application Logic ───────────────────────────────────────────────────
 def main():
     initialize_session()
     load_css()
 
     # ── Header ──
     st.markdown("""
-    <div class="main-header cyber-glow">
-        <h1>🛡️ CYBER CRIME PORTAL</h1>
-        <p>Pakistan's Advanced Electronic Evidence & Crime Reporting Platform</p>
-        <p style="font-size: 0.9em; margin-top: 10px; opacity: 0.7;">
-            Securely Compliant with PECA 2016 Standards
-        </p>
+    <div class="main-header">
+        <h1>🛡️ CYBER CRIME REPORTING</h1>
+        <p>Official Law Enforcement Portal - Pakistan</p>
     </div>
     """, unsafe_allow_html=True)
 
     # ── Sidebar ──
     with st.sidebar:
-        st.markdown("### 🌐 NETWORK NAVIGATION")
-        page_options = ["Home", "Report Cybercrime", "Track Complaint", "Cyber Law Guide", "Help & Support"]
-        page_index_map = {"home": 0, "report_form": 1, "tracking": 2, "law_guide": 3, "help_support": 4}
+        st.markdown("### 🗺️ NAVIGATION")
         
-        selected_page = st.radio(
-            "Select Operational Node:",
-            page_options,
-            index=page_index_map.get(st.session_state.current_page, 0)
-        )
-
-        st.markdown("---")
-        st.markdown("### 🔐 RESTRICTED ACCESS")
-        if st.button("👮 OFFICER LOGIN", use_container_width=True):
-            navigate_to("officer_login")
-
-        st.markdown("---")
-        st.markdown("### 🚨 EMERGENCY")
-        st.error("Police: 15")
-        st.info("FIA: helpdesk@nr3c.gov.pk")
-
-    # ── Logic to sync sidebar with session state ──
-    reverse_map = {v: k for k, v in page_index_map.items()}
-    if selected_page:
-        mapped_key = page_options.index(selected_page)
-        page_key = reverse_map.get(mapped_key)
-        if page_key and st.session_state.current_page != page_key:
-            st.session_state.current_page = page_key
+        # Navigation Map
+        pages = {
+            "Home": "home",
+            "Report Crime": "report_form",
+            "Track Status": "tracking",
+            "Legal Guide": "law_guide",
+            "Help Center": "help_support"
+        }
+        
+        # Determine current index
+        current_page = st.session_state.current_page
+        page_list = list(pages.values())
+        try:
+            default_idx = page_list.index(current_page)
+        except ValueError:
+            default_idx = 0
+            
+        selected = st.radio("Access Node:", list(pages.keys()), index=default_idx)
+        
+        if pages[selected] != st.session_state.current_page:
+            st.session_state.current_page = pages[selected]
             st.rerun()
+
+        st.markdown("---")
+        if not st.session_state.officer_logged_in:
+            if st.button("👮 OFFICER LOGIN", use_container_width=True):
+                navigate_to("officer_login")
+        else:
+            st.success(f"Log: {st.session_state.officer_id}")
+            if st.button("📊 GO TO PANEL", use_container_width=True):
+                navigate_to("officer_panel")
+            if st.button("🚪 LOGOUT", use_container_width=True):
+                st.session_state.officer_logged_in = False
+                st.session_state.officer_id = None
+                navigate_to("home")
 
     # ── Page Routing ──
     current = st.session_state.current_page
 
+    # Import views dynamically to avoid circular issues
     if current == "home":
         show_home_page()
     elif current == "report_form":
@@ -139,51 +130,29 @@ def main():
         from views.officer_panel import render_officer_panel
         render_officer_panel(set_page_config=False)
 
-    # ── Footer ──
+    # ── Chatbot Overlay ──
+    from components.chatbot import render_chatbot
+    with st.expander("💬 AI CYBER ASSISTANT", expanded=False):
+        render_chatbot()
+
+    # Footer
     st.markdown(f"""
     <div class="footer">
-        <h3>🛡️ CYBER SECURE PK</h3>
-        <p>National Electronic Crime Management System</p>
-        <p style="font-size: 0.8rem; margin-top: 1rem;">
-            &copy; {datetime.now().year} - All Rights Reserved | Government of Pakistan
-        </p>
+        <p>© {datetime.now().year} National Cybercrime Investigation Agency</p>
     </div>
     """, unsafe_allow_html=True)
 
 def show_home_page():
-    st.markdown("## 🛰️ SYSTEM OVERVIEW")
+    st.markdown("### 🛰️ GLOBAL THREAT MONITOR")
+    c1, c2, c3 = st.columns(3)
+    c1.metric("NETWORK STATUS", "ENCRYPTED", "SECURE")
+    c2.metric("LEGAL UPTIME", "100%", "PECA 2016")
+    c3.metric("RESPONSE TIME", "< 24H", "ACTIVE")
     
-    col1, col2, col3 = st.columns(3)
-    
-    with col1:
-        st.markdown("""
-        <div class="stMetric cyber-glow">
-            <h3>🔒 END-TO-END SECURITY</h3>
-            <p>Advanced encryption protocols for all reported data and evidence.</p>
-        </div>
-        """, unsafe_allow_html=True)
-        
-    with col2:
-        st.markdown("""
-        <div class="stMetric cyber-glow">
-            <h3>⚡ REAL-TIME TRACKING</h3>
-            <p>Monitor your case progress with high-precision tracking nodes.</p>
-        </div>
-        """, unsafe_allow_html=True)
-        
-    with col3:
-        st.markdown("""
-        <div class="stMetric cyber-glow">
-            <h3>⚖️ LEGAL INTELLIGENCE</h3>
-            <p>Guided legal analysis based on Pakistan's PECA 2016 lawbook.</p>
-        </div>
-        """, unsafe_allow_html=True)
-
     st.markdown("---")
+    st.info("💡 **Welcome to the Portal.** Use the sidebar to report incidents or track your existing cases.")
     
-    # Hero Call to Action
-    st.markdown("### 🛡️ DO YOU NEED TO REPORT A CRIME?")
-    if st.button("INITIALIZE COMPLAINT FORM", type="primary", use_container_width=True):
+    if st.button("INITIATE REPORTING SEQUENCE", type="primary", use_container_width=True):
         navigate_to("report_form")
 
 if __name__ == "__main__":
