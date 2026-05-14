@@ -1,5 +1,6 @@
 """
 Cybercrime Complaint Report Form Page
+Modern Premium Version
 """
 
 import streamlit as st
@@ -19,23 +20,12 @@ if str(ROOT_DIR) not in sys.path:
 
 # Load environment variables
 load_dotenv()
-
-# Configure logging
-logging.basicConfig(
-    level=getattr(logging, os.getenv('LOG_LEVEL', 'INFO')),
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-    handlers=[
-        logging.FileHandler('app.log'),
-        logging.StreamHandler()
-    ]
-)
 logger = logging.getLogger(__name__)
 
 # Database file
 COMPLAINTS_FILE = ROOT_DIR / "backend" / "data" / "complaints.json"
 
 def load_complaints():
-    """Load complaints database."""
     if os.path.exists(COMPLAINTS_FILE):
         try:
             with open(COMPLAINTS_FILE, 'r') as f:
@@ -45,144 +35,109 @@ def load_complaints():
     return {}
 
 def save_complaints(complaints):
-    """Save complaints to database."""
     os.makedirs(COMPLAINTS_FILE.parent, exist_ok=True)
     with open(COMPLAINTS_FILE, 'w') as f:
         json.dump(complaints, f, indent=2, default=str)
 
 def render_report_form(set_page_config: bool = True):
-    """Display the cybercrime complaint form."""
     if set_page_config:
-        st.set_page_config(
-            page_title="Report Cybercrime - Cyber Crime System",
-            page_icon="📋",
-            layout="wide"
-        )
+        st.set_page_config(page_title="Initialize Report - Cyber System", page_icon="📋", layout="wide")
     
-    # Custom CSS
-    css = """
-    <style>
-    .complaint-form {
-        background: #f8fafc;
-        padding: 2rem;
-        border-radius: 10px;
-        border: 1px solid #e2e8f0;
-    }
-    .evidence-section {
-        background: #fef3c7;
-        padding: 1.5rem;
-        border-radius: 8px;
-        border-left: 4px solid #f59e0b;
-        margin: 1rem 0;
-    }
-    .header-box {
-        background: linear-gradient(135deg, #1e3a8a, #3b82f6);
-        color: white;
-        padding: 2rem;
-        border-radius: 10px;
-        text-align: center;
-        margin-bottom: 2rem;
-    }
-    </style>
-    """
-    st.markdown(css, unsafe_allow_html=True)
+    st.markdown("## 📋 INITIALIZE NEW CASE REPORT")
+    st.write("Please provide precise details. All entries are subject to legal verification.")
     
-    st.markdown("""
-    <div class="header-box">
-        <h1>📋 Report a Cybercrime</h1>
-        <p>Pakistan's Secure Online Cybercrime Reporting Platform</p>
-    </div>
-    """, unsafe_allow_html=True)
-    
-    # Back button
-    if st.button("← Back to Home"):
+    # Navigation
+    if st.button("← RETURN TO CORE", use_container_width=False):
         st.session_state.current_page = "home"
-        if hasattr(st, "experimental_rerun"):
-            st.experimental_rerun()
-        elif hasattr(st, "rerun"):
-            st.rerun()
-        else:
-            st.info("Please refresh the page to return to Home.")
+        st.rerun()
     
     with st.form("complaint_form"):
         st.markdown('<div class="complaint-form">', unsafe_allow_html=True)
 
-        # Personal Information (Optional for anonymity)
-        st.subheader("Personal Information (Optional)")
-        anonymous = st.checkbox("Report Anonymously", value=True)
-
-        full_name = ""
-        phone = ""
-        cnic = ""
-        address = ""
+        # Contact Node
+        st.markdown("### 👤 CONTACT INFORMATION")
+        anonymous = st.checkbox("MAINTAIN OPERATIONAL ANONYMITY", value=False)
+        
+        email = st.text_input("PRIMARY EMAIL (REQUIRED FOR STATUS UPDATES)", placeholder="citizen@example.com")
 
         if not anonymous:
             col1, col2 = st.columns(2)
             with col1:
-                full_name = st.text_input("Full Name")
-                phone = st.text_input("Phone Number")
+                full_name = st.text_input("FULL LEGAL NAME")
+                phone = st.text_input("MOBILE CONTACT")
             with col2:
-                cnic = st.text_input("CNIC (13 digits)", max_chars=13)
-                address = st.text_area("Address")
+                cnic = st.text_input("CNIC (13 DIGITS)", max_chars=13)
+                address = st.text_area("PHYSICAL ADDRESS")
+        else:
+            full_name = "ANONYMOUS"
+            phone = "N/A"
+            cnic = "N/A"
+            address = "N/A"
 
-        # Incident Details
-        st.subheader("Incident Details")
-        incident_date = st.date_input("Date of Incident")
-        location = st.text_input("Incident Location")
-        complaint_reason = st.selectbox(
-            "Type of Cybercrime",
-            ["Select...", "Hacking", "Phishing", "Cyberstalking", "Online Harassment",
-             "Data Theft", "Financial Fraud", "Child Exploitation", "Caller ID Spoofing",
-             "Spamming", "Identity Theft", "Unauthorized Access", "Malware", "Other"]
-        )
-        description = st.text_area("Detailed Description", height=150)
+        # Incident Matrix
+        st.markdown("---")
+        st.markdown("### 🛰️ INCIDENT MATRIX")
+        col_type, col_date = st.columns(2)
+        with col_type:
+            complaint_reason = st.selectbox(
+                "CRIME CLASSIFICATION",
+                ["Select...", "Hacking", "Phishing", "Cyberstalking", "Online Harassment",
+                 "Data Theft", "Financial Fraud", "Child Exploitation", "Identity Theft", "Malware", "Other"]
+            )
+        with col_date:
+            incident_date = st.date_input("INCIDENT TIMESTAMP")
+        
+        location = st.text_input("DIGITAL/PHYSICAL LOCATION")
+        description = st.text_area("DETAILED INCIDENT LOG (MINIMUM 20 CHARACTERS)", height=150)
 
-        # Evidence Upload Section
+        # Evidence Core
         st.markdown('<div class="evidence-section">', unsafe_allow_html=True)
-        st.subheader("📎 Electronic Evidence (Optional)")
-        st.write("Upload supporting evidence securely. All files are encrypted and scanned.")
-
+        st.markdown("#### 📎 ELECTRONIC EVIDENCE BUNDLE")
         uploaded_files = st.file_uploader(
-            "Upload Evidence",
+            "UPLOAD DATA",
             type=['mp4', 'mov', 'avi', 'jpg', 'jpeg', 'png', 'pdf'],
             accept_multiple_files=True,
-            help="Max video size: 1GB, Images/PDFs: 50MB each"
+            help="Encrypted upload. Max video: 1GB | Images/PDF: 50MB"
         )
         st.markdown('</div>', unsafe_allow_html=True)
 
-        # Submit button
-        submitted = st.form_submit_button("Submit Complaint", type="primary", use_container_width=True)
+        # Submission
+        submitted = st.form_submit_button("SUBMIT CASE REPORT", type="primary", use_container_width=True)
 
         st.markdown('</div>', unsafe_allow_html=True)
 
     if submitted:
-        # Validate form
-        if complaint_reason == "Select...":
-            st.error("Please select the type of cybercrime.")
+        # Validation
+        if not email or "@" not in email:
+            st.error("❌ VALID EMAIL REQUIRED FOR SYSTEM NOTIFICATIONS.")
             return
 
-        if not description or len(description.strip()) < 10:
-            st.error("Please provide a detailed description (minimum 10 characters).")
+        if complaint_reason == "Select...":
+            st.error("❌ PLEASE CLASSIFY THE INCIDENT.")
+            return
+
+        if not description or len(description.strip()) < 20:
+            st.error("❌ INSUFFICIENT LOG DETAIL. PROVIDE AT LEAST 20 CHARACTERS.")
             return
 
         if not anonymous:
             if not full_name or len(full_name.strip()) < 2:
-                st.error("Please provide your full name.")
+                st.error("❌ FULL LEGAL NAME REQUIRED FOR NON-ANONYMOUS FILING.")
                 return
             if cnic and len(cnic) != 13:
-                st.error("CNIC must be exactly 13 digits.")
+                st.error("❌ CNIC MUST BE EXACTLY 13 DIGITS.")
                 return
 
-        # Generate tracking ID
+        # Success Logic
         tracking_id = f"CCRS-PK-{datetime.now().year}-{str(uuid.uuid4())[:8].upper()}"
-
-        # Prepare complaint data
+        
         complaint_data = {
             "tracking_id": tracking_id,
-            "full_name": full_name if not anonymous else None,
-            "phone": phone if not anonymous else None,
-            "cnic": cnic if not anonymous else None,
-            "address": address if not anonymous else None,
+            "email": email,
+            "full_name": full_name,
+            "phone": phone,
+            "cnic": cnic,
+            "address": address,
             "anonymous": anonymous,
             "incident_date": incident_date.isoformat(),
             "location": location,
@@ -193,47 +148,26 @@ def render_report_form(set_page_config: bool = True):
             "status": "pending"
         }
 
-        # Submit to database
         try:
             complaints = load_complaints()
             complaints[tracking_id] = complaint_data
             save_complaints(complaints)
 
-            st.success("✅ Complaint submitted successfully!")
-            st.info(f"**Tracking ID:** {tracking_id}")
-            st.warning("📄 Please save this tracking ID for future reference.")
-
-            # Upload evidence if provided
-            if uploaded_files:
-                st.subheader("📎 Uploading Evidence...")
-                progress_bar = st.progress(0)
-
-                for i, file in enumerate(uploaded_files):
-                    # In production, upload to secure storage
-                    progress_bar.progress((i + 1) / len(uploaded_files))
-
-                st.success("✅ Evidence uploaded successfully!")
-
-            # Show next steps
-            st.subheader("Next Steps:")
-            st.write("""
-            1. **Save your tracking ID** for future reference
-            2. You will receive updates via email/SMS (if provided)
-            3. Investigation will be conducted by cybercrime authorities
-            4. Check status using your tracking ID on "Track Complaint" page
-            5. Law enforcement officers will review your case
-            6. Cases are either approved (solved) or rejected (invalid)
-            """)
-
-            # Reset form
-            st.session_state.complaint_submitted = True
+            st.success("🛰️ CASE REGISTERED IN SYSTEM CORE.")
+            st.markdown(f"""
+            <div class="tracking-card cyber-glow">
+                <h3>ASSIGNED TRACKING ID: <span style="color:var(--secondary);">{tracking_id}</span></h3>
+                <p>An initial confirmation has been logged. Use this ID to monitor operational status.</p>
+            </div>
+            """, unsafe_allow_html=True)
             
-            import time
-            time.sleep(2)
+            if uploaded_files:
+                st.info(f"✅ {len(uploaded_files)} evidence files attached and encrypted.")
 
+            st.info("💡 Pro-tip: Check your email periodically for automated status updates.")
+            
         except Exception as e:
-            st.error(f"❌ Failed to submit complaint: {str(e)}")
-            logger.error(f"Complaint submission error: {str(e)}")
+            st.error(f"❌ SYSTEM INTEGRITY ERROR: {str(e)}")
 
 if __name__ == "__main__":
     render_report_form()

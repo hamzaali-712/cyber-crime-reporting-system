@@ -1,7 +1,6 @@
 """
 Cyber Crime Reporting System - Tracking Page
-
-Page for tracking complaint status.
+Modern Premium Version
 """
 
 import streamlit as st
@@ -18,187 +17,89 @@ if str(ROOT_DIR) not in sys.path:
 COMPLAINTS_FILE = ROOT_DIR / "backend" / "data" / "complaints.json"
 DECISIONS_FILE = ROOT_DIR / "backend" / "data" / "officer_decisions.json"
 
-def load_complaints():
-    """Load complaints database."""
-    if os.path.exists(COMPLAINTS_FILE):
+def load_json(file_path):
+    if os.path.exists(file_path):
         try:
-            with open(COMPLAINTS_FILE, 'r') as f:
-                return json.load(f)
-        except:
-            return {}
-    return {}
-
-def load_decisions():
-    """Load officer decisions database."""
-    if os.path.exists(DECISIONS_FILE):
-        try:
-            with open(DECISIONS_FILE, 'r') as f:
+            with open(file_path, 'r') as f:
                 return json.load(f)
         except:
             return {}
     return {}
 
 def render_tracking_page(set_page_config: bool = True):
-    """Render the complaint tracking page."""
     if set_page_config:
-        st.set_page_config(
-            page_title="Track Complaint - Cyber Crime System",
-            page_icon="📍",
-            layout="wide"
-        )
+        st.set_page_config(page_title="Track Case - Cyber System", page_icon="📍", layout="wide")
     
-    # Custom CSS
-    css = """
-    <style>
-    .tracking-card {
-        background: #f8fafc;
-        padding: 2rem;
-        border-radius: 10px;
-        border-left: 4px solid #3b82f6;
-    }
-    .pending-status {
-        background: #fef08a;
-        color: #854d0e;
-        padding: 0.5rem 1rem;
-        border-radius: 5px;
-        font-weight: bold;
-    }
-    .approved-status {
-        background: #dcfce7;
-        color: #166534;
-        padding: 0.5rem 1rem;
-        border-radius: 5px;
-        font-weight: bold;
-    }
-    .solved-status {
-        background: #bfdbfe;
-        color: #1e3a8a;
-        padding: 0.5rem 1rem;
-        border-radius: 5px;
-        font-weight: bold;
-    }
-    .rejected-status {
-        background: #fee2e2;
-        color: #b91c1c;
-        padding: 0.5rem 1rem;
-        border-radius: 5px;
-        font-weight: bold;
-    }
-    </style>
-    """
-    st.markdown(css, unsafe_allow_html=True)
-    
-    st.header("📍 Track Your Complaint")
+    st.markdown("## 📍 CASE TRACKING MODULE")
+    st.write("Access real-time operational status of your registered complaint.")
 
-    st.write("""
-    Enter your tracking ID below to check the status of your cybercrime complaint.
-    Your tracking ID was provided when you submitted your complaint.
-    """)
-
-    # Search for complaint
-    col1, col2 = st.columns([2, 1])
-    
-    with col1:
+    # Search Unit
+    col_input, col_btn = st.columns([3, 1])
+    with col_input:
         tracking_id = st.text_input(
-            "Tracking ID",
+            "ENTER TRACKING ID",
             placeholder="CCRS-PK-2026-XXXXXXXX"
         )
-    
-    with col2:
+    with col_btn:
         st.write("")
-        search_btn = st.button("Search", type="primary")
+        st.write("")
+        search_btn = st.button("EXECUTE SEARCH", type="primary", use_container_width=True)
 
     if search_btn and tracking_id:
-        complaints = load_complaints()
-        decisions = load_decisions()
+        complaints = load_json(COMPLAINTS_FILE)
+        decisions = load_json(DECISIONS_FILE)
         
         if tracking_id in complaints:
-            complaint = complaints[tracking_id]
-            decision = decisions.get(tracking_id)
+            c = complaints[tracking_id]
+            d = decisions.get(tracking_id)
             
             st.markdown("---")
-            st.subheader("✅ Complaint Found")
+            st.markdown(f"### ✅ CASE NODE FOUND: {tracking_id}")
             
-            st.markdown('<div class="tracking-card">', unsafe_allow_html=True)
+            # Tracking Card
+            st.markdown('<div class="tracking-card cyber-glow">', unsafe_allow_html=True)
             
-            col1, col2 = st.columns(2)
-            
-            with col1:
-                st.write(f"**Tracking ID:** {tracking_id}")
-                st.write(f"**Complaint Type:** {complaint.get('complaint_reason')}")
-                st.write(f"**Incident Date:** {complaint.get('incident_date')}")
-                st.write(f"**Location:** {complaint.get('location')}")
-            
-            with col2:
-                if not complaint.get('anonymous'):
-                    st.write(f"**Name:** {complaint.get('full_name', 'N/A')}")
-                    st.write(f"**Phone:** {complaint.get('phone', 'N/A')}")
+            c1, c2 = st.columns(2)
+            with c1:
+                st.write(f"**Classification:** {c.get('complaint_reason')}")
+                st.write(f"**Incident Date:** {c.get('incident_date')}")
+                st.write(f"**Location:** {c.get('location')}")
+            with c2:
+                if c.get('anonymous'):
+                    st.write("**Complainant:** ANONYMOUS")
                 else:
-                    st.write("**Type:** Anonymous Report")
-            
+                    st.write(f"**Complainant:** {c.get('full_name')}")
+                st.write(f"**Submission Date:** {c.get('submitted_at')}")
+
             st.markdown("---")
             
-            # Status
-            st.subheader("📊 Complaint Status")
+            # Status Matrix
+            st.subheader("📊 OPERATIONAL STATUS")
             
-            if decision:
-                if "Solve" in decision.get("decision", ""):
-                    st.markdown('<div class="solved-status">🛠️ SOLVED - CASE SUCCESSFULLY COMPLETED</div>', unsafe_allow_html=True)
-                    st.info(f"**Officer Decision:** {decision.get('decision')}")
-                    st.info(f"**Notes:** {decision.get('notes')}")
-                    st.info(f"**Decided By:** {decision.get('officer_id')}")
-                    st.info(f"**Date:** {decision.get('decided_at')}")
-                elif "Approve" in decision.get("decision", ""):
-                    st.markdown('<div class="approved-status">✅ APPROVED - UNDER INVESTIGATION</div>', unsafe_allow_html=True)
-                    st.success(f"**Officer Decision:** {decision.get('decision')}")
-                    st.success(f"**Notes:** {decision.get('notes')}")
-                    st.success(f"**Decided By:** {decision.get('officer_id')}")
-                    st.success(f"**Date:** {decision.get('decided_at')}")
+            if d:
+                decision_text = d.get("decision", "").upper()
+                notes = d.get("notes", "N/A")
+                
+                if "SOLVE" in decision_text:
+                    st.markdown('<div class="solved-badge">CASE RESOLVED</div>', unsafe_allow_html=True)
+                elif "APPROVE" in decision_text:
+                    st.markdown('<div class="approved-badge">UNDER INVESTIGATION</div>', unsafe_allow_html=True)
                 else:
-                    st.markdown('<div class="rejected-status">❌ REJECTED - INVALID/INCOMPLETE</div>', unsafe_allow_html=True)
-                    st.warning(f"**Officer Decision:** {decision.get('decision')}")
-                    st.warning(f"**Reason:** {decision.get('notes')}")
-                    st.warning(f"**Decided By:** {decision.get('officer_id')}")
-                    st.warning(f"**Date:** {decision.get('decided_at')}")
+                    st.markdown('<div class="rejected-badge">REJECTED / INSUFFICIENT DATA</div>', unsafe_allow_html=True)
+                
+                st.markdown(f"**Officer Remarks:** *\"{notes}\"*")
+                st.markdown(f"**Operational Date:** {d.get('decided_at')}")
             else:
-                st.markdown('<div class="pending-status">⏳ PENDING REVIEW</div>', unsafe_allow_html=True)
-                st.info("Your complaint is currently being reviewed by our law enforcement team. Please check back later for updates.")
-            
-            st.markdown("---")
-            st.subheader("📝 Your Complaint Details")
-            st.write(f"**Description:** {complaint.get('description')}")
-            st.write(f"**Evidence Files:** {complaint.get('evidence_count', 0)} file(s)")
-            st.write(f"**Submitted:** {complaint.get('submitted_at')}")
+                st.markdown('<div class="pending-badge">PENDING REVIEW</div>', unsafe_allow_html=True)
+                st.info("The complaint is currently in the review queue. Analysts will initialize investigation shortly.")
             
             st.markdown('</div>', unsafe_allow_html=True)
             
         else:
-            st.error(f"❌ Tracking ID '{tracking_id}' not found in the system.")
-            st.info("Please check if you entered the correct tracking ID.")
+            st.error(f"❌ CASE ID '{tracking_id}' NOT FOUND IN CENTRAL DATABASE.")
+    
     elif search_btn:
-        st.error("Please enter a tracking ID to search.")
-
-    # Additional information
-    st.markdown("---")
-    st.subheader("❓ Need Help?")
-
-    col1, col2 = st.columns(2)
-
-    with col1:
-        st.write("**Lost your tracking ID?**")
-        st.write("Contact the cybercrime helpline for assistance.")
-
-    with col2:
-        st.write("**Status not updating?**")
-        st.write("Allow 24-48 hours for initial processing.")
-
-    st.info("""
-    **Important Notes:**
-    - Status updates may take time during peak periods
-    - All complaints are investigated thoroughly
-    - You may be contacted for additional information
-    - Keep your tracking ID secure and confidential
-    """)
+        st.warning("PLEASE PROVIDE A VALID TRACKING ID.")
 
 if __name__ == "__main__":
     render_tracking_page()

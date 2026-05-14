@@ -1,97 +1,81 @@
 """
 Cyber Crime Reporting System - Help & Support Page
-
-Page for help and support information.
+Modern Premium Version
 """
 
 import streamlit as st
 from components import FAQSection
 
 def render_help_page():
-    """Render the help and support page."""
-    st.header("Help & Support")
+    st.markdown("## 🛰️ HELP & SUPPORT CENTER")
+    st.write("Access emergency resources and victim support services.")
 
     # Emergency contacts
-    st.subheader("🚨 Emergency Contacts")
-
-    col1, col2, col3 = st.columns(3)
-
-    with col1:
-        st.write("**Pakistan Police**")
-        st.write("**Dial:** 15")
-        st.write("*Immediate emergency response*")
-
-    with col2:
-        st.write("**FIA Cybercrime Wing**")
-        st.write("**Contact:** Local FIA office")
-        st.write("*Federal Investigation Agency*")
-
-    with col3:
-        st.write("**NCIA**")
-        st.write("**National Cybercrime Investigation Agency**")
-        st.write("*Specialized cybercrime unit*")
+    st.markdown("### 🚨 EMERGENCY CHANNELS")
+    c1, c2, c3 = st.columns(3)
+    
+    with c1:
+        st.markdown("""
+        <div class="stMetric cyber-glow">
+            <h4>PAKISTAN POLICE</h4>
+            <p><strong>DIAL:</strong> 15</p>
+            <p style="font-size:0.8rem; opacity:0.8;">Primary Emergency Response</p>
+        </div>
+        """, unsafe_allow_html=True)
+    with c2:
+        st.markdown("""
+        <div class="stMetric cyber-glow">
+            <h4>FIA CYBERCRIME</h4>
+            <p><strong>HELPDESK:</strong> 111-342-111</p>
+            <p style="font-size:0.8rem; opacity:0.8;">Federal Investigation Agency</p>
+        </div>
+        """, unsafe_allow_html=True)
+    with c3:
+        st.markdown("""
+        <div class="stMetric cyber-glow">
+            <h4>NCIA UNIT</h4>
+            <p><strong>PORTAL:</strong> ncia.gov.pk</p>
+            <p style="font-size:0.8rem; opacity:0.8;">Specialized Investigations</p>
+        </div>
+        """, unsafe_allow_html=True)
 
     st.markdown("---")
 
     # Victim support
-    st.subheader("💙 Victim Support")
-
-    st.write("""
-    If you're a victim of cybercrime, remember:
-
-    **Immediate Actions:**
-    1. **Preserve Evidence** - Don't delete anything
-    2. **Document Everything** - Take screenshots and notes
-    3. **Report Immediately** - Time is critical
-    4. **Seek Support** - You're not alone
-
-    **Evidence to Preserve:**
-    - Suspicious emails and messages
-    - Transaction records
-    - Screenshots of incidents
-    - URLs and web addresses
-    - Dates and times of occurrences
+    st.markdown("### 🛡️ VICTIM SUPPORT PROTOCOL")
+    st.info("""
+    **If you are a victim of cybercrime, initialize the following protocol immediately:**
+    1. **HALT COMMUNICATION:** Do not engage with the threat actor.
+    2. **DATA PRESERVATION:** Take high-resolution screenshots of all evidence.
+    3. **NODE ISOLATION:** Change passwords and enable MFA on all affected accounts.
+    4. **REPORT:** Initialize a case report on this portal immediately.
     """)
 
-    # Support services
-    st.subheader("🏥 Support Services")
-
-    services = [
-        {"name": "Cybercrime Helpline", "contact": "15", "description": "24/7 emergency support"},
-        {"name": "Victim Support Center", "contact": "Local police", "description": "Counseling and guidance"},
-        {"name": "Legal Aid Society", "contact": "Provincial offices", "description": "Free legal assistance"},
-        {"name": "Digital Security Training", "contact": "NCIA website", "description": "Prevention education"}
-    ]
-
-    for service in services:
-        with st.expander(f"{service['name']} - {service['contact']}"):
-            st.write(service['description'])
-
-    st.markdown("---")
-
     # FAQ section
-    st.subheader("❓ Frequently Asked Questions")
+    st.markdown("---")
+    st.markdown("### ❓ OPERATIONAL FAQ")
     FAQSection.render_faqs()
 
     # Contact form
     st.markdown("---")
-    st.subheader("📧 Contact Us")
-
+    st.markdown("### 📧 DIRECT INQUIRY")
     with st.form("contact_form"):
-        st.write("Have a question? Send us a message.")
-
-        name = st.text_input("Name")
-        email = st.text_input("Email")
-        subject = st.selectbox("Subject", ["General Inquiry", "Technical Issue", "Legal Question", "Other"])
-        message = st.text_area("Message")
-
-        submitted = st.form_submit_button("Send Message")
+        st.write("Send a secure inquiry to our support analysts.")
+        st.markdown('<div class="complaint-form">', unsafe_allow_html=True)
+        
+        name = st.text_input("NAME / ALIAS")
+        email = st.text_input("CONTACT EMAIL")
+        subject = st.selectbox("SUBJECT NODE", ["General Inquiry", "Technical Issue", "Legal Question", "Feedback"])
+        message = st.text_area("DETAILED MESSAGE")
+        
+        submitted = st.form_submit_button("DISPATCH MESSAGE", type="primary", use_container_width=True)
+        st.markdown('</div>', unsafe_allow_html=True)
 
         if submitted:
             if not name or not email or not message:
-                st.error("Please fill in all required fields.")
+                st.error("ALL NODES IN FORM MUST BE POPULATED.")
             else:
-                st.success("Message sent successfully! We'll get back to you soon.")
+                st.success("🛰️ MESSAGE DISPATCHED. RESPONSE WILL BE ROUTED TO YOUR EMAIL.")
 
 if __name__ == "__main__":
     render_help_page()

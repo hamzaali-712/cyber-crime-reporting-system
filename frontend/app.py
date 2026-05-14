@@ -1,12 +1,6 @@
 """
 Cyber Crime Reporting System - Main Streamlit Application
-
-A secure platform for reporting cybercrimes with electronic evidence management.
-Government-grade security with privacy-by-design principles.
-
-Entry points:
-  - Local:  streamlit run frontend/app.py  (from repo root)
-  - Cloud:  streamlit_app.py delegates here via runpy
+Modern Premium Version
 """
 
 import streamlit as st
@@ -18,10 +12,7 @@ import logging
 from datetime import datetime
 import uuid
 
-# ── Path setup (must run before any local imports) ────────────────────────────
-# Add BOTH the repo root AND the frontend/ directory to sys.path.
-# This lets us write:  from views.xxx import yyy   (simple, always works)
-# regardless of whether we were launched from repo-root or from inside frontend/
+# ── Path setup ────────────────────────────────────────────────────────────────
 FRONTEND_DIR = pathlib.Path(__file__).resolve().parent
 ROOT_DIR     = FRONTEND_DIR.parent
 
@@ -31,18 +22,10 @@ for _p in (str(ROOT_DIR), str(FRONTEND_DIR)):
 
 # ── Environment & logging ─────────────────────────────────────────────────────
 load_dotenv()
-
-logging.basicConfig(
-    level=getattr(logging, os.getenv('LOG_LEVEL', 'INFO')),
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-    handlers=[
-        logging.FileHandler('app.log'),
-        logging.StreamHandler()
-    ]
-)
+logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-# ── Page config (must be first Streamlit call) ────────────────────────────────
+# ── Page config ───────────────────────────────────────────────────────────────
 st.set_page_config(
     page_title="Cyber Crime Reporting System - Pakistan",
     page_icon="🛡️",
@@ -50,68 +33,25 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# ── Custom CSS ────────────────────────────────────────────────────────────────
+# ── Custom CSS Loader ─────────────────────────────────────────────────────────
 def load_css():
-    """Load custom CSS for professional government-style UI."""
-    css = """
-    <style>
-    .main-header {
-        background: linear-gradient(135deg, #1e3a8a, #3b82f6);
-        color: white;
-        padding: 2rem;
-        border-radius: 10px;
-        text-align: center;
-        margin-bottom: 2rem;
-    }
-    .complaint-form {
-        background: #f8fafc;
-        padding: 2rem;
-        border-radius: 10px;
-        border: 1px solid #e2e8f0;
-    }
-    .evidence-section {
-        background: #fef3c7;
-        padding: 1.5rem;
-        border-radius: 8px;
-        border-left: 4px solid #f59e0b;
-        margin: 1rem 0;
-    }
-    .law-section {
-        background: #ecfdf5;
-        padding: 1.5rem;
-        border-radius: 8px;
-        border-left: 4px solid #10b981;
-    }
-    .stButton>button {
-        background: #1e40af;
-        color: white;
-        border: none;
-        padding: 0.75rem 1.5rem;
-        border-radius: 5px;
-        font-weight: 600;
-    }
-    .stButton>button:hover {
-        background: #1e3a8a;
-    }
-    .footer {
-        text-align: center;
-        padding: 2rem;
-        color: #64748b;
-        border-top: 1px solid #e2e8f0;
-        margin-top: 3rem;
-    }
-    </style>
-    """
-    st.markdown(css, unsafe_allow_html=True)
+    """Load the premium cyber-themed CSS."""
+    css_path = FRONTEND_DIR / "static" / "styles.css"
+    if css_path.exists():
+        with open(css_path) as f:
+            st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
+    else:
+        # Fallback basic styles if file is missing
+        st.markdown("""
+        <style>
+        .main-header { background: #1e3a8a; color: white; padding: 2rem; border-radius: 10px; text-align: center; }
+        </style>
+        """, unsafe_allow_html=True)
 
 # ── Session management ────────────────────────────────────────────────────────
 def initialize_session():
     """Initialize secure session state."""
     defaults = {
-        'user_authenticated': False,
-        'complaint_data': {},
-        'evidence_files': [],
-        'tracking_id': None,
         'current_page': 'home',
         'officer_logged_in': False,
         'officer_id': None,
@@ -123,168 +63,128 @@ def initialize_session():
         if key not in st.session_state:
             st.session_state[key] = val
 
-
-def rerun_page():
-    """Rerun the Streamlit app using the available rerun API."""
-    if hasattr(st, "rerun"):
-        st.rerun()
-    elif hasattr(st, "experimental_rerun"):
-        st.experimental_rerun()
-
-
 def navigate_to(page_name: str):
-    """Navigate to a specific page within the app."""
+    """Navigate to a specific page."""
     st.session_state.current_page = page_name
-    rerun_page()
+    st.rerun()
 
-# ── Home page ─────────────────────────────────────────────────────────────────
+# ── Application Main ──────────────────────────────────────────────────────────
+def main():
+    initialize_session()
+    load_css()
+
+    # ── Header ──
+    st.markdown("""
+    <div class="main-header cyber-glow">
+        <h1>🛡️ CYBER CRIME PORTAL</h1>
+        <p>Pakistan's Advanced Electronic Evidence & Crime Reporting Platform</p>
+        <p style="font-size: 0.9em; margin-top: 10px; opacity: 0.7;">
+            Securely Compliant with PECA 2016 Standards
+        </p>
+    </div>
+    """, unsafe_allow_html=True)
+
+    # ── Sidebar ──
+    with st.sidebar:
+        st.markdown("### 🌐 NETWORK NAVIGATION")
+        page_options = ["Home", "Report Cybercrime", "Track Complaint", "Cyber Law Guide", "Help & Support"]
+        page_index_map = {"home": 0, "report_form": 1, "tracking": 2, "law_guide": 3, "help_support": 4}
+        
+        selected_page = st.radio(
+            "Select Operational Node:",
+            page_options,
+            index=page_index_map.get(st.session_state.current_page, 0)
+        )
+
+        st.markdown("---")
+        st.markdown("### 🔐 RESTRICTED ACCESS")
+        if st.button("👮 OFFICER LOGIN", use_container_width=True):
+            navigate_to("officer_login")
+
+        st.markdown("---")
+        st.markdown("### 🚨 EMERGENCY")
+        st.error("Police: 15")
+        st.info("FIA: helpdesk@nr3c.gov.pk")
+
+    # ── Logic to sync sidebar with session state ──
+    reverse_map = {v: k for k, v in page_index_map.items()}
+    if selected_page:
+        mapped_key = page_options.index(selected_page)
+        page_key = reverse_map.get(mapped_key)
+        if page_key and st.session_state.current_page != page_key:
+            st.session_state.current_page = page_key
+            st.rerun()
+
+    # ── Page Routing ──
+    current = st.session_state.current_page
+
+    if current == "home":
+        show_home_page()
+    elif current == "report_form":
+        from views.report_form import render_report_form
+        render_report_form(set_page_config=False)
+    elif current == "tracking":
+        from views.tracking import render_tracking_page
+        render_tracking_page(set_page_config=False)
+    elif current == "law_guide":
+        from views.law_guide import render_law_guide_page
+        render_law_guide_page()
+    elif current == "help_support":
+        from views.help import render_help_page
+        render_help_page()
+    elif current == "officer_login":
+        from views.officer_login import render_officer_login
+        render_officer_login(set_page_config=False)
+    elif current == "officer_panel":
+        from views.officer_panel import render_officer_panel
+        render_officer_panel(set_page_config=False)
+
+    # ── Footer ──
+    st.markdown(f"""
+    <div class="footer">
+        <h3>🛡️ CYBER SECURE PK</h3>
+        <p>National Electronic Crime Management System</p>
+        <p style="font-size: 0.8rem; margin-top: 1rem;">
+            &copy; {datetime.now().year} - All Rights Reserved | Government of Pakistan
+        </p>
+    </div>
+    """, unsafe_allow_html=True)
+
 def show_home_page():
-    """Display the home page with system overview."""
-    st.header("Welcome to Pakistan's Cyber Crime Reporting System")
-
-    col1, col2 = st.columns(2)
-
+    st.markdown("## 🛰️ SYSTEM OVERVIEW")
+    
+    col1, col2, col3 = st.columns(3)
+    
     with col1:
-        st.subheader("🔒 Secure Reporting")
-        st.write("""
-        Report cybercrimes anonymously or with registration.
-        Your data is protected with government-grade security.
-        """)
-
-        st.subheader("📋 Electronic Evidence")
-        st.write("""
-        Upload videos, images, and documents securely.
-        All evidence is encrypted and malware-scanned.
-        """)
-
+        st.markdown("""
+        <div class="stMetric cyber-glow">
+            <h3>🔒 END-TO-END SECURITY</h3>
+            <p>Advanced encryption protocols for all reported data and evidence.</p>
+        </div>
+        """, unsafe_allow_html=True)
+        
     with col2:
-        st.subheader("⚖️ Legal Guidance")
-        st.write("""
-        Access Pakistan's cybercrime laws and regulations.
-        Get AI-powered guidance on applicable sections.
-        """)
-
-        st.subheader("📄 Official Reports")
-        st.write("""
-        Generate PDF reports with tracking IDs.
-        Government-style formatting with watermarks.
-        """)
+        st.markdown("""
+        <div class="stMetric cyber-glow">
+            <h3>⚡ REAL-TIME TRACKING</h3>
+            <p>Monitor your case progress with high-precision tracking nodes.</p>
+        </div>
+        """, unsafe_allow_html=True)
+        
+    with col3:
+        st.markdown("""
+        <div class="stMetric cyber-glow">
+            <h3>⚖️ LEGAL INTELLIGENCE</h3>
+            <p>Guided legal analysis based on Pakistan's PECA 2016 lawbook.</p>
+        </div>
+        """, unsafe_allow_html=True)
 
     st.markdown("---")
-    st.subheader("🚨 Report a Cybercrime Now")
-    if st.button("Start Complaint Form", type="primary", use_container_width=True):
+    
+    # Hero Call to Action
+    st.markdown("### 🛡️ DO YOU NEED TO REPORT A CRIME?")
+    if st.button("INITIALIZE COMPLAINT FORM", type="primary", use_container_width=True):
         navigate_to("report_form")
-
-# ── Main application ──────────────────────────────────────────────────────────
-def main():
-    """Main application entry point."""
-    # Defensive: re-insert paths in case Streamlit rerun cleared them
-    for _p in [str(ROOT_DIR), str(FRONTEND_DIR)]:
-        if _p not in sys.path:
-            sys.path.insert(0, _p)
-    try:
-        initialize_session()
-        load_css()
-
-        # Main header
-        st.markdown("""
-        <div class="main-header">
-            <h1>🛡️ Cyber Crime Reporting System</h1>
-            <p>Pakistan's Secure Online Cybercrime Reporting Platform</p>
-            <p style="font-size: 0.9em;">Prevention of Electronic Crimes Act (PECA) 2016 Compliant</p>
-        </div>
-        """, unsafe_allow_html=True)
-
-        # Sidebar navigation
-        with st.sidebar:
-            st.title("Navigation")
-            page_options = ["Home", "Report Cybercrime", "Track Complaint", "Cyber Law Guide", "Help & Support"]
-            page_index_map = {
-                "home":         0,
-                "report_form":  1,
-                "tracking":     2,
-                "law_guide":    3,
-                "help_support": 4,
-            }
-            page = st.radio(
-                "Select Section:",
-                page_options,
-                index=page_index_map.get(st.session_state.current_page, 0)
-            )
-
-            st.markdown("---")
-            st.subheader("🔐 Staff Area")
-            if st.button("👮 Officer Panel Login"):
-                navigate_to("officer_login")
-
-            st.markdown("---")
-            st.markdown("**Emergency Contacts:**")
-            st.markdown("• Police: 15")
-            st.markdown("• FIA Cybercrime: [Contact]")
-            st.markdown("• NCCIA: [Contact]")
-
-        # Sync sidebar radio with session state
-        current_page_label = page_options[page_index_map.get(st.session_state.current_page, 0)]
-        if page != current_page_label:
-            if page == "Home":
-                navigate_to("home")
-            elif page == "Report Cybercrime":
-                navigate_to("report_form")
-            elif page == "Track Complaint":
-                navigate_to("tracking")
-            elif page == "Cyber Law Guide":
-                navigate_to("law_guide")
-            elif page == "Help & Support":
-                navigate_to("help_support")
-
-        # ── Page routing ──────────────────────────────────────────────────────
-        # All view imports use simple `from views.xxx` because FRONTEND_DIR is on sys.path.
-        current = st.session_state.current_page
-
-        if current == "home":
-            show_home_page()
-
-        elif current == "report_form":
-            from views.report_form import render_report_form
-            render_report_form(set_page_config=False)
-
-        elif current == "tracking":
-            from views.tracking import render_tracking_page
-            render_tracking_page(set_page_config=False)
-
-        elif current == "law_guide":
-            from views.law_guide import render_law_guide_page
-            render_law_guide_page()
-
-        elif current == "help_support":
-            from views.help import render_help_page
-            render_help_page()
-
-        elif current == "officer_login":
-            from views.officer_login import render_officer_login
-            render_officer_login(set_page_config=False)
-
-        elif current == "officer_panel":
-            from views.officer_panel import render_officer_panel
-            render_officer_panel(set_page_config=False)
-
-        # Footer
-        st.markdown("""
-        <div class="footer">
-            <p><strong>Cyber Crime Reporting System</strong> | Developed for Pakistan's Digital Security</p>
-            <p>© 2026 - All rights reserved | Privacy Policy | Terms of Service</p>
-        </div>
-        """, unsafe_allow_html=True)
-
-    except Exception as e:
-        logger.error(f"Application error: {str(e)}")
-        st.error("An unexpected error occurred. Please try again later.")
-        st.error(f"Error details: {str(e)}")
-        import traceback
-        st.code(traceback.format_exc(), language="python")
-        with st.expander("🔍 Debug: sys.path"):
-            st.code("\n".join(sys.path))
-
 
 if __name__ == "__main__":
     main()
