@@ -15,7 +15,7 @@ from datetime import datetime
 import uuid
 
 # Ensure project root is in sys.path for absolute imports
-ROOT_DIR = pathlib.Path(__file__).resolve().parent.parent
+ROOT_DIR = pathlib.Path(__file__).resolve().parent
 if str(ROOT_DIR) not in sys.path:
     sys.path.insert(0, str(ROOT_DIR))
 
