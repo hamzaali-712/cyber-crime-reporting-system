@@ -99,6 +99,14 @@ def initialize_session():
         st.session_state.evidence_files = []
     if 'tracking_id' not in st.session_state:
         st.session_state.tracking_id = None
+    if 'current_page' not in st.session_state:
+        st.session_state.current_page = 'home'
+
+
+def navigate_to(page_name: str):
+    """Navigate to a specific page within the app."""
+    st.session_state.current_page = page_name
+    st.experimental_rerun()
 
 # Main application
 def main():
@@ -122,10 +130,18 @@ def main():
         # Sidebar navigation
         with st.sidebar:
             st.title("Navigation")
+            page_options = ["Home", "Report Cybercrime", "Track Complaint", "Cyber Law Guide", "Help & Support"]
+            page_index_map = {
+                "home": 0,
+                "report_form": 1,
+                "tracking": 2,
+                "law_guide": 3,
+                "help_support": 4,
+            }
             page = st.radio(
                 "Select Section:",
-                ["Home", "Report Cybercrime", "Track Complaint", "Cyber Law Guide", "Help & Support"],
-                index=0
+                page_options,
+                index=page_index_map.get(st.session_state.current_page, 0)
             )
 
             st.markdown("---")
@@ -133,7 +149,7 @@ def main():
             # Officer Panel Access
             st.subheader("🔐 Staff Area")
             if st.button("👮 Officer Panel Login"):
-                st.switch_page("pages/officer_login.py")
+                navigate_to("officer_login")
             
             st.markdown("---")
             st.markdown("**Emergency Contacts:**")
@@ -142,19 +158,36 @@ def main():
             st.markdown("• NCCIA: [Contact]")
 
         # Page routing
-        if page == "Home":
+        current_page_label = page_options[page_index_map.get(st.session_state.current_page, 0)]
+        if page != current_page_label:
+            if page == "Home":
+                navigate_to("home")
+            elif page == "Report Cybercrime":
+                navigate_to("report_form")
+            elif page == "Track Complaint":
+                navigate_to("tracking")
+            elif page == "Cyber Law Guide":
+                navigate_to("law_guide")
+            elif page == "Help & Support":
+                navigate_to("help_support")
+
+        if st.session_state.current_page == "home":
             show_home_page()
-        elif page == "Report Cybercrime":
-            st.switch_page("pages/report_form.py")
-        elif page == "Track Complaint":
+        elif st.session_state.current_page == "report_form":
+            from pages.report_form import render_report_form
+            render_report_form(set_page_config=False)
+        elif st.session_state.current_page == "tracking":
             from pages.tracking import render_tracking_page
-            render_tracking_page()
-        elif page == "Cyber Law Guide":
+            render_tracking_page(set_page_config=False)
+        elif st.session_state.current_page == "law_guide":
             from pages.law_guide import render_law_guide_page
             render_law_guide_page()
-        elif page == "Help & Support":
+        elif st.session_state.current_page == "help_support":
             from pages.help import render_help_page
             render_help_page()
+        elif st.session_state.current_page == "officer_login":
+            from pages.officer_login import render_officer_login
+            render_officer_login(set_page_config=False)
 
         # Footer
         st.markdown("""
@@ -204,7 +237,7 @@ def show_home_page():
     st.markdown("---")
     st.subheader("🚨 Report a Cybercrime Now")
     if st.button("Start Complaint Form", type="primary", use_container_width=True):
-        st.switch_page("pages/report_form.py")
+        navigate_to("report_form")
 
 def show_complaint_form():
     """Display the cybercrime complaint form."""

@@ -43,13 +43,14 @@ def save_complaints(complaints):
     with open(COMPLAINTS_FILE, 'w') as f:
         json.dump(complaints, f, indent=2, default=str)
 
-def render_report_form():
+def render_report_form(set_page_config: bool = True):
     """Display the cybercrime complaint form."""
-    st.set_page_config(
-        page_title="Report Cybercrime - Cyber Crime System",
-        page_icon="📋",
-        layout="wide"
-    )
+    if set_page_config:
+        st.set_page_config(
+            page_title="Report Cybercrime - Cyber Crime System",
+            page_icon="📋",
+            layout="wide"
+        )
     
     # Custom CSS
     css = """
@@ -88,7 +89,8 @@ def render_report_form():
     
     # Back button
     if st.button("← Back to Home"):
-        st.switch_page("frontend/app.py")
+        st.session_state.current_page = "home"
+        st.switch_page("app.py")
     
     with st.form("complaint_form"):
         st.markdown('<div class="complaint-form">', unsafe_allow_html=True)

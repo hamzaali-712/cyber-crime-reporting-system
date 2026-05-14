@@ -26,13 +26,14 @@ def save_officers(officers_data):
     with open(OFFICERS_FILE, 'w') as f:
         json.dump(officers_data, f, indent=2)
 
-def render_officer_login():
+def render_officer_login(set_page_config: bool = True):
     """Render officer login page."""
-    st.set_page_config(
-        page_title="Officer Login - Cyber Crime System",
-        page_icon="👮",
-        layout="centered"
-    )
+    if set_page_config:
+        st.set_page_config(
+            page_title="Officer Login - Cyber Crime System",
+            page_icon="👮",
+            layout="centered"
+        )
     
     # Custom CSS
     st.markdown("""

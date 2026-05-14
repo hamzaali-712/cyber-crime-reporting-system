@@ -32,13 +32,14 @@ def load_decisions():
             return {}
     return {}
 
-def render_tracking_page():
+def render_tracking_page(set_page_config: bool = True):
     """Render the complaint tracking page."""
-    st.set_page_config(
-        page_title="Track Complaint - Cyber Crime System",
-        page_icon="📍",
-        layout="wide"
-    )
+    if set_page_config:
+        st.set_page_config(
+            page_title="Track Complaint - Cyber Crime System",
+            page_icon="📍",
+            layout="wide"
+        )
     
     # Custom CSS
     css = """

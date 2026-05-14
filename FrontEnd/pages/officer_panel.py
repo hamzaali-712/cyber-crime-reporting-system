@@ -44,13 +44,14 @@ def save_decisions(decisions):
     with open(OFFICER_DECISIONS_FILE, 'w') as f:
         json.dump(decisions, f, indent=2, default=str)
 
-def render_officer_panel():
+def render_officer_panel(set_page_config: bool = True):
     """Render the officer panel."""
-    st.set_page_config(
-        page_title="Officer Panel - Cyber Crime System",
-        page_icon="👮",
-        layout="wide"
-    )
+    if set_page_config:
+        st.set_page_config(
+            page_title="Officer Panel - Cyber Crime System",
+            page_icon="👮",
+            layout="wide"
+        )
     
     # Check authentication
     if not is_officer_logged_in():
