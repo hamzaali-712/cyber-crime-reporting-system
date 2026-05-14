@@ -1,0 +1,11 @@
+{
+  "CYBER2026DEMO": {
+    "name": "Demo Officer",
+    "designation": "Inspector",
+    "email": "demo@police.gov.pk",
+    "phone": "+92-300-0000000",
+    "password": "demo123",
+    "created_at": "2026-01-01T00:00:00",
+    "status": "active"
+  }
+}

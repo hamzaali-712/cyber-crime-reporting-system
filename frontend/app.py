@@ -129,6 +129,13 @@ def main():
             )
 
             st.markdown("---")
+            
+            # Officer Panel Access
+            st.subheader("🔐 Staff Area")
+            if st.button("👮 Officer Panel Login"):
+                st.switch_page("pages/officer_login.py")
+            
+            st.markdown("---")
             st.markdown("**Emergency Contacts:**")
             st.markdown("• Police: 15")
             st.markdown("• FIA Cybercrime: [Contact]")
@@ -138,7 +145,7 @@ def main():
         if page == "Home":
             show_home_page()
         elif page == "Report Cybercrime":
-            show_complaint_form()
+            st.switch_page("pages/report_form.py")
         elif page == "Track Complaint":
             from pages.tracking import render_tracking_page
             render_tracking_page()
@@ -196,9 +203,8 @@ def show_home_page():
 
     st.markdown("---")
     st.subheader("🚨 Report a Cybercrime Now")
-    if st.button("Start Complaint Form", type="primary"):
-        st.session_state.page = "Report Cybercrime"
-        st.rerun()
+    if st.button("Start Complaint Form", type="primary", use_container_width=True):
+        st.switch_page("pages/report_form.py")
 
 def show_complaint_form():
     """Display the cybercrime complaint form."""
@@ -345,6 +351,17 @@ def show_law_guide():
 
     st.markdown('<div class="law-section">', unsafe_allow_html=True)
 
+    # Import cyber laws data
+    import sys
+    sys.path.append('data')
+    try:
+        from cyber_laws import get_all_laws, get_categories, search_laws, get_laws_by_category
+        laws_data = get_all_laws()
+        categories = get_categories()
+    except ImportError:
+        st.error("Cyber laws database not loaded. Please ensure cyber_laws.py exists.")
+        return
+
     # Search and filter
     col1, col2 = st.columns([2, 1])
     with col1:
@@ -352,55 +369,45 @@ def show_law_guide():
     with col2:
         category_filter = st.selectbox(
             "Filter by category:",
-            ["All", "Unauthorized Access", "Data Damage", "Cyberstalking", "Phishing",
-             "Child Pornography", "Identity Theft", "Hacking", "Malware", "Data Theft",
-             "Spamming", "Online Harassment", "Financial Fraud", "Privacy Violation"]
+            ["All"] + categories
         )
-
-    # Mock law data (replace with API call)
-    laws_data = [
-        {
-            "section": "13",
-            "title": "Unauthorized access to information system",
-            "category": "Unauthorized Access",
-            "description": "Whoever intentionally accesses or causes access to any information system without lawful authority shall be punished.",
-            "punishment": "Imprisonment up to 3 years or fine up to Rs. 5 million or both"
-        },
-        {
-            "section": "20",
-            "title": "Cyberstalking",
-            "category": "Cyberstalking",
-            "description": "Whoever uses information system to stalk or harass another person shall be punished.",
-            "punishment": "Imprisonment up to 3 years or fine up to Rs. 1 million or both"
-        },
-        {
-            "section": "21",
-            "title": "Fraudulent use of information system",
-            "category": "Phishing",
-            "description": "Whoever uses information system to deceive or mislead any person or cause harm through fraudulent means shall be punished.",
-            "punishment": "Imprisonment up to 3 years or fine up to Rs. 5 million or both"
-        }
-    ]
 
     # Filter laws
     filtered_laws = laws_data
     if search_term:
-        filtered_laws = [law for law in filtered_laws
-                        if search_term.lower() in law['title'].lower() or
-                           search_term.lower() in law['description'].lower()]
+        filtered_laws = search_laws(search_term)
     if category_filter != "All":
-        filtered_laws = [law for law in filtered_laws if law['category'] == category_filter]
+        filtered_laws = get_laws_by_category(category_filter)
 
     # Display laws
     if filtered_laws:
+        st.subheader(f"📚 Found {len(filtered_laws)} Law(s)")
+        
         for law in filtered_laws:
-            with st.expander(f"Section {law['section']}: {law['title']}"):
-                st.write(f"**Category:** {law['category']}")
-                st.write(f"**Description:** {law['description']}")
-                st.write(f"**Punishment:** {law['punishment']}")
-                st.write(f"**Relevant PECA Sections:** PECA Section {law['section']}")
+            with st.expander(f"⚖️ Section {law['section']}: {law['title']}", expanded=False):
+                col1, col2 = st.columns(2)
+                
+                with col1:
+                    st.markdown(f"**Category:** `{law['category']}`")
+                    st.markdown(f"**Section:** PECA {law['section']}")
+                
+                with col2:
+                    st.markdown(f"**Applicable To:**")
+                    for item in law['applicable_to']:
+                        st.markdown(f"• {item}")
+                
+                st.markdown("---")
+                st.markdown("**Description:**")
+                st.write(law['description'])
+                
+                st.markdown("**Details:**")
+                st.write(law['details'])
+                
+                st.warning(f"**Punishment:** {law['punishment']}")
+                
+                st.markdown(f"*Reference: {law['peca_reference']}*")
     else:
-        st.info("No laws found matching your search criteria.")
+        st.info("❌ No laws found matching your search criteria.")
 
     st.markdown('</div>', unsafe_allow_html=True)
 
