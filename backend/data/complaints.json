@@ -15,5 +15,21 @@
     "status": "solved",
     "officer_decision": "Solve - Case Solved Successfully",
     "decided_by": "CYBER2026AKIFNAVEED"
+  },
+  "CCRS-PK-2026-A9C04256": {
+    "tracking_id": "CCRS-PK-2026-A9C04256",
+    "email": "hamzatalwarali712@gmail.com",
+    "full_name": "hamza ali abbasi",
+    "phone": "03021437012",
+    "cnic": "3520267839303",
+    "address": "",
+    "anonymous": false,
+    "incident_date": "2026-05-15",
+    "location": "mobile phone",
+    "complaint_reason": "Online Harassment",
+    "description": "jjjjjjjjjjjjjjjjjjjjjjjjffffffffffffffffffffffffffffffbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+    "evidence_count": 1,
+    "submitted_at": "2026-05-15T02:28:03.272063",
+    "status": "pending"
   }
 }

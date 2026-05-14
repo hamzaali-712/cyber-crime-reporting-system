@@ -1,6 +1,6 @@
 """
 Cyber Crime Reporting System - Main Application
-Final Stability Fix for Routing & Authentication
+Advanced Routing & Stability Fix
 """
 
 import streamlit as st
@@ -21,7 +21,6 @@ for _p in (str(ROOT_DIR), str(FRONTEND_DIR)):
 
 # ── Environment & logging ─────────────────────────────────────────────────────
 load_dotenv()
-logging.basicConfig(level=logging.INFO)
 
 # ── Page config ───────────────────────────────────────────────────────────────
 st.set_page_config(
@@ -57,7 +56,7 @@ def main():
     st.markdown("""
     <div class="main-header">
         <h1>🛡️ CYBER CRIME PORTAL</h1>
-        <p>Government of Pakistan - Law Enforcement</p>
+        <p>Government of Pakistan - Law Enforcement Access</p>
     </div>
     """, unsafe_allow_html=True)
 
@@ -65,6 +64,7 @@ def main():
     with st.sidebar:
         st.markdown("### 🗺️ NAVIGATION")
         
+        # Define base public pages
         pages = {
             "🏠 Home": "home",
             "📋 Report Crime": "report_form",
@@ -73,63 +73,67 @@ def main():
             "❓ Help Center": "help_support"
         }
         
-        # If logged in, add Dashboard to the list
-        if st.session_state.get('officer_logged_in'):
-            pages = {"👮 DASHBOARD": "officer_panel", **pages}
+        # Add internal pages to the map if they are the current page
+        # This prevents the radio from resetting when we are on a "non-radio" page
+        all_accessible_pages = pages.copy()
+        if st.session_state.current_page == "officer_login":
+            all_accessible_pages["🔐 Officer Login"] = "officer_login"
+        elif st.session_state.current_page == "officer_panel":
+            all_accessible_pages["👮 Officer Panel"] = "officer_panel"
             
         # Determine the radio index based on current page
-        page_list = list(pages.values())
+        page_labels = list(all_accessible_pages.keys())
+        page_values = list(all_accessible_pages.values())
+        
         try:
-            current_idx = page_list.index(st.session_state.current_page)
+            current_idx = page_values.index(st.session_state.current_page)
         except ValueError:
             current_idx = 0
             
-        selected_label = st.radio("Access Node:", list(pages.keys()), index=current_idx)
-        selected_page = pages[selected_label]
+        selected_label = st.radio("Access Node:", page_labels, index=current_idx, key="nav_radio")
+        selected_page = all_accessible_pages[selected_label]
         
-        # Only navigate if the user manually changed the radio
+        # Navigation logic
         if selected_page != st.session_state.current_page:
             st.session_state.current_page = selected_page
             st.rerun()
 
         st.markdown("---")
         if not st.session_state.get('officer_logged_in'):
-            if st.button("🔐 OFFICER LOGIN", use_container_width=True):
+            if st.button("🔑 OFFICER AUTHENTICATION", use_container_width=True):
                 navigate_to("officer_login")
         else:
-            st.success(f"ID: {st.session_state.get('officer_id')}")
+            st.success(f"ACTIVE ID: {st.session_state.get('officer_id')}")
+            if st.button("📊 DASHBOARD", use_container_width=True):
+                navigate_to("officer_panel")
             if st.button("🚪 LOGOUT", use_container_width=True):
                 st.session_state.officer_logged_in = False
+                st.session_state.officer_id = None
                 navigate_to("home")
 
     # ── Page Routing ──
     current = st.session_state.current_page
 
-    try:
-        if current == "home":
-            show_home_page()
-        elif current == "report_form":
-            from views.report_form import render_report_form
-            render_report_form(set_page_config=False)
-        elif current == "tracking":
-            from views.tracking import render_tracking_page
-            render_tracking_page(set_page_config=False)
-        elif current == "law_guide":
-            from views.law_guide import render_law_guide_page
-            render_law_guide_page()
-        elif current == "help_support":
-            from views.help import render_help_page
-            render_help_page()
-        elif current == "officer_login":
-            from views.officer_login import render_officer_login
-            render_officer_login(set_page_config=False)
-        elif current == "officer_panel":
-            from views.officer_panel import render_officer_panel
-            render_officer_panel(set_page_config=False)
-    except Exception as e:
-        st.error(f"Routing Error: {str(e)}")
-        if st.button("Back to Home"):
-            navigate_to("home")
+    if current == "home":
+        show_home_page()
+    elif current == "report_form":
+        from views.report_form import render_report_form
+        render_report_form(set_page_config=False)
+    elif current == "tracking":
+        from views.tracking import render_tracking_page
+        render_tracking_page(set_page_config=False)
+    elif current == "law_guide":
+        from views.law_guide import render_law_guide_page
+        render_law_guide_page()
+    elif current == "help_support":
+        from views.help import render_help_page
+        render_help_page()
+    elif current == "officer_login":
+        from views.officer_login import render_officer_login
+        render_officer_login(set_page_config=False)
+    elif current == "officer_panel":
+        from views.officer_panel import render_officer_panel
+        render_officer_panel(set_page_config=False)
 
     # ── Chatbot ──
     from components.chatbot import render_chatbot
@@ -139,14 +143,15 @@ def main():
     st.markdown(f"""<div class="footer"><p>© {datetime.now().year} NCIA Pakistan</p></div>""", unsafe_allow_html=True)
 
 def show_home_page():
-    st.markdown("### 🛰️ PORTAL NODES")
+    st.markdown("### 🛰️ GLOBAL THREAT MONITOR")
     c1, c2, c3 = st.columns(3)
-    c1.metric("NETWORK", "ENCRYPTED")
+    c1.metric("NETWORK", "SECURE")
     c2.metric("COMPLIANCE", "PECA 2016")
-    c3.metric("AVAILABILITY", "ONLINE")
+    c3.metric("UPTIME", "100%")
     
     st.markdown("---")
-    if st.button("INITIATE COMPLAINT SEQUENCE", type="primary", use_container_width=True):
+    st.info("💡 Use the sidebar to initiate a report or track your existing case status.")
+    if st.button("START COMPLAINT FORM", type="primary", use_container_width=True):
         navigate_to("report_form")
 
 if __name__ == "__main__":

@@ -1,16 +1,18 @@
 """
 Cybercrime Assistant - AI Chatbot Component
+Direct API Implementation to bypass SDK proxy bugs.
 """
 
 import streamlit as st
-from groq import Groq
 import os
+import requests
+import json
 from dotenv import load_dotenv
 
 load_dotenv()
 
 def render_chatbot():
-    """Renders a chat interface using the Groq API."""
+    """Renders a chat interface using direct REST calls to Groq."""
     st.markdown("---")
     
     if "messages" not in st.session_state:
@@ -29,29 +31,39 @@ def render_chatbot():
 
         with st.chat_message("assistant"):
             try:
-                # Clean initialization to avoid 'proxies' error
                 api_key = os.getenv("GROQ_API_KEY")
                 if not api_key:
                     st.error("API Key missing.")
                     return
 
-                client = Groq(api_key=api_key)
+                # Direct API call to bypass Groq SDK / httpx proxy issues
+                url = "https://api.groq.com/openai/v1/chat/completions"
+                headers = {
+                    "Authorization": f"Bearer {api_key}",
+                    "Content-Type": "application/json"
+                }
                 
                 system_prompt = "You are a professional Cybercrime Assistant for the Pakistan NCIA. Provide clear guidance on laws (PECA 2016) and reporting procedures."
                 
-                response = client.chat.completions.create(
-                    model="llama3-8b-8192",
-                    messages=[
+                payload = {
+                    "model": "llama3-8b-8192",
+                    "messages": [
                         {"role": "system", "content": system_prompt},
                         *[{"role": m["role"], "content": m["content"]} for m in st.session_state.messages]
                     ],
-                    max_tokens=512
-                )
+                    "temperature": 0.5,
+                    "max_tokens": 512
+                }
                 
-                msg = response.choices[0].message.content
-                st.markdown(msg)
-                st.session_state.messages.append({"role": "assistant", "content": msg})
+                response = requests.post(url, headers=headers, data=json.dumps(payload), timeout=15)
+                
+                if response.status_code == 200:
+                    data = response.json()
+                    msg = data["choices"][0]["message"]["content"]
+                    st.markdown(msg)
+                    st.session_state.messages.append({"role": "assistant", "content": msg})
+                else:
+                    st.error(f"API Error ({response.status_code}): {response.text}")
                 
             except Exception as e:
-                st.error(f"Chatbot Error: {str(e)}")
-                st.info("Check your API key and connection.")
+                st.error(f"System Error: {str(e)}")
