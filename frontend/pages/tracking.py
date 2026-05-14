@@ -70,6 +70,13 @@ def render_tracking_page(set_page_config: bool = True):
         border-radius: 5px;
         font-weight: bold;
     }
+    .solved-status {
+        background: #bfdbfe;
+        color: #1e3a8a;
+        padding: 0.5rem 1rem;
+        border-radius: 5px;
+        font-weight: bold;
+    }
     .rejected-status {
         background: #fee2e2;
         color: #b91c1c;
@@ -135,12 +142,18 @@ def render_tracking_page(set_page_config: bool = True):
             st.subheader("📊 Complaint Status")
             
             if decision:
-                if "Approve" in decision.get("decision", ""):
-                    st.markdown('<div class="approved-status">✅ APPROVED - CASE SOLVED</div>', unsafe_allow_html=True)
+                if "Solve" in decision.get("decision", ""):
+                    st.markdown('<div class="solved-status">🛠️ SOLVED - CASE SUCCESSFULLY COMPLETED</div>', unsafe_allow_html=True)
                     st.info(f"**Officer Decision:** {decision.get('decision')}")
                     st.info(f"**Notes:** {decision.get('notes')}")
                     st.info(f"**Decided By:** {decision.get('officer_id')}")
                     st.info(f"**Date:** {decision.get('decided_at')}")
+                elif "Approve" in decision.get("decision", ""):
+                    st.markdown('<div class="approved-status">✅ APPROVED - UNDER INVESTIGATION</div>', unsafe_allow_html=True)
+                    st.success(f"**Officer Decision:** {decision.get('decision')}")
+                    st.success(f"**Notes:** {decision.get('notes')}")
+                    st.success(f"**Decided By:** {decision.get('officer_id')}")
+                    st.success(f"**Date:** {decision.get('decided_at')}")
                 else:
                     st.markdown('<div class="rejected-status">❌ REJECTED - INVALID/INCOMPLETE</div>', unsafe_allow_html=True)
                     st.warning(f"**Officer Decision:** {decision.get('decision')}")

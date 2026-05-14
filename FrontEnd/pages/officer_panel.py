@@ -149,7 +149,7 @@ def render_officer_panel(set_page_config: bool = True):
     st.info(f"**Officer ID:** {officer_id}")
     
     # Tabs
-    tab1, tab2, tab3, tab4 = st.tabs(["📋 Pending Reports", "✅ Approved Cases", "❌ Rejected Cases", "📊 Statistics"])
+    tab1, tab2, tab3, tab4, tab5 = st.tabs(["📋 Pending Reports", "✅ Approved Cases", "🛠️ Solved Cases", "❌ Rejected Cases", "📊 Statistics"])
     
     complaints = load_complaints()
     decisions = load_decisions()
@@ -224,7 +224,7 @@ def render_officer_panel(set_page_config: bool = True):
         
         decision = st.radio(
             "Make a decision:",
-            ["Select...", "Approve - Case Solved Successfully", "Reject - Case Invalid/Incomplete"]
+            ["Select...", "Approve - Case is Valid/Under Investigation", "Solve - Case Solved Successfully", "Reject - Case Invalid/Incomplete"]
         )
         
         if decision != "Select...":
@@ -255,7 +255,14 @@ def render_officer_panel(set_page_config: bool = True):
                         
                         # Update complaint status
                         all_complaints = load_complaints()
-                        all_complaints[tracking_id]["status"] = "approved" if "Approve" in decision else "rejected"
+                        if "Approve" in decision:
+                            status = "approved"
+                        elif "Solve" in decision:
+                            status = "solved"
+                        else:
+                            status = "rejected"
+                            
+                        all_complaints[tracking_id]["status"] = status
                         all_complaints[tracking_id]["officer_decision"] = decision
                         all_complaints[tracking_id]["decided_by"] = officer_id
                         save_complaints(all_complaints)
@@ -266,7 +273,10 @@ def render_officer_panel(set_page_config: bool = True):
                         import time
                         time.sleep(2)
                         st.session_state.selected_complaint = None
-                        st.rerun()
+                        if hasattr(st, "experimental_rerun"):
+                            st.experimental_rerun()
+                        elif hasattr(st, "rerun"):
+                            st.rerun()
             
             with col2:
                 if st.button("❌ Cancel"):
@@ -276,7 +286,7 @@ def render_officer_panel(set_page_config: bool = True):
                     elif hasattr(st, "rerun"):
                         st.rerun()
     with tab2:
-        st.subheader("✅ Approved Cases - Successfully Completed")
+        st.subheader("✅ Approved Cases - Under Investigation")
         
         approved_complaints = []
         for tracking_id, complaint in complaints.items():
@@ -288,11 +298,47 @@ def render_officer_panel(set_page_config: bool = True):
             st.info("No approved cases yet.")
         else:
             for tracking_id, complaint, decision in approved_complaints:
+                with st.container():
+                    col1, col2 = st.columns([3, 1])
+                    with col1:
+                        st.markdown(f"""
+                        <div class="complaint-card" style="border-left: 4px solid #10b981;">
+                            <h4>✅ {complaint.get('complaint_reason')}</h4>
+                            <p><strong>Tracking ID:</strong> {tracking_id}</p>
+                            <p><strong>Status:</strong> <span class="approved-badge">APPROVED</span></p>
+                            <p><strong>Officer:</strong> {decision.get('officer_id')}</p>
+                            <p><strong>Decided On:</strong> {decision.get('decided_at', 'N/A')}</p>
+                            <p><strong>Notes:</strong> {decision.get('notes', 'N/A')}</p>
+                        </div>
+                        """, unsafe_allow_html=True)
+                    with col2:
+                        if st.button("🔄 Update Status", key=f"update_{tracking_id}"):
+                            st.session_state.selected_complaint = tracking_id
+                            st.session_state.selected_complaint_data = complaint
+                            if hasattr(st, "experimental_rerun"):
+                                st.experimental_rerun()
+                            elif hasattr(st, "rerun"):
+                                st.rerun()
+                                
+    # Solved Cases Tab
+    with tab3:
+        st.subheader("🛠️ Solved Cases - Successfully Completed")
+        
+        solved_complaints = []
+        for tracking_id, complaint in complaints.items():
+            decision = decisions.get(tracking_id)
+            if decision and "Solve" in decision.get("decision", ""):
+                solved_complaints.append((tracking_id, complaint, decision))
+        
+        if not solved_complaints:
+            st.info("No solved cases yet.")
+        else:
+            for tracking_id, complaint, decision in solved_complaints:
                 st.markdown(f"""
-                <div class="complaint-card" style="border-left: 4px solid #10b981;">
-                    <h4>✅ {complaint.get('complaint_reason')}</h4>
+                <div class="complaint-card" style="border-left: 4px solid #3b82f6;">
+                    <h4>🛠️ {complaint.get('complaint_reason')}</h4>
                     <p><strong>Tracking ID:</strong> {tracking_id}</p>
-                    <p><strong>Status:</strong> <span class="approved-badge">APPROVED</span></p>
+                    <p><strong>Status:</strong> <span class="approved-badge" style="background:#bfdbfe;color:#1e3a8a;">SOLVED</span></p>
                     <p><strong>Officer:</strong> {decision.get('officer_id')}</p>
                     <p><strong>Decided On:</strong> {decision.get('decided_at', 'N/A')}</p>
                     <p><strong>Notes:</strong> {decision.get('notes', 'N/A')}</p>
@@ -300,7 +346,7 @@ def render_officer_panel(set_page_config: bool = True):
                 """, unsafe_allow_html=True)
     
     # Rejected Cases Tab
-    with tab3:
+    with tab4:
         st.subheader("❌ Rejected Cases - Invalid/Incomplete")
         
         rejected_complaints = []
@@ -325,15 +371,16 @@ def render_officer_panel(set_page_config: bool = True):
                 """, unsafe_allow_html=True)
     
     # Statistics Tab
-    with tab4:
+    with tab5:
         st.subheader("📊 Case Statistics")
         
         total_cases = len(complaints)
         pending_cases = len([tracking_id for tracking_id in complaints.keys() if tracking_id not in decisions])
         approved_cases = len([d for d in decisions.values() if "Approve" in d.get("decision", "")])
+        solved_cases = len([d for d in decisions.values() if "Solve" in d.get("decision", "")])
         rejected_cases = len([d for d in decisions.values() if "Reject" in d.get("decision", "")])
         
-        col1, col2, col3, col4 = st.columns(4)
+        col1, col2, col3, col4, col5 = st.columns(5)
         
         with col1:
             st.metric("Total Cases", total_cases)
@@ -343,8 +390,11 @@ def render_officer_panel(set_page_config: bool = True):
         
         with col3:
             st.metric("Approved", approved_cases)
-        
+            
         with col4:
+            st.metric("Solved", solved_cases)
+        
+        with col5:
             st.metric("Rejected", rejected_cases)
         
         st.markdown("---")
@@ -353,6 +403,7 @@ def render_officer_panel(set_page_config: bool = True):
         status_data = {
             "Pending": pending_cases,
             "Approved": approved_cases,
+            "Solved": solved_cases,
             "Rejected": rejected_cases
         }
         
