@@ -4,11 +4,18 @@ Cybercrime Complaint Report Form Page
 
 import streamlit as st
 import os
+import sys
+from pathlib import Path
 from dotenv import load_dotenv
 import logging
 from datetime import datetime
 import uuid
 import json
+
+# Ensure local path imports work regardless of run directory
+BASE_DIR = Path(__file__).resolve().parent.parent
+if str(BASE_DIR / "frontend") not in sys.path:
+    sys.path.insert(0, str(BASE_DIR / "frontend"))
 
 # Load environment variables
 load_dotenv()
@@ -25,7 +32,7 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 # Database file
-COMPLAINTS_FILE = "backend/data/complaints.json"
+COMPLAINTS_FILE = BASE_DIR / "backend" / "data" / "complaints.json"
 
 def load_complaints():
     """Load complaints database."""
@@ -39,7 +46,7 @@ def load_complaints():
 
 def save_complaints(complaints):
     """Save complaints to database."""
-    os.makedirs(os.path.dirname(COMPLAINTS_FILE), exist_ok=True)
+    os.makedirs(COMPLAINTS_FILE.parent, exist_ok=True)
     with open(COMPLAINTS_FILE, 'w') as f:
         json.dump(complaints, f, indent=2, default=str)
 
@@ -90,7 +97,12 @@ def render_report_form(set_page_config: bool = True):
     # Back button
     if st.button("← Back to Home"):
         st.session_state.current_page = "home"
-        st.switch_page("app.py")
+        if hasattr(st, "experimental_rerun"):
+            st.experimental_rerun()
+        elif hasattr(st, "rerun"):
+            st.rerun()
+        else:
+            st.info("Please refresh the page to return to Home.")
     
     with st.form("complaint_form"):
         st.markdown('<div class="complaint-form">', unsafe_allow_html=True)

@@ -5,12 +5,20 @@ Officer Panel - View and Manage Cybercrime Reports
 import streamlit as st
 import json
 import os
+import sys
+from pathlib import Path
 from datetime import datetime
+
+# Ensure local frontend imports work properly
+BASE_DIR = Path(__file__).resolve().parent.parent
+if str(BASE_DIR / "frontend") not in sys.path:
+    sys.path.insert(0, str(BASE_DIR / "frontend"))
+
 from pages.officer_login import is_officer_logged_in, get_current_officer_id, logout_officer
 
 # Database file for complaints
-COMPLAINTS_FILE = "backend/data/complaints.json"
-OFFICER_DECISIONS_FILE = "backend/data/officer_decisions.json"
+COMPLAINTS_FILE = BASE_DIR / "backend" / "data" / "complaints.json"
+OFFICER_DECISIONS_FILE = BASE_DIR / "backend" / "data" / "officer_decisions.json"
 
 def load_complaints():
     """Load complaints database."""
@@ -24,7 +32,7 @@ def load_complaints():
 
 def save_complaints(complaints):
     """Save complaints to database."""
-    os.makedirs(os.path.dirname(COMPLAINTS_FILE), exist_ok=True)
+    os.makedirs(COMPLAINTS_FILE.parent, exist_ok=True)
     with open(COMPLAINTS_FILE, 'w') as f:
         json.dump(complaints, f, indent=2, default=str)
 
@@ -40,7 +48,7 @@ def load_decisions():
 
 def save_decisions(decisions):
     """Save officer decisions to database."""
-    os.makedirs(os.path.dirname(OFFICER_DECISIONS_FILE), exist_ok=True)
+    os.makedirs(OFFICER_DECISIONS_FILE.parent, exist_ok=True)
     with open(OFFICER_DECISIONS_FILE, 'w') as f:
         json.dump(decisions, f, indent=2, default=str)
 
@@ -57,7 +65,11 @@ def render_officer_panel(set_page_config: bool = True):
     if not is_officer_logged_in():
         st.error("❌ Please login first.")
         if st.button("Go to Login"):
-            st.switch_page("pages/officer_login.py")
+            st.session_state.current_page = "officer_login"
+            if hasattr(st, "experimental_rerun"):
+                st.experimental_rerun()
+            elif hasattr(st, "rerun"):
+                st.rerun()
         return
     
     officer_id = get_current_officer_id()
@@ -127,7 +139,11 @@ def render_officer_panel(set_page_config: bool = True):
             st.success("Logged out successfully!")
             import time
             time.sleep(1)
-            st.switch_page("pages/officer_login.py")
+            st.session_state.current_page = "officer_login"
+            if hasattr(st, "experimental_rerun"):
+                st.experimental_rerun()
+            elif hasattr(st, "rerun"):
+                st.rerun()
     
     # Officer info
     st.info(f"**Officer ID:** {officer_id}")
@@ -169,7 +185,10 @@ def render_officer_panel(set_page_config: bool = True):
                         if st.button("👁️ Review", key=f"review_{tracking_id}"):
                             st.session_state.selected_complaint = tracking_id
                             st.session_state.selected_complaint_data = complaint
-                            st.rerun()
+                            if hasattr(st, "experimental_rerun"):
+                                st.experimental_rerun()
+                            elif hasattr(st, "rerun"):
+                                st.rerun()
     
     # Review Complaint Detail
     if st.session_state.get("selected_complaint"):
@@ -252,9 +271,10 @@ def render_officer_panel(set_page_config: bool = True):
             with col2:
                 if st.button("❌ Cancel"):
                     st.session_state.selected_complaint = None
-                    st.rerun()
-    
-    # Approved Cases Tab
+                    if hasattr(st, "experimental_rerun"):
+                        st.experimental_rerun()
+                    elif hasattr(st, "rerun"):
+                        st.rerun()
     with tab2:
         st.subheader("✅ Approved Cases - Successfully Completed")
         
@@ -309,8 +329,7 @@ def render_officer_panel(set_page_config: bool = True):
         st.subheader("📊 Case Statistics")
         
         total_cases = len(complaints)
-        pending_cases = len([c for c in complaints.values() if not decisions.get(
-            [t for t, comp in complaints.items() if comp == c][0])])
+        pending_cases = len([tracking_id for tracking_id in complaints.keys() if tracking_id not in decisions])
         approved_cases = len([d for d in decisions.values() if "Approve" in d.get("decision", "")])
         rejected_cases = len([d for d in decisions.values() if "Reject" in d.get("decision", "")])
         

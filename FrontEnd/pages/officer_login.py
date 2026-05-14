@@ -5,10 +5,17 @@ Officer Login and Authentication Page
 import streamlit as st
 import json
 import os
+import sys
+from pathlib import Path
 from datetime import datetime
 
+# Ensure local frontend imports work properly
+BASE_DIR = Path(__file__).resolve().parent.parent
+if str(BASE_DIR / "frontend") not in sys.path:
+    sys.path.insert(0, str(BASE_DIR / "frontend"))
+
 # Officer database file
-OFFICERS_FILE = "backend/data/officers.json"
+OFFICERS_FILE = BASE_DIR / "backend" / "data" / "officers.json"
 
 def load_officers():
     """Load officers database."""
@@ -22,7 +29,7 @@ def load_officers():
 
 def save_officers(officers_data):
     """Save officers database."""
-    os.makedirs(os.path.dirname(OFFICERS_FILE), exist_ok=True)
+    os.makedirs(OFFICERS_FILE.parent, exist_ok=True)
     with open(OFFICERS_FILE, 'w') as f:
         json.dump(officers_data, f, indent=2)
 
@@ -98,7 +105,10 @@ def render_officer_login(set_page_config: bool = True):
     
     if signup_btn:
         st.session_state.show_registration = True
-        st.rerun()
+        if hasattr(st, "experimental_rerun"):
+            st.experimental_rerun()
+        elif hasattr(st, "rerun"):
+            st.rerun()
     
     if login_btn:
         if not officer_id or not password:
@@ -113,7 +123,11 @@ def render_officer_login(set_page_config: bool = True):
             st.info(f"Welcome, {officer_id}!")
             import time
             time.sleep(1)
-            st.switch_page("pages/officer_panel.py")
+            st.session_state.current_page = "officer_panel"
+            if hasattr(st, "experimental_rerun"):
+                st.experimental_rerun()
+            elif hasattr(st, "rerun"):
+                st.rerun()
         else:
             st.error("❌ Invalid Officer ID or password.")
     
