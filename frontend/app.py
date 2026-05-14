@@ -191,22 +191,40 @@ def main():
         if st.session_state.current_page == "home":
             show_home_page()
         elif st.session_state.current_page == "report_form":
-            from frontend.views.report_form import render_report_form
+            try:
+                from frontend.views.report_form import render_report_form
+            except ModuleNotFoundError:
+                from views.report_form import render_report_form
             render_report_form(set_page_config=False)
         elif st.session_state.current_page == "tracking":
-            from frontend.views.tracking import render_tracking_page
+            try:
+                from frontend.views.tracking import render_tracking_page
+            except ModuleNotFoundError:
+                from views.tracking import render_tracking_page
             render_tracking_page(set_page_config=False)
         elif st.session_state.current_page == "law_guide":
-            from frontend.views.law_guide import render_law_guide_page
+            try:
+                from frontend.views.law_guide import render_law_guide_page
+            except ModuleNotFoundError:
+                from views.law_guide import render_law_guide_page
             render_law_guide_page()
         elif st.session_state.current_page == "help_support":
-            from frontend.views.help import render_help_page
+            try:
+                from frontend.views.help import render_help_page
+            except ModuleNotFoundError:
+                from views.help import render_help_page
             render_help_page()
         elif st.session_state.current_page == "officer_login":
-            from frontend.views.officer_login import render_officer_login
+            try:
+                from frontend.views.officer_login import render_officer_login
+            except ModuleNotFoundError:
+                from views.officer_login import render_officer_login
             render_officer_login(set_page_config=False)
         elif st.session_state.current_page == "officer_panel":
-            from frontend.views.officer_panel import render_officer_panel
+            try:
+                from frontend.views.officer_panel import render_officer_panel
+            except ModuleNotFoundError:
+                from views.officer_panel import render_officer_panel
             render_officer_panel(set_page_config=False)
 
         # Footer
