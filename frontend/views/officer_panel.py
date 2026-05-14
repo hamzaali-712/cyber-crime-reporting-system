@@ -35,33 +35,53 @@ def save_json(file_path, data):
     with open(file_path, 'w') as f:
         json.dump(data, f, indent=2, default=str)
 
-def draft_ai_email(case_details, decision, officer_notes):
-    """Uses AI to draft a professional email for the victim."""
+def draft_ai_email(c, decision, officer_notes):
+    """Uses AI to draft a detailed, professional email including all case data."""
     try:
         api_key = os.getenv("GROQ_API_KEY")
         url = "https://api.groq.com/openai/v1/chat/completions"
         headers = {"Authorization": f"Bearer {api_key}", "Content-Type": "application/json"}
         
+        # Detailed prompt including all case info
         prompt = f"""
-        Draft a professional and empathetic email from the NCIA Cybercrime Wing to a victim.
-        Case Type: {case_details.get('complaint_reason')}
-        Decision: {decision}
-        Officer Remarks: {officer_notes}
+        Draft a comprehensive, professional official email from NCIA Pakistan to a citizen.
         
-        Use a supportive government tone. Address them as 'Dear Citizen' if name is unknown.
+        CITIZEN DETAILS:
+        - Name: {c.get('full_name', 'N/A')}
+        - CNIC: {c.get('cnic', 'N/A')}
+        - Email: {c.get('email', 'N/A')}
+        
+        CASE DETAILS:
+        - Tracking ID: {c.get('tracking_id')}
+        - Category/Reason: {c.get('complaint_reason')}
+        - Incident Date: {c.get('incident_date')}
+        - Original Description: {c.get('description')}
+        
+        OPERATIONAL DECISION:
+        - Status: {decision}
+        - Officer Remarks: {officer_notes}
+        
+        REQUIREMENTS:
+        1. Mention the Category/Reason clearly.
+        2. Mention the CNIC and Full Name to verify the recipient.
+        3. Acknowledge the original incident description briefly.
+        4. Explain the decision ({decision}) and the officer's remarks.
+        5. Use a formal, supportive, and authoritative government tone.
+        6. Do not use placeholders like [Your Name], write as 'NCIA Operations Unit'.
         """
         
         payload = {
             "model": "llama-3.1-8b-instant",
-            "messages": [{"role": "system", "content": "Professional secretary."}, {"role": "user", "content": prompt}],
-            "temperature": 0.3
+            "messages": [{"role": "system", "content": "You are a senior NCIA legal officer."}, {"role": "user", "content": prompt}],
+            "temperature": 0.3,
+            "max_tokens": 1200
         }
         
-        response = requests.post(url, headers=headers, json=payload, timeout=10)
+        response = requests.post(url, headers=headers, json=payload, timeout=12)
         if response.status_code == 200:
             return response.json()["choices"][0]["message"]["content"]
-    except:
-        return f"Case Update: {decision}\n\nRemarks: {officer_notes}"
+    except Exception as e:
+        return f"System Error: {str(e)}\n\nCase Update: {decision}\nRemarks: {officer_notes}"
     return "Drafting failed."
 
 def render_officer_panel(set_page_config: bool = True):
@@ -97,7 +117,7 @@ def render_officer_panel(set_page_config: bool = True):
                         <div class="complaint-card">
                             <span class="status-pill status-pending">PENDING</span>
                             <h4 style="margin: 5px 0;">{c.get('complaint_reason')}</h4>
-                            <p style="font-size: 0.8rem; opacity: 0.7;">ID: {tid}</p>
+                            <p style="font-size: 0.8rem; opacity: 0.7;">ID: {tid} | Citizen: {c.get('full_name', 'Anonymous')}</p>
                         </div>
                         """, unsafe_allow_html=True)
                     with col2:
@@ -110,16 +130,15 @@ def render_officer_panel(set_page_config: bool = True):
         c = complaints[tid]
         st.markdown("---")
         st.subheader(f"Manual Review: {tid}")
-        st.write(f"**Details:** {c.get('description')}")
         
         with st.form("action_form"):
             decision = st.selectbox("Decision:", ["Approve", "Solve", "Reject"])
-            notes = st.text_area("Internal Remarks:")
+            notes = st.text_area("Internal Remarks (Summarize for AI):")
             if st.form_submit_button("SUBMIT DECISION"):
                 decisions[tid] = {"officer_id": officer_id, "decision": decision, "notes": notes, "timestamp": datetime.now().isoformat()}
                 save_json(OFFICER_DECISIONS_FILE, decisions)
                 st.session_state.review_tid = None
-                st.success("Decision logged. Go to 'AI Automation' to notify the victim.")
+                st.success("Decision logged.")
                 st.rerun()
 
     with tab2:
@@ -130,7 +149,7 @@ def render_officer_panel(set_page_config: bool = True):
             <div class="complaint-card">
                 <span class="status-pill {cls}">{d['decision']}</span>
                 <h4 style="margin: 5px 0;">{c.get('complaint_reason', 'N/A')}</h4>
-                <p style="font-size: 0.8rem; opacity: 0.7;">ID: {tid} | Note: {d['notes']}</p>
+                <p style="font-size: 0.8rem; opacity: 0.7;">ID: {tid} | Citizen: {c.get('full_name', 'N/A')}</p>
             </div>
             """, unsafe_allow_html=True)
 
@@ -147,30 +166,27 @@ def render_officer_panel(set_page_config: bool = True):
                 d = decisions.get(selected_tid)
                 
                 st.markdown("---")
-                
-                # Email detection and override logic
                 db_email = c.get('email', '')
-                st.write(f"**Detected Email:** `{db_email if db_email else 'N/A'}`")
+                victim_email = st.text_input("Reciprocal Email:", value=db_email, placeholder="Enter email")
                 
-                victim_email = st.text_input("Reciprocal Email (Manual Entry/Override):", value=db_email, placeholder="Enter victim email if missing")
-                
-                if st.button("🪄 GENERATE AI DRAFT"):
-                    with st.spinner("AI is drafting response..."):
+                if st.button("🪄 GENERATE ENHANCED AI DRAFT"):
+                    with st.spinner("AI is synthesizing case data..."):
                         draft = draft_ai_email(c, d['decision'], d['notes'])
                         st.session_state.ai_draft = draft
                 
                 if st.session_state.get('ai_draft'):
-                    final_draft = st.text_area("Review AI Draft:", value=st.session_state.ai_draft, height=300)
+                    final_draft = st.text_area("Review Enhanced AI Draft:", value=st.session_state.ai_draft, height=400)
                     if st.button("📧 DISPATCH EMAIL TO VICTIM", type="primary"):
-                        if not victim_email or "@" not in victim_email:
-                            st.error("Please provide a valid recipient email.")
+                        if not victim_email:
+                            st.error("No recipient email provided.")
                         else:
-                            with st.spinner("Sending..."):
-                                if send_case_update_email(victim_email, selected_tid, d['decision'], final_draft):
-                                    st.success(f"Notification sent to {victim_email}")
+                            with st.spinner("Initializing secure SMTP dispatch..."):
+                                success, err_msg = send_case_update_email(victim_email, selected_tid, d['decision'], final_draft)
+                                if success:
+                                    st.success(f"Notification successfully dispatched to {victim_email}")
                                     st.session_state.ai_draft = None
                                 else:
-                                    st.error("Dispatch failed. Check SMTP settings.")
+                                    st.error(f"Dispatch Failed: {err_msg}")
 
 if __name__ == "__main__":
     render_officer_panel()

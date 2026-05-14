@@ -16,5 +16,12 @@
     "password": "Akif1234",
     "created_at": "2026-05-15T00:50:52.901020",
     "status": "active"
+  },
+  "CYBER2026HAMZAALI": {
+    "name": "Hamza Ali",
+    "email": "hamzatalwarali712@gmail.com",
+    "role": "Cyber Expert",
+    "password": "Lotus@30",
+    "created_at": "2026-05-15T02:44:59.208111"
   }
 }
