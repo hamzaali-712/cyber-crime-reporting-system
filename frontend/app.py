@@ -1,6 +1,6 @@
 """
 Cyber Crime Reporting System - Main Application
-Cloud-Stable Navigation & State Synchronization
+Stability & Navigation Fix
 """
 
 import streamlit as st
@@ -38,7 +38,11 @@ def initialize_session():
         st.session_state.officer_logged_in = False
 
 def navigate_to(page_name: str):
+    """Sets the page and handles the radio button synchronization."""
     st.session_state.current_page = page_name
+    # To force the radio button to update, we clear its state so 'index' takes priority
+    if 'nav_radio' in st.session_state:
+        del st.session_state['nav_radio']
     st.rerun()
 
 # ── Main ──
@@ -52,7 +56,7 @@ def main():
     with st.sidebar:
         st.markdown("### 🗺️ NAVIGATION")
         
-        # Navigation Map
+        # Define public pages
         pages = {
             "🏠 Home": "home",
             "📋 Report Crime": "report_form",
@@ -61,34 +65,27 @@ def main():
             "❓ Help Center": "help_support"
         }
         
-        all_accessible_pages = pages.copy()
+        # Determine accessible internal pages
         if st.session_state.current_page == "officer_login":
-            all_accessible_pages["🔐 Officer Login"] = "officer_login"
+            pages["🔐 Officer Login"] = "officer_login"
         elif st.session_state.current_page == "officer_panel":
-            all_accessible_pages["👮 Officer Panel"] = "officer_panel"
+            pages["👮 Officer Panel"] = "officer_panel"
             
-        page_labels = list(all_accessible_pages.keys())
-        page_values = list(all_accessible_pages.values())
+        page_labels = list(pages.keys())
+        page_values = list(pages.values())
         
-        # 🛡️ CLOUD STABILITY FIX: Synchronize Radio state with Session state
-        # If the page was changed by an external button, force the radio to match.
-        if 'nav_radio' in st.session_state:
-            current_radio_page = all_accessible_pages.get(st.session_state.nav_radio)
-            if current_radio_page != st.session_state.current_page:
-                for label, val in all_accessible_pages.items():
-                    if val == st.session_state.current_page:
-                        st.session_state.nav_radio = label
-                        break
-        
+        # Calculate current index
         try:
             current_idx = page_values.index(st.session_state.current_page)
         except ValueError:
             current_idx = 0
             
+        # Use radio WITHOUT 'key' for state management to avoid sync loops
+        # Or use 'key' but handle it carefully
         selected_label = st.radio("Access Node:", page_labels, index=current_idx, key="nav_radio")
-        selected_page = all_accessible_pages[selected_label]
+        selected_page = pages[selected_label]
         
-        # Standard Navigation
+        # Update page if radio changed
         if selected_page != st.session_state.current_page:
             st.session_state.current_page = selected_page
             st.rerun()
