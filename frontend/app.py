@@ -1,6 +1,6 @@
 """
 Cyber Crime Reporting System - Main Application
-Callback-Based Stable Navigation
+Clean Stable Navigation (Dynamic Key Strategy)
 """
 
 import streamlit as st
@@ -31,21 +31,6 @@ def load_css():
             st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
 
 # ── Session management ────────────────────────────────────────────────────────
-def on_nav_change():
-    """Callback for radio button to handle page transitions safely."""
-    label = st.session_state.nav_radio
-    # We need a static mapping that works during the callback
-    mapping = {
-        "🏠 Home": "home",
-        "📋 Report Crime": "report_form",
-        "📍 Track Status": "tracking",
-        "📚 Legal Guide": "law_guide",
-        "❓ Help Center": "help_support",
-        "🔐 Officer Login": "officer_login",
-        "👮 Officer Panel": "officer_panel"
-    }
-    st.session_state.current_page = mapping.get(label, "home")
-
 def initialize_session():
     if 'current_page' not in st.session_state:
         st.session_state.current_page = 'home'
@@ -53,19 +38,8 @@ def initialize_session():
         st.session_state.officer_logged_in = False
 
 def navigate_to(page_name: str):
-    """Programmatic navigation."""
+    """Simple, clean navigation using session state."""
     st.session_state.current_page = page_name
-    # Update the radio button label to match the new page
-    mapping_rev = {
-        "home": "🏠 Home",
-        "report_form": "📋 Report Crime",
-        "tracking": "📍 Track Status",
-        "law_guide": "📚 Legal Guide",
-        "help_support": "❓ Help Center",
-        "officer_login": "🔐 Officer Login",
-        "officer_panel": "👮 Officer Panel"
-    }
-    st.session_state.nav_radio = mapping_rev.get(page_name, "🏠 Home")
     st.rerun()
 
 # ── Main ──
@@ -80,43 +54,39 @@ def main():
         st.markdown("### 🗺️ NAVIGATION")
         
         # Base pages
-        options = ["🏠 Home", "📋 Report Crime", "📍 Track Status", "📚 Legal Guide", "❓ Help Center"]
-        
-        # Dynamically append internal pages to the radio options ONLY IF we are on them
-        # This keeps the radio index stable for the visible options
-        if st.session_state.current_page == "officer_login":
-            options.append("🔐 Officer Login")
-        elif st.session_state.current_page == "officer_panel":
-            options.append("👮 Officer Panel")
-            
-        mapping_rev = {
-            "home": "🏠 Home",
-            "report_form": "📋 Report Crime",
-            "tracking": "📍 Track Status",
-            "law_guide": "📚 Legal Guide",
-            "help_support": "❓ Help Center",
-            "officer_login": "🔐 Officer Login",
-            "officer_panel": "👮 Officer Panel"
+        pages = {
+            "🏠 Home": "home",
+            "📋 Report Crime": "report_form",
+            "📍 Track Status": "tracking",
+            "📚 Legal Guide": "law_guide",
+            "❓ Help Center": "help_support"
         }
         
-        # Ensure the radio value in session state matches current_page before rendering
-        target_label = mapping_rev.get(st.session_state.current_page, "🏠 Home")
-        if st.session_state.get('nav_radio') != target_label:
-            st.session_state.nav_radio = target_label
-
-        # Use index calculation for the first run, but rely on on_change for user interaction
+        # Add dynamic officer options
+        if st.session_state.current_page == "officer_login":
+            pages["🔐 Officer Login"] = "officer_login"
+        elif st.session_state.current_page == "officer_panel":
+            pages["👮 Officer Panel"] = "officer_panel"
+            
+        page_labels = list(pages.keys())
+        page_values = list(pages.values())
+        
         try:
-            current_idx = options.index(target_label)
-        except:
+            current_idx = page_values.index(st.session_state.current_page)
+        except ValueError:
             current_idx = 0
-
-        st.radio(
-            "Access Node:", 
-            options, 
-            index=current_idx, 
-            key="nav_radio", 
-            on_change=on_nav_change
-        )
+            
+        # 🔑 STABILITY FIX: Dynamic Key Strategy
+        # By including current_page in the key, we force Streamlit to refresh the radio
+        # when the page changes via a button, ensuring the 'index' is always applied.
+        radio_key = f"nav_radio_{st.session_state.current_page}"
+        selected_label = st.radio("Access Node:", page_labels, index=current_idx, key=radio_key)
+        selected_page = pages[selected_label]
+        
+        # Handle User Interaction via Radio
+        if selected_page != st.session_state.current_page:
+            st.session_state.current_page = selected_page
+            st.rerun()
 
         st.markdown("---")
         if not st.session_state.get('officer_logged_in'):
@@ -168,6 +138,7 @@ def show_home_page():
     c2.metric("COMPLIANCE", "PECA 2016")
     c3.metric("UPTIME", "100%")
     st.markdown("---")
+    st.info("💡 Use the sidebar to initiate a report or track your existing case status.")
     if st.button("START COMPLAINT FORM", type="primary", use_container_width=True):
         navigate_to("report_form")
 
