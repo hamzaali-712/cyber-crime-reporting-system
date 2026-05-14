@@ -14,12 +14,10 @@ import logging
 from datetime import datetime
 import uuid
 
-# Ensure local frontend package imports work regardless of execution directory
-APP_DIR = pathlib.Path(__file__).resolve().parent
-if str(APP_DIR) not in sys.path:
-    sys.path.insert(0, str(APP_DIR))
-if str(APP_DIR / "views") not in sys.path:
-    sys.path.insert(0, str(APP_DIR / "views"))
+# Ensure project root is in sys.path for absolute imports
+ROOT_DIR = pathlib.Path(__file__).resolve().parent.parent
+if str(ROOT_DIR) not in sys.path:
+    sys.path.insert(0, str(ROOT_DIR))
 
 # Load environment variables
 load_dotenv()
@@ -193,22 +191,22 @@ def main():
         if st.session_state.current_page == "home":
             show_home_page()
         elif st.session_state.current_page == "report_form":
-            from views.report_form import render_report_form
+            from frontend.views.report_form import render_report_form
             render_report_form(set_page_config=False)
         elif st.session_state.current_page == "tracking":
-            from views.tracking import render_tracking_page
+            from frontend.views.tracking import render_tracking_page
             render_tracking_page(set_page_config=False)
         elif st.session_state.current_page == "law_guide":
-            from views.law_guide import render_law_guide_page
+            from frontend.views.law_guide import render_law_guide_page
             render_law_guide_page()
         elif st.session_state.current_page == "help_support":
-            from views.help import render_help_page
+            from frontend.views.help import render_help_page
             render_help_page()
         elif st.session_state.current_page == "officer_login":
-            from views.officer_login import render_officer_login
+            from frontend.views.officer_login import render_officer_login
             render_officer_login(set_page_config=False)
         elif st.session_state.current_page == "officer_panel":
-            from views.officer_panel import render_officer_panel
+            from frontend.views.officer_panel import render_officer_panel
             render_officer_panel(set_page_config=False)
 
         # Footer

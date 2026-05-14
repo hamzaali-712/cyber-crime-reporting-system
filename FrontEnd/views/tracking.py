@@ -10,13 +10,13 @@ import os
 import sys
 from pathlib import Path
 
-BASE_DIR = Path(__file__).resolve().parent.parent
-if str(BASE_DIR) not in sys.path:
-    sys.path.insert(0, str(BASE_DIR))
+ROOT_DIR = Path(__file__).resolve().parent.parent.parent
+if str(ROOT_DIR) not in sys.path:
+    sys.path.insert(0, str(ROOT_DIR))
 
 # Database files
-COMPLAINTS_FILE = BASE_DIR / "backend" / "data" / "complaints.json"
-DECISIONS_FILE = BASE_DIR / "backend" / "data" / "officer_decisions.json"
+COMPLAINTS_FILE = ROOT_DIR / "backend" / "data" / "complaints.json"
+DECISIONS_FILE = ROOT_DIR / "backend" / "data" / "officer_decisions.json"
 
 def load_complaints():
     """Load complaints database."""

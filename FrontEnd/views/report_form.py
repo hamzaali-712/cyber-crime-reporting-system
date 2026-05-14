@@ -13,9 +13,9 @@ import uuid
 import json
 
 # Ensure local path imports work regardless of run directory
-BASE_DIR = Path(__file__).resolve().parent.parent
-if str(BASE_DIR) not in sys.path:
-    sys.path.insert(0, str(BASE_DIR))
+ROOT_DIR = Path(__file__).resolve().parent.parent.parent
+if str(ROOT_DIR) not in sys.path:
+    sys.path.insert(0, str(ROOT_DIR))
 
 # Load environment variables
 load_dotenv()
@@ -32,7 +32,7 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 # Database file
-COMPLAINTS_FILE = BASE_DIR / "backend" / "data" / "complaints.json"
+COMPLAINTS_FILE = ROOT_DIR / "backend" / "data" / "complaints.json"
 
 def load_complaints():
     """Load complaints database."""

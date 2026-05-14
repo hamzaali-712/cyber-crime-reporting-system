@@ -10,12 +10,12 @@ from pathlib import Path
 from datetime import datetime
 
 # Ensure local frontend imports work properly
-BASE_DIR = Path(__file__).resolve().parent.parent
-if str(BASE_DIR) not in sys.path:
-    sys.path.insert(0, str(BASE_DIR))
+ROOT_DIR = Path(__file__).resolve().parent.parent.parent
+if str(ROOT_DIR) not in sys.path:
+    sys.path.insert(0, str(ROOT_DIR))
 
 # Officer database file
-OFFICERS_FILE = BASE_DIR / "backend" / "data" / "officers.json"
+OFFICERS_FILE = ROOT_DIR / "backend" / "data" / "officers.json"
 
 def load_officers():
     """Load officers database."""
