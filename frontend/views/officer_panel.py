@@ -1,21 +1,18 @@
 """
 Officer Panel - Case Management Dashboard
-Includes AI Automation and Evidence Review.
+Includes Robust Evidence Discovery.
 """
 
 import streamlit as st
 import json
 import os
 import sys
-import requests
 from pathlib import Path
 from datetime import datetime
 
 ROOT_DIR = Path(__file__).resolve().parent.parent.parent
 if str(ROOT_DIR) not in sys.path:
     sys.path.insert(0, str(ROOT_DIR))
-
-from backend.utils.email_service import send_case_update_email
 
 # Database files
 COMPLAINTS_FILE = ROOT_DIR / "backend" / "data" / "complaints.json"
@@ -36,18 +33,12 @@ def save_json(file_path, data):
     with open(file_path, 'w') as f:
         json.dump(data, f, indent=2, default=str)
 
-def draft_ai_email(c, decision, officer_notes):
-    """AI drafting for victim updates."""
-    try:
-        api_key = os.getenv("GROQ_API_KEY")
-        url = "https://api.groq.com/openai/v1/chat/completions"
-        headers = {"Authorization": f"Bearer {api_key}", "Content-Type": "application/json"}
-        prompt = f"Draft official email for case {c.get('tracking_id')}. Type: {c.get('complaint_reason')}. Decision: {decision}. Notes: {officer_notes}."
-        payload = {"model": "llama-3.1-8b-instant", "messages": [{"role": "user", "content": prompt}]}
-        res = requests.post(url, headers=headers, json=payload, timeout=10)
-        return res.json()["choices"][0]["message"]["content"]
-    except:
-        return f"Case Update: {decision}\n\nRemarks: {officer_notes}"
+def get_actual_evidence_files(tracking_id):
+    """Scans the physical directory for evidence files to ensure 100% accuracy."""
+    case_dir = EVIDENCE_BASE_DIR / tracking_id
+    if case_dir.exists() and case_dir.is_dir():
+        return [f for f in os.listdir(case_dir) if os.path.isfile(case_dir / f)]
+    return []
 
 def render_officer_panel(set_page_config: bool = True):
     if set_page_config:
@@ -73,59 +64,56 @@ def render_officer_panel(set_page_config: bool = True):
             with st.container():
                 col1, col2 = st.columns([4, 1])
                 with col1:
-                    st.markdown(f"""<div class="complaint-card"><span class="status-pill status-pending">PENDING</span>
-                    <h4 style="margin:5px 0;">{c.get('complaint_reason')}</h4><p>ID: {tid}</p></div>""", unsafe_allow_html=True)
+                    st.markdown(f'<div class="complaint-card"><h4 style="margin:5px 0;">{c.get("complaint_reason")}</h4><p>ID: {tid}</p></div>', unsafe_allow_html=True)
                 with col2:
                     if st.button("REVIEW", key=f"rev_{tid}"):
                         st.session_state.review_tid = tid
                         st.rerun()
 
-    # Case Dossier Review
     if st.session_state.get('review_tid'):
         tid = st.session_state.review_tid
         c = complaints[tid]
         st.markdown("---")
         st.subheader(f"🔍 CASE DOSSIER: {tid}")
         
-        # Details Columns
+        # Details
         c1, c2 = st.columns(2)
         with c1:
-            st.markdown("#### 👤 Citizen Data")
+            st.markdown("#### 👤 Citizen Information")
             st.write(f"**Name:** {c.get('full_name')}")
             st.write(f"**CNIC:** {c.get('cnic')}")
-            st.write(f"**Address:** {c.get('address')}")
         with c2:
             st.markdown("#### 🛰️ Incident Info")
-            st.write(f"**Type:** {c.get('complaint_reason')}")
-            st.write(f"**Location:** {c.get('location')}")
-            st.write(f"**Date:** {c.get('incident_date')}")
+            st.write(f"**Crime Type:** {c.get('complaint_reason')}")
+            st.write(f"**Submission Date:** {c.get('submitted_at')}")
 
         st.markdown("#### 📄 Description")
         st.info(c.get('description'))
 
-        # ── Evidence Section ──
+        # ── Robust Evidence Section ──
         st.markdown("#### 📁 EVIDENCE REPOSITORY")
-        evidence_files = c.get('evidence_files', [])
-        if not evidence_files:
-            st.warning("No physical evidence attached to this case.")
+        
+        # Scan filesystem directly instead of relying on JSON metadata
+        physical_files = get_actual_evidence_files(tid)
+        
+        if not physical_files:
+            st.warning("No physical evidence detected in the secure repository for this case.")
+            st.info("If you just uploaded evidence, please ensure the submission completed successfully.")
         else:
-            cols = st.columns(len(evidence_files) if len(evidence_files) < 4 else 4)
-            for i, fname in enumerate(evidence_files):
+            st.success(f"Detected {len(physical_files)} evidence files.")
+            cols = st.columns(min(len(physical_files), 4))
+            for i, fname in enumerate(physical_files):
                 with cols[i % 4]:
                     fpath = EVIDENCE_BASE_DIR / tid / fname
-                    if fpath.exists():
-                        with open(fpath, "rb") as f:
-                            btn = st.download_button(
-                                label=f"📥 {fname[:15]}...",
-                                data=f,
-                                file_name=fname,
-                                key=f"dl_{tid}_{i}"
-                            )
-                        # Preview images
-                        if fname.lower().endswith(('.png', '.jpg', '.jpeg')):
-                            st.image(str(fpath), use_container_width=True)
-                    else:
-                        st.error("File missing on server.")
+                    with open(fpath, "rb") as f:
+                        st.download_button(
+                            label=f"📥 {fname}",
+                            data=f,
+                            file_name=fname,
+                            key=f"robust_dl_{tid}_{i}"
+                        )
+                    if fname.lower().endswith(('.png', '.jpg', '.jpeg')):
+                        st.image(str(fpath), use_container_width=True)
 
         with st.form("action_form"):
             st.markdown("#### ⚡ Operational Decision")
@@ -135,7 +123,6 @@ def render_officer_panel(set_page_config: bool = True):
                 decisions[tid] = {"officer_id": officer_id, "decision": decision, "notes": notes, "timestamp": datetime.now().isoformat()}
                 save_json(OFFICER_DECISIONS_FILE, decisions)
                 st.session_state.review_tid = None
-                st.success("Decision Logged.")
                 st.rerun()
             if st.form_submit_button("CLOSE", use_container_width=True):
                 st.session_state.review_tid = None
@@ -145,26 +132,6 @@ def render_officer_panel(set_page_config: bool = True):
         for tid, d in decisions.items():
             c = complaints.get(tid, {})
             st.markdown(f'<div class="complaint-card"><h4 style="margin:5px 0;">{c.get("complaint_reason")}</h4><p>ID: {tid}</p></div>', unsafe_allow_html=True)
-
-    with tab3:
-        st.subheader("🤖 AI AUTOMATION CENTER")
-        # (Same as before but simplified for readability)
-        tids = list(decisions.keys())
-        if tids:
-            sel_tid = st.selectbox("Select Case:", tids)
-            if sel_tid:
-                c = complaints.get(sel_tid)
-                d = decisions.get(sel_tid)
-                if st.button("🪄 DRAFT AI UPDATE"):
-                    st.session_state.ai_draft = draft_ai_email(c, d['decision'], d['notes'])
-                if st.session_state.get('ai_draft'):
-                    final = st.text_area("Draft:", value=st.session_state.ai_draft, height=300)
-                    if st.button("📧 DISPATCH"):
-                        email = c.get('email') or st.text_input("Enter Email:")
-                        if email:
-                            success, msg = send_case_update_email(email, sel_tid, d['decision'], final)
-                            if success: st.success("Sent."); st.session_state.ai_draft = None
-                            else: st.error(f"Failed: {msg}")
 
 if __name__ == "__main__":
     render_officer_panel()
