@@ -14,7 +14,7 @@ ROOT_DIR = Path(__file__).resolve().parent.parent.parent
 if str(ROOT_DIR) not in sys.path:
     sys.path.insert(0, str(ROOT_DIR))
 
-from frontend.views.officer_login import is_officer_logged_in, get_current_officer_id, logout_officer
+from views.officer_login import is_officer_logged_in, get_current_officer_id, logout_officer
 
 # Database file for complaints
 COMPLAINTS_FILE = ROOT_DIR / "backend" / "data" / "complaints.json"

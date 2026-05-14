@@ -1,1 +1,19 @@
-{}
+{
+  "CCRS-PK-2026-0FAB2DBF": {
+    "tracking_id": "CCRS-PK-2026-0FAB2DBF",
+    "full_name": null,
+    "phone": null,
+    "cnic": null,
+    "address": null,
+    "anonymous": true,
+    "incident_date": "2026-05-15",
+    "location": "johar toen",
+    "complaint_reason": "Online Harassment",
+    "description": "test..............................................................",
+    "evidence_count": 1,
+    "submitted_at": "2026-05-15T00:47:45.589888",
+    "status": "solved",
+    "officer_decision": "Solve - Case Solved Successfully",
+    "decided_by": "CYBER2026AKIFNAVEED"
+  }
+}
