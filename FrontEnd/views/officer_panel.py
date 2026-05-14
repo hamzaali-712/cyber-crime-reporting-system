@@ -14,7 +14,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 if str(BASE_DIR / "frontend") not in sys.path:
     sys.path.insert(0, str(BASE_DIR / "frontend"))
 
-from pages.officer_login import is_officer_logged_in, get_current_officer_id, logout_officer
+from views.officer_login import is_officer_logged_in, get_current_officer_id, logout_officer
 
 # Database file for complaints
 COMPLAINTS_FILE = BASE_DIR / "backend" / "data" / "complaints.json"
