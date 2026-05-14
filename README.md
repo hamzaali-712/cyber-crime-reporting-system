@@ -99,6 +99,12 @@ cyber-crime-reporting-system/
    uvicorn backend.api.main:app --reload
    ```
 
+> Note: The Streamlit app entrypoint is `frontend/app.py`. This is the correct file path for local development and Streamlit Cloud deployment.
+
+## Documentation
+
+Detailed system diagrams and workflow diagrams are available in `docs/diagrams.md`.
+
 ## Development Workflow
 
 - Follow GitHub Professional Workflow

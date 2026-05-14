@@ -7,10 +7,16 @@ Page for tracking complaint status.
 import streamlit as st
 import json
 import os
+import sys
+from pathlib import Path
+
+BASE_DIR = Path(__file__).resolve().parent.parent
+if str(BASE_DIR / "frontend") not in sys.path:
+    sys.path.insert(0, str(BASE_DIR / "frontend"))
 
 # Database files
-COMPLAINTS_FILE = "backend/data/complaints.json"
-DECISIONS_FILE = "backend/data/officer_decisions.json"
+COMPLAINTS_FILE = BASE_DIR / "backend" / "data" / "complaints.json"
+DECISIONS_FILE = BASE_DIR / "backend" / "data" / "officer_decisions.json"
 
 def load_complaints():
     """Load complaints database."""

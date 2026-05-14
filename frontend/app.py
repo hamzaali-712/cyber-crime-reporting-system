@@ -7,10 +7,19 @@ Government-grade security with privacy-by-design principles.
 
 import streamlit as st
 import os
+import sys
+import pathlib
 from dotenv import load_dotenv
 import logging
 from datetime import datetime
 import uuid
+
+# Ensure local frontend package imports work regardless of execution directory
+APP_DIR = pathlib.Path(__file__).resolve().parent
+if str(APP_DIR) not in sys.path:
+    sys.path.insert(0, str(APP_DIR))
+if str(APP_DIR / "pages") not in sys.path:
+    sys.path.insert(0, str(APP_DIR / "pages"))
 
 # Load environment variables
 load_dotenv()
@@ -103,10 +112,20 @@ def initialize_session():
         st.session_state.current_page = 'home'
 
 
+def rerun_page():
+    """Rerun the Streamlit app using the available rerun API."""
+    if hasattr(st, "experimental_rerun"):
+        st.experimental_rerun()
+    elif hasattr(st, "rerun"):
+        st.rerun()
+    else:
+        raise RuntimeError("Streamlit rerun is unavailable. Please upgrade Streamlit.")
+
+
 def navigate_to(page_name: str):
     """Navigate to a specific page within the app."""
     st.session_state.current_page = page_name
-    st.experimental_rerun()
+    rerun_page()
 
 # Main application
 def main():
@@ -188,6 +207,9 @@ def main():
         elif st.session_state.current_page == "officer_login":
             from pages.officer_login import render_officer_login
             render_officer_login(set_page_config=False)
+        elif st.session_state.current_page == "officer_panel":
+            from pages.officer_panel import render_officer_panel
+            render_officer_panel(set_page_config=False)
 
         # Footer
         st.markdown("""

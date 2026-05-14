@@ -56,6 +56,7 @@
 ├─ docs/api/                   ← API documentation
 ├─ docs/architecture/          ← System architecture
 ├─ docs/guides/                ← User guides
+├─ docs/diagrams.md            ← System diagrams and workflows
 └─ deployment/                 ← Deployment guides
 ```
 
