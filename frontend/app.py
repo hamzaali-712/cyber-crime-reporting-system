@@ -1,6 +1,6 @@
 """
 Cyber Crime Reporting System - Main Application
-Advanced Routing & Stability Fix
+Cloud-Stable Navigation & State Synchronization
 """
 
 import streamlit as st
@@ -8,7 +8,6 @@ import os
 import sys
 import pathlib
 from dotenv import load_dotenv
-import logging
 from datetime import datetime
 
 # ── Path setup ────────────────────────────────────────────────────────────────
@@ -19,15 +18,10 @@ for _p in (str(ROOT_DIR), str(FRONTEND_DIR)):
     if _p not in sys.path:
         sys.path.insert(0, _p)
 
-# ── Environment & logging ─────────────────────────────────────────────────────
 load_dotenv()
 
 # ── Page config ───────────────────────────────────────────────────────────────
-st.set_page_config(
-    page_title="Cyber Portal PK",
-    page_icon="🛡️",
-    layout="wide"
-)
+st.set_page_config(page_title="Cyber Portal PK", page_icon="🛡️", layout="wide")
 
 # ── Custom CSS Loader ─────────────────────────────────────────────────────────
 def load_css():
@@ -52,19 +46,13 @@ def main():
     initialize_session()
     load_css()
 
-    # ── Header ──
-    st.markdown("""
-    <div class="main-header">
-        <h1>🛡️ CYBER CRIME PORTAL</h1>
-        <p>Government of Pakistan - Law Enforcement Access</p>
-    </div>
-    """, unsafe_allow_html=True)
+    st.markdown("""<div class="main-header"><h1>🛡️ CYBER CRIME PORTAL</h1><p>Government of Pakistan - Law Enforcement Access</p></div>""", unsafe_allow_html=True)
 
     # ── Sidebar ──
     with st.sidebar:
         st.markdown("### 🗺️ NAVIGATION")
         
-        # Define base public pages
+        # Navigation Map
         pages = {
             "🏠 Home": "home",
             "📋 Report Crime": "report_form",
@@ -73,17 +61,24 @@ def main():
             "❓ Help Center": "help_support"
         }
         
-        # Add internal pages to the map if they are the current page
-        # This prevents the radio from resetting when we are on a "non-radio" page
         all_accessible_pages = pages.copy()
         if st.session_state.current_page == "officer_login":
             all_accessible_pages["🔐 Officer Login"] = "officer_login"
         elif st.session_state.current_page == "officer_panel":
             all_accessible_pages["👮 Officer Panel"] = "officer_panel"
             
-        # Determine the radio index based on current page
         page_labels = list(all_accessible_pages.keys())
         page_values = list(all_accessible_pages.values())
+        
+        # 🛡️ CLOUD STABILITY FIX: Synchronize Radio state with Session state
+        # If the page was changed by an external button, force the radio to match.
+        if 'nav_radio' in st.session_state:
+            current_radio_page = all_accessible_pages.get(st.session_state.nav_radio)
+            if current_radio_page != st.session_state.current_page:
+                for label, val in all_accessible_pages.items():
+                    if val == st.session_state.current_page:
+                        st.session_state.nav_radio = label
+                        break
         
         try:
             current_idx = page_values.index(st.session_state.current_page)
@@ -93,7 +88,7 @@ def main():
         selected_label = st.radio("Access Node:", page_labels, index=current_idx, key="nav_radio")
         selected_page = all_accessible_pages[selected_label]
         
-        # Navigation logic
+        # Standard Navigation
         if selected_page != st.session_state.current_page:
             st.session_state.current_page = selected_page
             st.rerun()
@@ -113,7 +108,6 @@ def main():
 
     # ── Page Routing ──
     current = st.session_state.current_page
-
     if current == "home":
         show_home_page()
     elif current == "report_form":
@@ -148,7 +142,6 @@ def show_home_page():
     c1.metric("NETWORK", "SECURE")
     c2.metric("COMPLIANCE", "PECA 2016")
     c3.metric("UPTIME", "100%")
-    
     st.markdown("---")
     st.info("💡 Use the sidebar to initiate a report or track your existing case status.")
     if st.button("START COMPLAINT FORM", type="primary", use_container_width=True):
