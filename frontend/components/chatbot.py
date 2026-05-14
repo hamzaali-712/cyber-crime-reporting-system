@@ -45,14 +45,15 @@ def render_chatbot():
                 
                 system_prompt = "You are a professional Cybercrime Assistant for the Pakistan NCIA. Provide clear guidance on laws (PECA 2016) and reporting procedures."
                 
+                # Using the latest Llama 3.3 model for high performance
                 payload = {
-                    "model": "llama3-8b-8192",
+                    "model": "llama-3.3-70b-versatile",
                     "messages": [
                         {"role": "system", "content": system_prompt},
                         *[{"role": m["role"], "content": m["content"]} for m in st.session_state.messages]
                     ],
                     "temperature": 0.5,
-                    "max_tokens": 512
+                    "max_tokens": 1024
                 }
                 
                 response = requests.post(url, headers=headers, data=json.dumps(payload), timeout=15)
@@ -63,7 +64,17 @@ def render_chatbot():
                     st.markdown(msg)
                     st.session_state.messages.append({"role": "assistant", "content": msg})
                 else:
-                    st.error(f"API Error ({response.status_code}): {response.text}")
+                    # If 3.3 is too busy/heavy, fallback to 3.1 8b instant
+                    st.warning("Switching to lightweight model...")
+                    payload["model"] = "llama-3.1-8b-instant"
+                    response = requests.post(url, headers=headers, data=json.dumps(payload), timeout=15)
+                    if response.status_code == 200:
+                        data = response.json()
+                        msg = data["choices"][0]["message"]["content"]
+                        st.markdown(msg)
+                        st.session_state.messages.append({"role": "assistant", "content": msg})
+                    else:
+                        st.error(f"API Error ({response.status_code}): {response.text}")
                 
             except Exception as e:
                 st.error(f"System Error: {str(e)}")
