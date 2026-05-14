@@ -14,8 +14,8 @@ import json
 
 # Ensure local path imports work regardless of run directory
 BASE_DIR = Path(__file__).resolve().parent.parent
-if str(BASE_DIR / "frontend") not in sys.path:
-    sys.path.insert(0, str(BASE_DIR / "frontend"))
+if str(BASE_DIR) not in sys.path:
+    sys.path.insert(0, str(BASE_DIR))
 
 # Load environment variables
 load_dotenv()

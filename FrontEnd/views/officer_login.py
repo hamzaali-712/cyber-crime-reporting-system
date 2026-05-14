@@ -11,8 +11,8 @@ from datetime import datetime
 
 # Ensure local frontend imports work properly
 BASE_DIR = Path(__file__).resolve().parent.parent
-if str(BASE_DIR / "frontend") not in sys.path:
-    sys.path.insert(0, str(BASE_DIR / "frontend"))
+if str(BASE_DIR) not in sys.path:
+    sys.path.insert(0, str(BASE_DIR))
 
 # Officer database file
 OFFICERS_FILE = BASE_DIR / "backend" / "data" / "officers.json"
