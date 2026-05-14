@@ -178,6 +178,10 @@ def show_home_page():
 # ── Main application ──────────────────────────────────────────────────────────
 def main():
     """Main application entry point."""
+    # Defensive: re-insert paths in case Streamlit rerun cleared them
+    for _p in [str(ROOT_DIR), str(FRONTEND_DIR)]:
+        if _p not in sys.path:
+            sys.path.insert(0, _p)
     try:
         initialize_session()
         load_css()
@@ -278,6 +282,8 @@ def main():
         st.error(f"Error details: {str(e)}")
         import traceback
         st.code(traceback.format_exc(), language="python")
+        with st.expander("🔍 Debug: sys.path"):
+            st.code("\n".join(sys.path))
 
 
 if __name__ == "__main__":
