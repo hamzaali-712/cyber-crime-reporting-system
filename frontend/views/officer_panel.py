@@ -1,5 +1,5 @@
 """
-Officer Panel - Case Management Dashboard
+Officer Panel - Operational Dashboard
 """
 
 import streamlit as st
@@ -35,27 +35,27 @@ def save_json(file_path, data):
 
 def render_officer_panel(set_page_config: bool = True):
     if set_page_config:
-        st.set_page_config(page_title="Officer Dashboard", page_icon="👮", layout="wide")
+        try:
+            st.set_page_config(page_title="Officer Dashboard", page_icon="👮", layout="wide")
+        except:
+            pass # Already set by app.py
     
     if not st.session_state.get('officer_logged_in'):
-        st.error("❌ UNAUTHORIZED ACCESS.")
-        if st.button("GO TO LOGIN"):
-            st.session_state.current_page = "officer_login"
-            st.rerun()
+        st.error("❌ ACCESS DENIED.")
         return
     
-    officer_id = st.session_state.officer_id
-    st.markdown(f"### 👮 COMMAND CENTER | ID: `{officer_id}`")
-    
-    tab1, tab2, tab3 = st.tabs(["📥 PENDING", "✅ PROCESSED", "📊 ANALYTICS"])
+    officer_id = st.session_state.get('officer_id')
+    st.markdown(f"### 👮 OFFICER DASHBOARD | `{officer_id}`")
     
     complaints = load_json(COMPLAINTS_FILE)
     decisions = load_json(OFFICER_DECISIONS_FILE)
-
+    
+    tab1, tab2 = st.tabs(["📥 QUEUE", "✅ PROCESSED"])
+    
     with tab1:
         pending = [tid for tid in complaints if tid not in decisions]
         if not pending:
-            st.info("No pending cases.")
+            st.info("Queue clear.")
         else:
             for tid in pending:
                 c = complaints[tid]
@@ -65,35 +65,26 @@ def render_officer_panel(set_page_config: bool = True):
                         st.markdown(f"""
                         <div class="complaint-card">
                             <span class="status-pill status-pending">PENDING</span>
-                            <h4 style="margin: 10px 0;">{c.get('complaint_reason')}</h4>
-                            <p style="font-size: 0.85rem; opacity: 0.8;">ID: {tid} | Date: {c.get('incident_date')}</p>
+                            <h4 style="margin: 5px 0;">{c.get('complaint_reason')}</h4>
+                            <p style="font-size: 0.8rem; opacity: 0.7;">ID: {tid}</p>
                         </div>
                         """, unsafe_allow_html=True)
                     with col2:
-                        st.write("")
-                        if st.button("REVIEW", key=f"rev_{tid}", use_container_width=True):
-                            st.session_state.selected_case = tid
+                        if st.button("REVIEW", key=f"rev_{tid}"):
+                            st.session_state.review_tid = tid
                             st.rerun()
 
-    if st.session_state.get('selected_case'):
-        tid = st.session_state.selected_case
+    if st.session_state.get('review_tid'):
+        tid = st.session_state.review_tid
         c = complaints[tid]
         st.markdown("---")
         st.subheader(f"Case Review: {tid}")
+        st.info(c.get('description'))
         
-        with st.expander("📄 VIEW FULL DETAILS", expanded=True):
-            st.write(f"**Type:** {c.get('complaint_reason')}")
-            st.write(f"**Description:** {c.get('description')}")
-            st.write(f"**Email:** {c.get('email', 'N/A')}")
-        
-        # Decision Form
-        with st.form("decision_form"):
-            decision = st.selectbox("Action:", ["Approve", "Solve", "Reject"])
-            notes = st.text_area("Officer Remarks:", placeholder="Details for the citizen...")
-            
-            sub_col, can_col = st.columns(2)
-            if sub_col.form_submit_button("SUBMIT & NOTIFY", use_container_width=True):
-                # Update records
+        with st.form("action_form"):
+            decision = st.selectbox("Decision:", ["Approve", "Solve", "Reject"])
+            notes = st.text_area("Remarks:")
+            if st.form_submit_button("SUBMIT DECISION"):
                 decisions[tid] = {
                     "officer_id": officer_id,
                     "decision": decision,
@@ -102,42 +93,29 @@ def render_officer_panel(set_page_config: bool = True):
                 }
                 save_json(OFFICER_DECISIONS_FILE, decisions)
                 
-                # Email notification
-                user_email = c.get('email')
-                if user_email:
-                    with st.spinner("Dispatching Notification..."):
-                        success = send_case_update_email(user_email, tid, decision, notes)
-                        if success:
-                            st.success("Notification sent.")
-                        else:
-                            st.error("Email dispatch failed. Check SMTP settings.")
+                # Email
+                email = c.get('email')
+                if email:
+                    send_case_update_email(email, tid, decision, notes)
                 
-                st.session_state.selected_case = None
+                st.session_state.review_tid = None
+                st.success("Decision logged.")
                 st.rerun()
-            
-            if can_col.form_submit_button("CLOSE", use_container_width=True):
-                st.session_state.selected_case = None
+            if st.form_submit_button("CLOSE"):
+                st.session_state.review_tid = None
                 st.rerun()
 
     with tab2:
-        processed = [tid for tid in decisions]
-        for tid in processed:
-            d = decisions[tid]
+        for tid, d in decisions.items():
             c = complaints.get(tid, {})
-            status_cls = f"status-{d['decision'].lower()}"
+            cls = f"status-{d['decision'].lower()}"
             st.markdown(f"""
             <div class="complaint-card">
-                <span class="status-pill {status_cls}">{d['decision']}</span>
-                <h4 style="margin: 10px 0;">{c.get('complaint_reason', 'N/A')}</h4>
-                <p style="font-size: 0.85rem; opacity: 0.8;">ID: {tid} | Processed by: {d['officer_id']}</p>
-                <p style="font-style: italic; font-size: 0.8rem;">Note: {d['notes']}</p>
+                <span class="status-pill {cls}">{d['decision']}</span>
+                <h4 style="margin: 5px 0;">{c.get('complaint_reason', 'N/A')}</h4>
+                <p style="font-size: 0.8rem; opacity: 0.7;">ID: {tid}</p>
             </div>
             """, unsafe_allow_html=True)
-
-    with tab3:
-        st.metric("TOTAL REPORTS", len(complaints))
-        st.metric("RESOLVED", len(processed))
-        st.progress(len(processed)/len(complaints) if complaints else 0)
 
 if __name__ == "__main__":
     render_officer_panel()
