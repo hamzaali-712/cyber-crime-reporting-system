@@ -104,8 +104,17 @@ def render_officer_panel(set_page_config: bool = True):
                 with st.container():
                     col1, col2 = st.columns([4, 1])
                     with col1:
-                        st.markdown(f"""<div class="complaint-card"><span class="status-pill status-pending">PENDING</span>
-                        <h4 style="margin:5px 0;">{c.get('complaint_reason')}</h4><p>ID: {tid}</p></div>""", unsafe_allow_html=True)
+                        st.markdown(f"""
+                        <div class="complaint-card">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                                <span class="status-pill status-pending">PENDING</span>
+                                <code style="background: #0f172a; color: #3b82f6; padding: 4px 8px; border-radius: 4px; border: 1px solid #1e40af;">{tid}</code>
+                            </div>
+                            <h4 style="margin: 0; color: #f8fafc;">{c.get('complaint_reason')}</h4>
+                            <p style="margin: 5px 0 0 0; font-size: 0.85rem; color: #94a3b8;">Submitted: {c.get('submitted_at', 'N/A')[:16]}</p>
+                        </div>
+                        """, unsafe_allow_html=True)
+
                     with col2:
                         if st.button("REVIEW", key=f"rev_{tid}"):
                             st.session_state.review_tid = tid

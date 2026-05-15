@@ -35,11 +35,17 @@ def render_tracking_page(set_page_config: bool = True):
 
     # Search Unit
     col_input, col_btn = st.columns([3, 1])
+    
+    # Auto-fill if coming from a recent submission
+    default_id = st.session_state.get('last_tracking_id', "")
+    
     with col_input:
         tracking_id = st.text_input(
             "ENTER TRACKING ID",
+            value=default_id,
             placeholder="CCRS-PK-2026-XXXXXXXX"
         )
+
     with col_btn:
         st.write("")
         st.write("")

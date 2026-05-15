@@ -60,8 +60,47 @@ def render_report_form(set_page_config: bool = True):
     if set_page_config:
         st.set_page_config(page_title="Initialize Report", page_icon="📋", layout="wide")
     
-    st.markdown("## 📋 INITIALIZE NEW CASE REPORT")
-    
+    # ── Success/Result Display Area ──
+    if 'last_tracking_id' not in st.session_state:
+        st.session_state.last_tracking_id = None
+
+    # ── Success View ──
+    if st.session_state.last_tracking_id:
+        success_html = f"""
+<div style="background: rgba(16, 185, 129, 0.1); border: 2px solid #10b981; padding: 2.5rem; border-radius: 20px; margin: 2rem 0; text-align: center; border: 1px solid rgba(16, 185, 129, 0.3); box-shadow: 0 10px 40px rgba(0,0,0,0.4);">
+    <div style="font-size: 4rem; margin-bottom: 1rem;">🛡️</div>
+    <h1 style="color: #10b981; margin-top: 0; font-weight: 800; letter-spacing: -1px;">REPORT SECURED</h1>
+    <p style="font-size: 1.25rem; color: #f8fafc; opacity: 0.9;">Your case has been successfully registered in the National Cyber Database.</p>
+    <div style="background: #0f172a; padding: 2rem; border-radius: 15px; margin: 2rem 0; border: 1px solid #3b82f6; box-shadow: inset 0 0 20px rgba(59, 130, 246, 0.1);">
+        <p style="color: #3b82f6; margin-bottom: 0.75rem; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 3px; font-weight: 700;">OFFICIAL TRACKING ID</p>
+        <h1 style="color: #ffffff; font-family: 'JetBrains Mono', monospace; margin: 0; font-size: 2.5rem; letter-spacing: 4px;">{st.session_state.last_tracking_id}</h1>
+    </div>
+    <div style="display: flex; gap: 1rem; justify-content: center; margin-top: 1rem;">
+        <p style="color: #94a3b8; font-size: 0.95rem; max-width: 500px;">
+            <b>Pro Tip:</b> Save this ID now. You will need it to track your investigation status or provide additional evidence later.
+        </p>
+    </div>
+</div>
+""".replace("\n", " ")
+        st.markdown(success_html, unsafe_allow_html=True)
+
+
+
+        
+        c1, c2, c3 = st.columns([1, 2, 1])
+        with c2:
+            if st.button("➕ FILE NEW COMPLAINT", use_container_width=True, type="primary"):
+                st.session_state.last_tracking_id = None
+                st.rerun()
+            if st.button("📍 TRACK THIS CASE", use_container_width=True):
+                # We could potentially auto-navigate to tracking, but for now let's just stay here
+                # or set current_page to tracking if we have access to it.
+                if 'current_page' in st.session_state:
+                    st.session_state.current_page = "tracking"
+                    st.rerun()
+        return
+
+    # ── Form View ──
     with st.form("complaint_form", clear_on_submit=False):
         st.markdown('<div class="complaint-form">', unsafe_allow_html=True)
 
@@ -99,40 +138,42 @@ def render_report_form(set_page_config: bool = True):
 
     if submitted:
         if not email or "@" not in email:
-            st.error("Valid email required.")
-            return
-        if len(description) < 20:
-            st.error("Please provide more detail in the log.")
-            return
+            st.error("❌ CRITICAL ERROR: Valid Email Address is required for Case Registration.")
+        elif len(description) < 20:
+            st.error("❌ INSUFFICIENT DATA: Please provide a more detailed log of the incident (min 20 chars).")
+        else:
+            with st.spinner("INITIATING SECURE REGISTRATION..."):
+                tracking_id = f"CCRS-PK-{datetime.now().year}-{str(uuid.uuid4())[:8].upper()}"
+                
+                # Save files
+                evidence_filenames = save_evidence(tracking_id, uploaded_files)
+                
+                complaint_data = {
+                    "tracking_id": tracking_id,
+                    "email": email,
+                    "full_name": full_name,
+                    "phone": phone,
+                    "cnic": cnic,
+                    "address": address,
+                    "anonymous": anonymous,
+                    "incident_date": inc_date.isoformat(),
+                    "location": location,
+                    "complaint_reason": reason,
+                    "description": description,
+                    "evidence_files": evidence_filenames,
+                    "submitted_at": datetime.now().isoformat(),
+                    "status": "pending"
+                }
 
-        tracking_id = f"CCRS-PK-{datetime.now().year}-{str(uuid.uuid4())[:8].upper()}"
-        
-        # Save files FIRST
-        evidence_filenames = save_evidence(tracking_id, uploaded_files)
-        
-        complaint_data = {
-            "tracking_id": tracking_id,
-            "email": email,
-            "full_name": full_name,
-            "phone": phone,
-            "cnic": cnic,
-            "address": address,
-            "anonymous": anonymous,
-            "incident_date": inc_date.isoformat(),
-            "location": location,
-            "complaint_reason": reason,
-            "description": description,
-            "evidence_files": evidence_filenames,
-            "submitted_at": datetime.now().isoformat(),
-            "status": "pending"
-        }
+                complaints = load_complaints()
+                complaints[tracking_id] = complaint_data
+                save_complaints(complaints)
+                
+                st.session_state.last_tracking_id = tracking_id
+                st.balloons()
+                st.rerun()
 
-        complaints = load_complaints()
-        complaints[tracking_id] = complaint_data
-        save_complaints(complaints)
 
-        st.success(f"🛰️ CASE REGISTERED. TRACKING ID: {tracking_id}")
-        st.info("Your evidence has been encrypted and stored in our secure repository.")
 
 if __name__ == "__main__":
     render_report_form()
