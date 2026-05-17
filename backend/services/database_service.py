@@ -101,8 +101,24 @@ class DatabaseService:
         return complaints.get(tracking_id)
 
     def get_all_complaints(self) -> Dict[str, Dict[str, Any]]:
-        """Retrieves all registered complaints."""
-        return self._load_file(COMPLAINTS_FILE)
+        """Retrieves all registered complaints and auto-synchronizes legacy decision statuses."""
+        complaints = self._load_file(COMPLAINTS_FILE)
+        decisions = self._load_file(DECISIONS_FILE)
+        
+        updated = False
+        for tid, d in decisions.items():
+            if tid in complaints:
+                current_status = complaints[tid].get("status", "pending").lower()
+                decision_status = d.get("decision", "approve").lower()
+                if current_status == "pending" and decision_status != "pending":
+                    complaints[tid]["status"] = decision_status
+                    complaints[tid]["updated_at"] = d.get("decided_at", d.get("timestamp", datetime.now().isoformat()))
+                    updated = True
+                    
+        if updated:
+            self._save_file(COMPLAINTS_FILE, complaints)
+            
+        return complaints
 
     # ── SYNCED STATUS & DECISION LAYER ───────────────────────────────────────
     

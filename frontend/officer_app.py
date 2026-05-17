@@ -86,6 +86,8 @@ def main():
                 st.session_state.officer_logged_in = False
                 st.session_state.officer_id = None
                 st.session_state.current_officer_page = "login"
+                if 'review_tid' in st.session_state:
+                    st.session_state.review_tid = None
                 st.rerun()
         else:
             st.warning("SESSION: NOT AUTHORIZED")

@@ -47,7 +47,8 @@
     "description": "test case 1.......................................................",
     "evidence_count": 1,
     "submitted_at": "2026-05-15T02:50:08.883938",
-    "status": "pending"
+    "status": "solve",
+    "updated_at": "2026-05-15T02:51:18.815438"
   },
   "CCRS-PK-2026-B596066C": {
     "tracking_id": "CCRS-PK-2026-B596066C",
@@ -63,7 +64,8 @@
     "description": "dhjfdkahbkjfbahjbdhfchfjkdhvkdhvkjJH.",
     "evidence_count": 1,
     "submitted_at": "2026-05-15T02:55:22.879057",
-    "status": "pending"
+    "status": "solve",
+    "updated_at": "2026-05-15T03:05:32.800534"
   },
   "CCRS-PK-2026-D53D476B": {
     "tracking_id": "CCRS-PK-2026-D53D476B",
@@ -81,7 +83,8 @@
       "test image.png"
     ],
     "submitted_at": "2026-05-15T03:03:01.022133",
-    "status": "pending"
+    "status": "solve",
+    "updated_at": "2026-05-15T03:07:59.957144"
   },
   "CCRS-PK-2026-507C196E": {
     "tracking_id": "CCRS-PK-2026-507C196E",
@@ -153,6 +156,7 @@
       "test image.png"
     ],
     "submitted_at": "2026-05-15T22:03:56.675694",
-    "status": "pending"
+    "status": "approve",
+    "updated_at": "2026-05-15T22:05:03.285646"
   }
 }
