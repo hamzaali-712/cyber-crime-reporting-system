@@ -145,12 +145,16 @@ def render_report_form(set_page_config: bool = True):
 
         if not email or "@" not in email:
             st.error("❌ Email Validation Failure: A valid email address is required to register your complaint.")
+            st.toast("❌ Email Validation Failure! A valid email is required.", icon="🚨")
         elif not anonymous and (not cleaned_cnic or len(cleaned_cnic) != 13):
             st.error("❌ CNIC Validation Failure: Your CNIC must be exactly 13 digits (spaces and dashes are automatically removed).")
+            st.toast("❌ CNIC Validation Failure! CNIC must be 13 digits.", icon="🚨")
         elif not anonymous and (not cleaned_phone.startswith("+92") or len(cleaned_phone) != 13 or not cleaned_phone[3:].isdigit()):
             st.error("❌ Phone Number Validation Failure: Mobile number must start with +92 followed by exactly 10 digits (e.g., +923021437012).")
+            st.toast("❌ Phone Number Validation Failure! Mobile number must start with +92 followed by 10 digits.", icon="🚨")
         elif len(description) < 20:
             st.error("❌ Insufficient Information: Please write a more detailed explanation of the cybercrime incident (minimum 20 characters).")
+            st.toast("❌ Insufficient Information! Write at least 20 characters.", icon="🚨")
         else:
             with st.spinner("Registering complaint in National Database..."):
                 # Unique Tracking ID following standard CCRS schema
