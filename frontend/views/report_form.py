@@ -126,12 +126,29 @@ def render_report_form(set_page_config: bool = True):
         st.markdown('</div>', unsafe_allow_html=True)
 
     if submitted:
+        # Clean and normalize CNIC (strip dashes and spaces)
+        cleaned_cnic = "".join([c for c in cnic if c.isdigit()]) if (not anonymous and cnic) else "N/A"
+        
+        # Clean and normalize Phone (strip dashes, spaces, and handle domestic zero prefix)
+        cleaned_phone = phone.strip() if (not anonymous and phone) else "N/A"
+        if not anonymous and cleaned_phone:
+            cleaned_phone = "".join([c for c in cleaned_phone if c.isdigit() or c == '+'])
+            # 0302... (11 digits) -> +92302...
+            if cleaned_phone.startswith("03") and len(cleaned_phone) == 11:
+                cleaned_phone = "+92" + cleaned_phone[1:]
+            # 302... (10 digits) -> +92302...
+            elif cleaned_phone.startswith("3") and len(cleaned_phone) == 10:
+                cleaned_phone = "+92" + cleaned_phone
+            # 92302... (12 digits) -> +92302...
+            elif cleaned_phone.startswith("92") and not cleaned_phone.startswith("+") and len(cleaned_phone) == 12:
+                cleaned_phone = "+" + cleaned_phone
+
         if not email or "@" not in email:
             st.error("❌ Email Validation Failure: A valid email address is required to register your complaint.")
-        elif not anonymous and cnic and len(cnic) != 13:
-            st.error("❌ CNIC Validation Failure: Your CNIC must be exactly 13 digits without spaces or dashes.")
-        elif not anonymous and (not phone.startswith("+92") or len(phone) != 13 or not phone[3:].isdigit()):
-            st.error("❌ Phone Number Validation Failure: Mobile number must start with +92 followed by exactly 10 digits (e.g., +923024457878).")
+        elif not anonymous and (not cleaned_cnic or len(cleaned_cnic) != 13):
+            st.error("❌ CNIC Validation Failure: Your CNIC must be exactly 13 digits (spaces and dashes are automatically removed).")
+        elif not anonymous and (not cleaned_phone.startswith("+92") or len(cleaned_phone) != 13 or not cleaned_phone[3:].isdigit()):
+            st.error("❌ Phone Number Validation Failure: Mobile number must start with +92 followed by exactly 10 digits (e.g., +923021437012).")
         elif len(description) < 20:
             st.error("❌ Insufficient Information: Please write a more detailed explanation of the cybercrime incident (minimum 20 characters).")
         else:
@@ -148,8 +165,8 @@ def render_report_form(set_page_config: bool = True):
                     "tracking_id": tracking_id,
                     "email": email.strip(),
                     "full_name": full_name.strip(),
-                    "phone": phone.strip(),
-                    "cnic": cnic.strip(),
+                    "phone": cleaned_phone,
+                    "cnic": cleaned_cnic,
                     "address": address.strip(),
                     "anonymous": anonymous,
                     "incident_date": inc_date.isoformat(),

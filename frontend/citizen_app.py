@@ -165,8 +165,7 @@ def main():
             "📋 File Cyber Complaint": "report_form",
             "📍 Track Case Status": "tracking",
             "📚 PECA 2016 Law Guide": "law_guide",
-            "❓ Help & Victim Support": "help_support",
-            "👮 Officer Command Center": "officer_terminal"
+            "❓ Help & Victim Support": "help_support"
         }
         
         page_labels = list(pages.keys())
@@ -210,17 +209,6 @@ def main():
     elif current == "help_support":
         from views.help import render_help_page
         render_help_page()
-    elif current == "officer_terminal":
-        # ── Officer Portal Security Gate ──
-        if 'officer_logged_in' not in st.session_state:
-            st.session_state.officer_logged_in = False
-            
-        if not st.session_state.officer_logged_in:
-            from views.officer_login import render_officer_login
-            render_officer_login(set_page_config=False)
-        else:
-            from views.officer_panel import render_officer_panel
-            render_officer_panel(set_page_config=False)
 
     # ── Chatbot Overlay ──
     from components.chatbot import render_chatbot
