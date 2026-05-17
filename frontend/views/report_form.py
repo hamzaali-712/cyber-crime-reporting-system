@@ -130,6 +130,8 @@ def render_report_form(set_page_config: bool = True):
             st.error("❌ Email Validation Failure: A valid email address is required to register your complaint.")
         elif not anonymous and cnic and len(cnic) != 13:
             st.error("❌ CNIC Validation Failure: Your CNIC must be exactly 13 digits without spaces or dashes.")
+        elif not anonymous and (not phone.startswith("+92") or len(phone) != 13 or not phone[3:].isdigit()):
+            st.error("❌ Phone Number Validation Failure: Mobile number must start with +92 followed by exactly 10 digits (e.g., +923024457878).")
         elif len(description) < 20:
             st.error("❌ Insufficient Information: Please write a more detailed explanation of the cybercrime incident (minimum 20 characters).")
         else:
