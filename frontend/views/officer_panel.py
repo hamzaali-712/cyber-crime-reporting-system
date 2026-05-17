@@ -159,36 +159,39 @@ def render_officer_panel(set_page_config: bool = True):
                     except Exception as e:
                         st.error(f"Error loading evidence: {e}")
 
-        # Review Actions Form
-        with st.form("action_form"):
-            st.markdown("#### ⚖️ INVESTIGATOR DECISION & REMARKS")
-            decision = st.selectbox("Assign Case Action Status:", ["Approve", "Solve", "Reject"], help="Approve puts the case under active investigation. Solve marks it completed. Reject closes the case.")
-            notes = st.text_area("Official Case Action Notes / Remarks:", placeholder="Provide details regarding active assignment, evidence validation, or resolution reasons.")
-            
-            c_btn1, c_btn2 = st.columns(2)
-            if c_btn1.form_submit_button("SUBMIT DECISION & LOCK", use_container_width=True):
-                if not notes.strip():
-                    st.error("Remarks and action notes are required to submit an investigator decision.")
+        # Review Actions Container
+        st.markdown("""
+        <div style="background: rgba(15, 23, 42, 0.4); border: 1px solid #1e3a8a; padding: 20px; border-radius: 8px; margin-top: 20px; margin-bottom: 20px;">
+            <h4 style="margin-top: 0; color: #3b82f6; display: flex; align-items: center; gap: 8px;">⚖️ INVESTIGATOR DECISION & REMARKS</h4>
+        </div>
+        """, unsafe_allow_html=True)
+        
+        decision = st.selectbox("Assign Case Action Status:", ["Approve", "Solve", "Reject"], help="Approve puts the case under active investigation. Solve marks it completed. Reject closes the case.")
+        notes = st.text_area("Official Case Action Notes / Remarks:", placeholder="Provide details regarding active assignment, evidence validation, or resolution reasons.")
+        
+        c_btn1, c_btn2 = st.columns(2)
+        if c_btn1.button("SUBMIT DECISION & LOCK", type="primary", use_container_width=True):
+            if not notes.strip():
+                st.error("Remarks and action notes are required to submit an investigator decision.")
+            else:
+                # Centralized synced DB update
+                success = db_service.update_complaint_status(
+                    tracking_id=tid,
+                    status=decision,
+                    notes=notes.strip(),
+                    officer_id=officer_id
+                )
+                
+                if success:
+                    st.success(f"Dossier {tid} successfully updated to status: {decision.upper()}.")
+                    st.session_state.review_tid = None
+                    st.rerun()
                 else:
-                    # Centralized synced DB update
-                    # This updates both files and creates the audit log in a single operation
-                    success = db_service.update_complaint_status(
-                        tracking_id=tid,
-                        status=decision,
-                        notes=notes.strip(),
-                        officer_id=officer_id
-                    )
-                    
-                    if success:
-                        st.success(f"Dossier {tid} successfully updated to status: {decision.upper()}.")
-                        st.session_state.review_tid = None
-                        st.rerun()
-                    else:
-                        st.error("Failed to commit decision to the database.")
-            
-            if c_btn2.form_submit_button("CLOSE DOSSIER REVIEW", use_container_width=True):
-                st.session_state.review_tid = None
-                st.rerun()
+                    st.error("Failed to commit decision to the database.")
+        
+        if c_btn2.button("CLOSE DOSSIER REVIEW", use_container_width=True):
+            st.session_state.review_tid = None
+            st.rerun()
 
     # ── TAB 2: PROCESSED CASES ──
     with tab2:
