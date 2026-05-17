@@ -166,11 +166,20 @@ def render_officer_panel(set_page_config: bool = True):
         </div>
         """, unsafe_allow_html=True)
         
-        decision = st.selectbox("Assign Case Action Status:", ["Approve", "Solve", "Reject"], help="Approve puts the case under active investigation. Solve marks it completed. Reject closes the case.")
-        notes = st.text_area("Official Case Action Notes / Remarks:", placeholder="Provide details regarding active assignment, evidence validation, or resolution reasons.")
+        decision = st.selectbox(
+            "Assign Case Action Status:",
+            ["Approve", "Solve", "Reject"],
+            help="Approve puts the case under active investigation. Solve marks it completed. Reject closes the case.",
+            key=f"dec_sel_{tid}"
+        )
+        notes = st.text_area(
+            "Official Case Action Notes / Remarks:",
+            placeholder="Provide details regarding active assignment, evidence validation, or resolution reasons.",
+            key=f"dec_notes_{tid}"
+        )
         
         c_btn1, c_btn2 = st.columns(2)
-        if c_btn1.button("SUBMIT DECISION & LOCK", type="primary", use_container_width=True):
+        if c_btn1.button("SUBMIT DECISION & LOCK", type="primary", use_container_width=True, key=f"btn_sub_{tid}"):
             if not notes.strip():
                 st.error("Remarks and action notes are required to submit an investigator decision.")
             else:
@@ -189,7 +198,7 @@ def render_officer_panel(set_page_config: bool = True):
                 else:
                     st.error("Failed to commit decision to the database.")
         
-        if c_btn2.button("CLOSE DOSSIER REVIEW", use_container_width=True):
+        if c_btn2.button("CLOSE DOSSIER REVIEW", use_container_width=True, key=f"btn_close_{tid}"):
             st.session_state.review_tid = None
             st.rerun()
 
