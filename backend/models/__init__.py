@@ -4,7 +4,10 @@ Cyber Crime Reporting System - Database Models
 Pydantic models for data validation and serialization.
 """
 
-from pydantic import BaseModel, Field, validator
+try:
+    from pydantic.v1 import BaseModel, Field, validator
+except ImportError:
+    from pydantic import BaseModel, Field, validator
 from typing import Optional, List, Dict, Any
 from datetime import datetime
 import re

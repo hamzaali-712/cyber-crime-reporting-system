@@ -1,0 +1,80 @@
+[
+  {
+    "id": "AUDIT-20260517-E5D367FC",
+    "user_id": "CYBER2026HAMZAALI",
+    "action": "OFFICER_LOGIN_FAILED",
+    "resource_type": "officer",
+    "resource_id": "CYBER2026HAMZAALI",
+    "details": {
+      "success": false
+    },
+    "timestamp": "2026-05-17T11:25:12.613393"
+  },
+  {
+    "id": "AUDIT-20260517-D96E11B6",
+    "user_id": "CYBER2026AKIFNAVEED",
+    "action": "OFFICER_LOGIN_FAILED",
+    "resource_type": "officer",
+    "resource_id": "CYBER2026AKIFNAVEED",
+    "details": {
+      "success": false
+    },
+    "timestamp": "2026-05-17T11:27:32.670392"
+  },
+  {
+    "id": "AUDIT-20260517-7F9FEAD3",
+    "user_id": "system/citizen",
+    "action": "OFFICER_REGISTRATION",
+    "resource_type": "officer",
+    "resource_id": "CYBER2026HAMZAALI",
+    "details": {
+      "role": "Cyber Security Specialist",
+      "email": "hamzatalwarali012@gmail.com"
+    },
+    "timestamp": "2026-05-17T11:28:57.813771"
+  },
+  {
+    "id": "AUDIT-20260517-0C027225",
+    "user_id": "CYBER2026HAMZAALI",
+    "action": "OFFICER_LOGIN_FAILED",
+    "resource_type": "officer",
+    "resource_id": "CYBER2026HAMZAALI",
+    "details": {
+      "success": false
+    },
+    "timestamp": "2026-05-17T11:29:19.486930"
+  },
+  {
+    "id": "AUDIT-20260517-7245BC43",
+    "user_id": "CYBER2026HAMZAALI",
+    "action": "OFFICER_LOGIN_FAILED",
+    "resource_type": "officer",
+    "resource_id": "CYBER2026HAMZAALI",
+    "details": {
+      "success": false
+    },
+    "timestamp": "2026-05-17T11:29:21.150890"
+  },
+  {
+    "id": "AUDIT-20260517-91469CB8",
+    "user_id": "CYBER2026HAMZAALI",
+    "action": "OFFICER_LOGIN_SUCCESS",
+    "resource_type": "officer",
+    "resource_id": "CYBER2026HAMZAALI",
+    "details": {
+      "success": true
+    },
+    "timestamp": "2026-05-17T11:30:40.092509"
+  },
+  {
+    "id": "AUDIT-20260517-B5DBB983",
+    "user_id": "CYBER2026HAMZAALI",
+    "action": "UPDATE_CASE_STATUS",
+    "resource_type": "complaint",
+    "resource_id": "CCRS-PK-2026-A9C04256",
+    "details": {
+      "status": "Approve"
+    },
+    "timestamp": "2026-05-17T11:31:09.941440"
+  }
+]

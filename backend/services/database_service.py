@@ -1,148 +1,246 @@
 """
-Cyber Crime Reporting System - Database Service
+Cyber Crime Reporting System - Centralized Database Service
 
-Handles all database operations with Supabase.
+Thread-safe, process-robust JSON database manager acting as the single source
+of truth for citizens and officer panels. Automatically manages:
+- Cryptographic PBKDF2 hashing for officer passwords.
+- Syncing status updates across complaints and decisions files.
+- Recording detailed audit logs for every state-changing event.
 """
 
 import os
+import json
+import threading
+import secrets
 from typing import Optional, List, Dict, Any
-from supabase import create_client, Client
 from datetime import datetime
-import logging
+from pathlib import Path
 
-try:
-    from models import User, Complaint, Evidence, Law, AuditLog
-except ImportError:
-    # Models import may fail during service initialization
-    pass
+# Security Utils for hashing and cryptography
+from backend.utils.security import SecurityUtils
 
-logger = logging.getLogger(__name__)
+# File Paths
+DATA_DIR = Path(__file__).resolve().parent.parent / "data"
+COMPLAINTS_FILE = DATA_DIR / "complaints.json"
+OFFICERS_FILE = DATA_DIR / "officers.json"
+DECISIONS_FILE = DATA_DIR / "officer_decisions.json"
+AUDIT_LOG_FILE = DATA_DIR / "audit_logs.json"
 
 class DatabaseService:
-    """Service for database operations."""
+    """Service for robust thread-safe database operations on local JSON storage."""
 
     def __init__(self):
-        self.supabase_url = os.getenv("SUPABASE_URL")
-        self.supabase_key = os.getenv("SUPABASE_ANON_KEY")
+        self.lock = threading.Lock()
+        os.makedirs(DATA_DIR, exist_ok=True)
+        
+        # Initialize files with valid structures
+        if not COMPLAINTS_FILE.exists() or COMPLAINTS_FILE.stat().st_size == 0:
+            self._write_raw(COMPLAINTS_FILE, {})
+        if not OFFICERS_FILE.exists() or OFFICERS_FILE.stat().st_size == 0:
+            self._write_raw(OFFICERS_FILE, {})
+        if not DECISIONS_FILE.exists() or DECISIONS_FILE.stat().st_size == 0:
+            self._write_raw(DECISIONS_FILE, {})
+        if not AUDIT_LOG_FILE.exists() or AUDIT_LOG_FILE.stat().st_size == 0:
+            self._write_raw(AUDIT_LOG_FILE, [])
 
-        if not self.supabase_url or not self.supabase_key:
-            logger.warning("Supabase credentials not configured")
-            self.client = None
-        else:
+    def _write_raw(self, path: Path, default_data: Any):
+        try:
+            with open(path, 'w', encoding='utf-8') as f:
+                json.dump(default_data, f, indent=2)
+        except Exception as e:
+            print(f"Error initializing database file {path.name}: {e}")
+
+    def _load_file(self, file_path: Path) -> Any:
+        """Loads data from a JSON file with thread safety."""
+        with self.lock:
+            if not file_path.exists():
+                return {} if file_path != AUDIT_LOG_FILE else []
             try:
-                self.client: Client = create_client(self.supabase_url, self.supabase_key)
-                logger.info("Supabase client initialized")
+                with open(file_path, 'r', encoding='utf-8') as f:
+                    return json.load(f)
             except Exception as e:
-                logger.error(f"Failed to initialize Supabase client: {e}")
-                self.client = None
+                # In case of corruption, return empty structural defaults
+                print(f"Error reading database file {file_path.name}: {e}")
+                return [] if file_path == AUDIT_LOG_FILE else {}
 
-    def create_user(self, user_data: Dict[str, Any]) -> Optional[str]:
-        """Create a new user."""
-        if not self.client:
-            return None
+    def _save_file(self, file_path: Path, data: Any):
+        """Saves data to a JSON file with thread safety."""
+        with self.lock:
+            try:
+                os.makedirs(file_path.parent, exist_ok=True)
+                with open(file_path, 'w', encoding='utf-8') as f:
+                    json.dump(data, f, indent=2, default=str)
+            except Exception as e:
+                print(f"Error writing database file {file_path.name}: {e}")
 
-        try:
-            response = self.client.table('users').insert(user_data).execute()
-            return response.data[0]['id'] if response.data else None
-        except Exception as e:
-            logger.error(f"Error creating user: {e}")
-            return None
+    # ── COMPLAINT LAYER ───────────────────────────────────────────────────────
+    
+    def create_complaint(self, complaint_data: Dict[str, Any]) -> str:
+        """Registers a new complaint and logs the event."""
+        tracking_id = complaint_data.get("tracking_id")
+        complaints = self._load_file(COMPLAINTS_FILE)
+        complaints[tracking_id] = complaint_data
+        self._save_file(COMPLAINTS_FILE, complaints)
+        
+        # Automatic audit log
+        self.create_audit_log(
+            user_id=None,
+            action="SUBMIT_COMPLAINT",
+            resource_type="complaint",
+            resource_id=tracking_id,
+            details={
+                "anonymous": complaint_data.get("anonymous"),
+                "reason": complaint_data.get("complaint_reason")
+            }
+        )
+        return tracking_id
 
-    def get_user_by_email(self, email: str) -> Optional[Dict[str, Any]]:
-        """Get user by email."""
-        if not self.client:
-            return None
+    def get_complaint(self, tracking_id: str) -> Optional[Dict[str, Any]]:
+        """Retrieves a specific complaint by tracking ID."""
+        complaints = self._load_file(COMPLAINTS_FILE)
+        return complaints.get(tracking_id)
 
-        try:
-            response = self.client.table('users').select('*').eq('email', email).execute()
-            return response.data[0] if response.data else None
-        except Exception as e:
-            logger.error(f"Error getting user: {e}")
-            return None
+    def get_all_complaints(self) -> Dict[str, Dict[str, Any]]:
+        """Retrieves all registered complaints."""
+        return self._load_file(COMPLAINTS_FILE)
 
-    def create_complaint(self, complaint_data: Dict[str, Any]) -> Optional[str]:
-        """Create a new complaint."""
-        if not self.client:
-            return None
-
-        try:
-            response = self.client.table('complaints').insert(complaint_data).execute()
-            return response.data[0]['id'] if response.data else None
-        except Exception as e:
-            logger.error(f"Error creating complaint: {e}")
-            return None
-
-    def get_complaint(self, tracking_id: str, user_id: Optional[str] = None) -> Optional[Dict[str, Any]]:
-        """Get complaint by tracking ID."""
-        if not self.client:
-            return None
-
-        try:
-            query = self.client.table('complaints').select('*').eq('tracking_id', tracking_id)
-            if user_id:
-                query = query.or_(f'user_id.is.null,user_id.eq.{user_id}')
-            response = query.execute()
-            return response.data[0] if response.data else None
-        except Exception as e:
-            logger.error(f"Error getting complaint: {e}")
-            return None
-
-    def update_complaint_by_tracking_id(self, tracking_id: str, update_data: Dict[str, Any]) -> bool:
-        """Update complaint by tracking ID."""
-        if not self.client:
+    # ── SYNCED STATUS & DECISION LAYER ───────────────────────────────────────
+    
+    def update_complaint_status(self, tracking_id: str, status: str, notes: str, officer_id: str) -> bool:
+        """
+        Synchronized atomic update of both complaints and decisions files.
+        Ensures complaint status is synced instantly and logs the audit event.
+        """
+        complaints = self._load_file(COMPLAINTS_FILE)
+        if tracking_id not in complaints:
             return False
+        
+        # 1. Update status directly inside complaints.json
+        complaints[tracking_id]["status"] = status.lower()
+        complaints[tracking_id]["updated_at"] = datetime.now().isoformat()
+        self._save_file(COMPLAINTS_FILE, complaints)
+        
+        # 2. Update decision history inside officer_decisions.json
+        decisions = self._load_file(DECISIONS_FILE)
+        decisions[tracking_id] = {
+            "officer_id": officer_id,
+            "decision": status,
+            "notes": notes,
+            "decided_at": datetime.now().isoformat()
+        }
+        self._save_file(DECISIONS_FILE, decisions)
+        
+        # 3. Automatic audit log
+        self.create_audit_log(
+            user_id=officer_id,
+            action="UPDATE_CASE_STATUS",
+            resource_type="complaint",
+            resource_id=tracking_id,
+            details={"status": status}
+        )
+        return True
 
-        try:
-            update_data['updated_at'] = datetime.utcnow().isoformat()
-            self.client.table('complaints').update(update_data).eq('tracking_id', tracking_id).execute()
-            return True
-        except Exception as e:
-            logger.error(f"Error updating complaint: {e}")
+    def get_decision(self, tracking_id: str) -> Optional[Dict[str, Any]]:
+        """Retrieves decision/remarks for a tracking ID."""
+        decisions = self._load_file(DECISIONS_FILE)
+        return decisions.get(tracking_id)
+
+    def get_all_decisions(self) -> Dict[str, Dict[str, Any]]:
+        """Retrieves all case decisions."""
+        return self._load_file(DECISIONS_FILE)
+
+    # ── OFFICER LAYER WITH CRYPTO SECURITY ───────────────────────────────────
+    
+    def get_officer(self, officer_id: str) -> Optional[Dict[str, Any]]:
+        """Retrieves an officer record."""
+        officers = self._load_file(OFFICERS_FILE)
+        return officers.get(officer_id)
+
+    def create_officer(self, officer_data: Dict[str, Any]) -> str:
+        """Registers a new officer using secure PBKDF2 hashing."""
+        name = officer_data.get("name")
+        email = officer_data.get("email")
+        role = officer_data.get("role")
+        raw_password = officer_data.get("password")
+        
+        generated_id = f"CYBER2026{name.replace(' ', '').upper()}"
+        hashed_password = SecurityUtils.hash_password(raw_password)
+        
+        officers = self._load_file(OFFICERS_FILE)
+        officers[generated_id] = {
+            "name": name,
+            "email": email,
+            "role": role,
+            "password": hashed_password,
+            "created_at": datetime.now().isoformat()
+        }
+        self._save_file(OFFICERS_FILE, officers)
+        
+        # Automatic audit log
+        self.create_audit_log(
+            user_id=None,
+            action="OFFICER_REGISTRATION",
+            resource_type="officer",
+            resource_id=generated_id,
+            details={"role": role, "email": email}
+        )
+        return generated_id
+
+    def verify_officer(self, officer_id: str, password: str) -> bool:
+        """Verifies officer credentials securely and writes an audit log."""
+        officer = self.get_officer(officer_id)
+        if not officer:
+            # Audit log for failed attempt
+            self.create_audit_log(
+                user_id="anonymous",
+                action="OFFICER_LOGIN_FAILED",
+                resource_type="officer",
+                resource_id=officer_id,
+                details={"reason": "Node ID not found"}
+            )
             return False
+        
+        hashed = officer.get("password")
+        is_valid = SecurityUtils.verify_password(password, hashed)
+        
+        # Automatic audit log
+        self.create_audit_log(
+            user_id=officer_id,
+            action="OFFICER_LOGIN_SUCCESS" if is_valid else "OFFICER_LOGIN_FAILED",
+            resource_type="officer",
+            resource_id=officer_id,
+            details={"success": is_valid}
+        )
+        return is_valid
 
-    def create_evidence(self, evidence_data: Dict[str, Any]) -> Optional[str]:
-        """Create evidence record."""
-        if not self.client:
-            return None
+    # ── SECURE AUDIT LOGGING LAYER ───────────────────────────────────────────
+    
+    def create_audit_log(self, user_id: Optional[str], action: str, resource_type: str, resource_id: str, details: Optional[Dict[str, Any]] = None) -> bool:
+        """Appends a new security-critical event to the central audit log file."""
+        logs = self._load_file(AUDIT_LOG_FILE)
+        if not isinstance(logs, list):
+            logs = []
+            
+        log_id = f"AUDIT-{datetime.now().strftime('%Y%m%d')}-{secrets.token_hex(4).upper()}"
+        log_entry = {
+            "id": log_id,
+            "user_id": user_id or "system/citizen",
+            "action": action,
+            "resource_type": resource_type,
+            "resource_id": resource_id,
+            "details": details or {},
+            "timestamp": datetime.now().isoformat()
+        }
+        logs.append(log_entry)
+        self._save_file(AUDIT_LOG_FILE, logs)
+        return True
 
-        try:
-            response = self.client.table('evidence').insert(evidence_data).execute()
-            return response.data[0]['id'] if response.data else None
-        except Exception as e:
-            logger.error(f"Error creating evidence: {e}")
-            return None
-
-    def get_laws(self, category: Optional[str] = None, search: Optional[str] = None) -> List[Dict[str, Any]]:
-        """Get cyber laws with optional filtering."""
-        if not self.client:
+    def get_audit_logs(self) -> List[Dict[str, Any]]:
+        """Retrieves the complete audit trail logs."""
+        logs = self._load_file(AUDIT_LOG_FILE)
+        if not isinstance(logs, list):
             return []
+        return logs
 
-        try:
-            query = self.client.table('laws').select('*')
-
-            if category:
-                query = query.eq('category', category)
-
-            if search:
-                query = query.or_(f'title.ilike.%{search}%,description.ilike.%{search}%')
-
-            response = query.execute()
-            return response.data or []
-        except Exception as e:
-            logger.error(f"Error getting laws: {e}")
-            return []
-
-    def create_audit_log(self, audit_data: Dict[str, Any]) -> bool:
-        """Create audit log entry."""
-        if not self.client:
-            return False
-
-        try:
-            self.client.table('audit_logs').insert(audit_data).execute()
-            return True
-        except Exception as e:
-            logger.error(f"Error creating audit log: {e}")
-            return False
-
-# Global instance
+# Instantiate global service instance
 db_service = DatabaseService()

@@ -19,8 +19,15 @@ class FileService:
     """Service for file operations."""
 
     def __init__(self):
-        self.encryption_key = os.getenv("ENCRYPTION_KEY")
-        self.fernet = Fernet(self.encryption_key.encode()) if self.encryption_key else None
+        raw_key = os.getenv("ENCRYPTION_KEY")
+        if raw_key:
+            import base64
+            import hashlib
+            self.encryption_key = base64.urlsafe_b64encode(hashlib.sha256(raw_key.encode()).digest()).decode()
+            self.fernet = Fernet(self.encryption_key.encode())
+        else:
+            self.encryption_key = None
+            self.fernet = None
 
         # File size limits
         self.max_sizes = {

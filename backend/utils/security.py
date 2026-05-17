@@ -21,7 +21,11 @@ logger = logging.getLogger(__name__)
 
 # Security constants
 JWT_SECRET = os.getenv("JWT_SECRET_KEY")
-ENCRYPTION_KEY = os.getenv("ENCRYPTION_KEY")
+raw_key = os.getenv("ENCRYPTION_KEY")
+if raw_key:
+    ENCRYPTION_KEY = base64.urlsafe_b64encode(hashlib.sha256(raw_key.encode()).digest()).decode()
+else:
+    ENCRYPTION_KEY = None
 JWT_ALGORITHM = "HS256"
 JWT_EXPIRATION_HOURS = 24
 
@@ -65,7 +69,7 @@ class SecurityUtils:
                 iterations=100000,
             )
             derived_key = kdf.derive(password.encode())
-            return secrets.compare_digest(key, base64.urlsafe_b64encode(derived_key))
+            return secrets.compare_digest(key, derived_key)
         except Exception:
             return False
 
