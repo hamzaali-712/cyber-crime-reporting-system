@@ -83,7 +83,7 @@ def render_officer_panel(set_page_config: bool = True):
     # ── TAB 1: PENDING QUEUE ──
     with tab1:
         # Filter for cases that are pending (status == "pending" or not decided)
-        pending = [tid for tid, c in complaints.items() if c.get("status", "pending").lower() == "pending"]
+        pending = [tid for tid, c in complaints.items() if str(c.get("status") or "pending").lower() == "pending"]
         
         if not pending:
             st.info("Queue is clear! There are no pending complaints to review.")
@@ -204,7 +204,7 @@ def render_officer_panel(set_page_config: bool = True):
 
     # ── TAB 2: PROCESSED CASES ──
     with tab2:
-        processed = [tid for tid, c in complaints.items() if c.get("status", "pending").lower() in ["approve", "approved", "solve", "solved", "reject", "rejected"]]
+        processed = [tid for tid, c in complaints.items() if str(c.get("status") or "pending").lower() in ["approve", "approved", "solve", "solved", "reject", "rejected"]]
         
         if not processed:
             st.info("No processed cases logged.")
