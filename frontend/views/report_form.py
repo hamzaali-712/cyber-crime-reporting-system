@@ -100,7 +100,7 @@ def render_report_form(set_page_config: bool = True):
             c1, c2 = st.columns(2)
             with c1:
                 full_name = st.text_input("Full Legal Name", placeholder="As printed on CNIC")
-                phone = st.text_input("Mobile / Contact Number", placeholder="03XXXXXXXXX")
+                phone = st.text_input("Mobile / Contact Number", max_chars=13, placeholder="E.g., +923021437012")
             with c2:
                 cnic = st.text_input("CNIC Number (13 Digits)", max_chars=13, placeholder="E.g., 3740512345678")
                 address = st.text_area("Home / Mailing Address", placeholder="Complete residential address")
