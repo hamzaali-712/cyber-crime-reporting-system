@@ -16,6 +16,10 @@ import secrets
 from typing import Optional, List, Dict, Any
 from datetime import datetime
 from pathlib import Path
+from dotenv import load_dotenv
+
+# Load environment variables
+load_dotenv()
 
 # Security Utils for hashing and cryptography
 from backend.utils.security import SecurityUtils
@@ -60,12 +64,114 @@ class DatabaseService:
         if not AUDIT_LOG_FILE.exists() or AUDIT_LOG_FILE.stat().st_size == 0:
             self._write_raw(AUDIT_LOG_FILE, [])
 
+        # Auto-migration triggered once if Supabase is empty
+        if supabase_client:
+            try:
+                self._migrate_local_to_supabase()
+            except Exception as e:
+                print(f"[Supabase Migration] Error running auto-migration on startup: {e}")
+
     def _write_raw(self, path: Path, default_data: Any):
         try:
             with open(path, 'w', encoding='utf-8') as f:
                 json.dump(default_data, f, indent=2)
         except Exception as e:
             print(f"Error initializing database file {path.name}: {e}")
+
+    def _migrate_local_to_supabase(self):
+        """Automatically migrates local JSON data to Supabase if Supabase is empty."""
+        # 1. Migrate Officers
+        try:
+            r = supabase_client.table("officers").select("officer_id").limit(1).execute()
+            if not r.data:
+                local_officers = self._load_file(OFFICERS_FILE)
+                if local_officers:
+                    print(f"[Supabase Migration] Found {len(local_officers)} local officers. Migrating to Cloud...")
+                    for oid, odata in local_officers.items():
+                        db_data = {
+                            "officer_id": oid,
+                            "name": odata.get("name"),
+                            "email": odata.get("email"),
+                            "role": odata.get("role"),
+                            "password": odata.get("password"),
+                            "created_at": odata.get("created_at", datetime.now().isoformat())
+                        }
+                        supabase_client.table("officers").insert(db_data).execute()
+                    print("[Supabase Migration] Officers migrated successfully!")
+        except Exception as e:
+            print(f"[Supabase Migration] Officers table migration skipped/failed: {e}")
+
+        # 2. Migrate Complaints
+        try:
+            r = supabase_client.table("complaints").select("tracking_id").limit(1).execute()
+            if not r.data:
+                local_complaints = self._load_file(COMPLAINTS_FILE)
+                if local_complaints:
+                    print(f"[Supabase Migration] Found {len(local_complaints)} local complaints. Migrating to Cloud...")
+                    for tid, cdata in local_complaints.items():
+                        db_data = {
+                            "tracking_id": tid,
+                            "email": cdata.get("email"),
+                            "full_name": cdata.get("full_name"),
+                            "phone": cdata.get("phone"),
+                            "cnic": cdata.get("cnic"),
+                            "address": cdata.get("address"),
+                            "anonymous": bool(cdata.get("anonymous")),
+                            "incident_date": str(cdata.get("incident_date")),
+                            "location": cdata.get("location"),
+                            "complaint_reason": cdata.get("complaint_reason"),
+                            "description": cdata.get("description"),
+                            "evidence_files": cdata.get("evidence_files", []),
+                            "status": cdata.get("status", "pending"),
+                            "submitted_at": cdata.get("submitted_at", datetime.now().isoformat()),
+                            "updated_at": cdata.get("updated_at")
+                        }
+                        supabase_client.table("complaints").insert(db_data).execute()
+                    print("[Supabase Migration] Complaints migrated successfully!")
+        except Exception as e:
+            print(f"[Supabase Migration] Complaints table migration skipped/failed: {e}")
+
+        # 3. Migrate Decisions
+        try:
+            r = supabase_client.table("officer_decisions").select("tracking_id").limit(1).execute()
+            if not r.data:
+                local_decisions = self._load_file(DECISIONS_FILE)
+                if local_decisions:
+                    print(f"[Supabase Migration] Found {len(local_decisions)} local decisions. Migrating to Cloud...")
+                    for tid, ddata in local_decisions.items():
+                        db_data = {
+                            "tracking_id": tid,
+                            "officer_id": ddata.get("officer_id"),
+                            "decision": ddata.get("decision"),
+                            "notes": ddata.get("notes"),
+                            "decided_at": ddata.get("decided_at", ddata.get("timestamp", datetime.now().isoformat()))
+                        }
+                        supabase_client.table("officer_decisions").insert(db_data).execute()
+                    print("[Supabase Migration] Decisions migrated successfully!")
+        except Exception as e:
+            print(f"[Supabase Migration] Decisions table migration skipped/failed: {e}")
+
+        # 4. Migrate Audit Logs
+        try:
+            r = supabase_client.table("audit_logs").select("id").limit(1).execute()
+            if not r.data:
+                local_logs = self._load_file(AUDIT_LOG_FILE)
+                if local_logs:
+                    print(f"[Supabase Migration] Found {len(local_logs)} local audit logs. Migrating to Cloud...")
+                    for log in local_logs:
+                        db_data = {
+                            "id": log.get("id"),
+                            "user_id": log.get("user_id"),
+                            "action": log.get("action"),
+                            "resource_type": log.get("resource_type"),
+                            "resource_id": log.get("resource_id"),
+                            "details": log.get("details", {}),
+                            "timestamp": log.get("timestamp", datetime.now().isoformat())
+                        }
+                        supabase_client.table("audit_logs").insert(db_data).execute()
+                    print("[Supabase Migration] Audit logs migrated successfully!")
+        except Exception as e:
+            print(f"[Supabase Migration] Audit logs table migration skipped/failed: {e}")
 
     def _load_file(self, file_path: Path) -> Any:
         """Loads data from a JSON file with thread safety."""
