@@ -61,10 +61,10 @@ flowchart TB
 
     AIService -->|API Request| GroqAPI
 
-    DBService -->|Write / Read (Primary)| SupaDB
-    FileService -->|Upload / Download (Primary)| SupaStore
+    DBService -->|Write and Read - Primary| SupaDB
+    FileService -->|Upload and Download - Primary| SupaStore
 
-    DBService -.->|Automatic Failover / Thread Lock| LocalJSON
+    DBService -.->|Automatic Failover via Thread Lock| LocalJSON
     FileService -.->|Local Backup Storage| LocalFiles
 
     DBService -->|Auto Cloud Sync on Start| SupaDB
@@ -84,45 +84,45 @@ classDiagram
         +Path OFFICERS_FILE
         +Path DECISIONS_FILE
         +Path AUDIT_LOG_FILE
-        +create_complaint(complaint_data: Dict) str
-        +get_complaint(tracking_id: str) Optional~Dict~
+        +create_complaint(complaint_data) str
+        +get_complaint(tracking_id) Optional
         +get_all_complaints() Dict
-        +update_complaint_status(tracking_id: str, status: str, notes: str, officer_id: str) bool
-        +get_decision(tracking_id: str) Optional~Dict~
+        +update_complaint_status(tracking_id, status, notes, officer_id) bool
+        +get_decision(tracking_id) Optional
         +get_all_decisions() Dict
-        +get_officer(officer_id: str) Optional~Dict~
-        +create_officer(officer_data: Dict) str
-        +verify_officer(officer_id: str, password: str) bool
-        +create_audit_log(user_id: str, action: str, resource_type: str, resource_id: str, details: Dict) bool
-        +get_audit_logs() List~Dict~
+        +get_officer(officer_id) Optional
+        +create_officer(officer_data) str
+        +verify_officer(officer_id, password) bool
+        +create_audit_log(user_id, action, resource_type, resource_id, details) bool
+        +get_audit_logs() List
         -_migrate_local_to_supabase()
-        -_load_file(file_path: Path) Any
-        -_save_file(file_path: Path, data: Any)
+        -_load_file(file_path) Any
+        -_save_file(file_path, data)
     }
 
     class SecurityUtils {
-        +hash_password(password: str) str
-        +verify_password(password: str, hashed: str) bool
-        +generate_jwt_token(data: Dict, expires_in: int) str
-        +verify_jwt_token(token: str) Optional~Dict~
-        +encrypt_evidence_file(file_data: bytes, key: bytes) bytes
-        +decrypt_evidence_file(encrypted_data: bytes, key: bytes) bytes
-        +generate_file_sha256(file_path: Path) str
+        +hash_password(password) str
+        +verify_password(password, hashed) bool
+        +generate_jwt_token(data, expires_in) str
+        +verify_jwt_token(token) Optional
+        +encrypt_evidence_file(file_data, key) bytes
+        +decrypt_evidence_file(encrypted_data, key) bytes
+        +generate_file_sha256(file_path) str
     }
 
     class AIService {
         +Groq client
-        +analyze_complaint(description: str) Dict
-        +summarize_incident(description: str) str
-        +classify_peca_category(description: str) Dict
-        +get_legal_assistance(query: str, category: str) str
+        +analyze_complaint(description) Dict
+        +summarize_incident(description) str
+        +classify_peca_category(description) Dict
+        +get_legal_assistance(query, category) str
     }
 
     class FileService {
         +Path UPLOAD_DIR
-        +save_evidence(file_name: str, file_data: bytes) str
-        +secure_evidence_metadata(complaint_id: str, file_name: str, file_size: int, file_path: str) Dict
-        +scan_file_for_malware(file_path: Path) bool
+        +save_evidence(file_name, file_data) str
+        +secure_evidence_metadata(complaint_id, file_name, file_size, file_path) Dict
+        +scan_file_for_malware(file_path) bool
     }
 
     DatabaseService --> SecurityUtils : Uses for hashing & audit logging
