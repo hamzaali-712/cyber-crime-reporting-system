@@ -35,15 +35,24 @@
 
 ## 🌐 Live System Deployments
 
-The CCRS architecture is divided into two primary, highly responsive workspaces. Below is the operational routing dashboard:
+The CCRS architecture is divided into two operational environments. Below are the separate workspaces for development and final production:
 
-| Entity | Repository | Live Deployment |
+### 🛠️ Working Development Environment
+This is the active development environment for testing experimental features and continuous integrations.
+
+| Portal Node | Repository | Live Deployment URL |
 | :--- | :--- | :--- |
 | **🛡️ Citizen Reporting Portal** | [hamzaali-712/cyber-crime-reporting-system](https://github.com/hamzaali-712/cyber-crime-reporting-system/) | [🔗 cyber-crime-reporting-system-sre.streamlit.app](https://cyber-crime-reporting-system-sre.streamlit.app/) |
-| **👮 Officer Command Portal** | [hamzaali-712/cyber-crime-reporting-system](https://github.com/hamzaali-712/cyber-crime-reporting-system/) | [🔗 ccrs-officer-command.streamlit.app](https://ccrs-officer-command.streamlit.app/) |
+| **👮 Officer Command Panel** | [hamzaali-712/cyber-crime-reporting-system](https://github.com/hamzaali-712/cyber-crime-reporting-system/) | [🔗 ccrs-officer-command.streamlit.app](https://ccrs-officer-command.streamlit.app/) |
+
+### 🚀 Final Production Environment
+This is the stable, production-grade node deployed for official access.
+
+| Portal Node | Repository | Live Deployment URL |
+| :--- | :--- | :--- |
 | **📦 Production Core Repo (Fork)** | [FarukhMumtaz/CyberCrime-IS](https://github.com/FarukhMumtaz/CyberCrime-IS) | *Internal Production Engine* |
-| **🛡️ Production Citizen Node** | — | [🔗 cybercrme-userport.streamlit.app](https://cybercrme-userport.streamlit.app/) |
-| **👮 Production Officer Node** | — | [🔗 cybercrime-officerport.streamlit.app](https://cybercrime-officerport.streamlit.app/) |
+| **🛡️ Production Citizen Node** | [FarukhMumtaz/CyberCrime-IS](https://github.com/FarukhMumtaz/CyberCrime-IS) | [🔗 cybercrme-userport.streamlit.app](https://cybercrme-userport.streamlit.app/) |
+| **👮 Production Officer Node** | [FarukhMumtaz/CyberCrime-IS](https://github.com/FarukhMumtaz/CyberCrime-IS) | [🔗 cybercrime-officerport.streamlit.app](https://cybercrime-officerport.streamlit.app/) |
 
 ---
 
@@ -83,91 +92,74 @@ The CCRS architecture is divided into two primary, highly responsive workspaces.
 The diagram below illustrates how data and control flow through the system. It showcases the presentation, business, persistence, and external service modules.
 
 ```mermaid
-flowchart TB
+flowchart TD
     %% Styling Classes
     classDef citizen fill:#1e3d59,stroke:#17b978,stroke-width:2px,color:#fff;
     classDef officer fill:#1b1947,stroke:#ff5722,stroke-width:2px,color:#fff;
     classDef appRouter fill:#2b2d42,stroke:#8d99ae,stroke-width:2px,color:#fff;
-    classDef backend fill:#1f4068,stroke:#00bcd4,stroke-width:2px,color:#fff;
-    classDef storage fill:#162447,stroke:#e43f5a,stroke-width:2px,color:#fff;
+    classDef db fill:#162447,stroke:#00bcd4,stroke-width:2px,color:#fff;
     classDef ai fill:#0f3057,stroke:#ffd369,stroke-width:2px,color:#fff;
     
-    %% Actors
-    C["🇵🇰 Pakistani Citizen<br>(Reporter)"]:::citizen
-    O["👮 Law Enforcement Officer<br>(Investigator)"]:::officer
-    
-    subgraph Frontend ["🖥️ Streamlit Presentation Layer"]
-        CA["Citizen Portal<br>(citizen_app.py / app.py)"]:::citizen
-        OA["Officer Portal<br>(officer_app.py / app.py)"]:::officer
-        Router["App Router<br>(Dynamic Session Router)"]:::appRouter
+    C["🇵🇰 Citizen"]:::citizen
+    O["👮 Officer"]:::officer
+
+    subgraph Presentation ["🖥️ Presentation Layer"]
+        CA["Citizen Portal (citizen_app.py)"]:::citizen
+        OA["Officer Portal (officer_app.py)"]:::officer
+        Router["App Router (app.py)"]:::appRouter
     end
 
-    subgraph Core ["⚙️ Application Business & Services Layer"]
-        Form["Complaint Engine<br>(report_form.py)"]:::citizen
-        Tracking["Tracking Engine<br>(tracking.py)"]:::citizen
-        Laws["Cyber Law Book<br>(cyber_laws.py)"]:::citizen
-        OfficerPanel["Investigation Panel<br>(officer_panel.py)"]:::officer
-        OfficerAuth["Officer Auth<br>(officer_login.py)"]:::officer
+    subgraph Services ["⚙️ Application Core Services"]
+        Form["Complaint Engine"]:::citizen
+        Tracking["Tracking Engine"]:::citizen
+        Laws["Cyber Law Book"]:::citizen
+        OPanel["Officer Panel"]:::officer
+        OAuth["Officer Auth"]:::officer
     end
 
-    subgraph DataStore ["💾 Multi-Channel Data Store"]
-        subgraph LocalStore ["📂 Local JSON Store (Development)"]
-            CompDB["complaints.json"]
-            OffDB["officers.json"]
-            DecDB["officer_decisions.json"]
-        end
-        subgraph CloudStore ["⚡ Production Backend"]
-            Supa["Supabase DB (PostgreSQL)"]
-            RLS["Row Level Security (RLS)"]
-            FastAPI["FastAPI Backend (backend/api/main.py)"]:::backend
-        end
+    subgraph Data ["💾 Data Store Layer"]
+        CompDB[("Complaints (JSON)")]:::db
+        OffDB[("Officers (JSON)")]:::db
+        DecDB[("Decisions (JSON)")]:::db
+        SupaDB[("Supabase DB (PostgreSQL RLS)")]:::db
     end
 
-    subgraph SecurityAI ["🔐 Security & AI Intelligence Engine"]
-        Groq["🤖 Groq AI API<br>(Complaint Summarizer & Categorizer)"]:::ai
-        Crypt["🔑 Encryption Engine<br>(cryptography / PyJWT / bcrypt)"]
-        Malware["🛡️ Malware Scanner<br>(MIME check / ClamAV)"]
-        Evidence["📁 Secure Evidence Vault<br>(Encrypted File Storage)"]:::storage
+    subgraph SecAI ["🔐 Security & AI Intelligence"]
+        Groq["Groq AI Engine"]:::ai
+        Crypt["Encryption Engine"]:::appRouter
+        Scan["Malware Scanner"]:::appRouter
+        Vault["Secure File Vault"]:::db
     end
 
     %% Flows
-    C -->|Submits Incident & Evidence| CA
-    C -->|Checks Case Status| CA
-    O -->|Authenticates & Reviews Cases| OA
+    C --> CA
+    O --> OA
+    CA --> Router
+    OA --> Router
+    Router --> Form
+    Router --> Tracking
+    Router --> Laws
+    Router --> OPanel
+    Router --> OAuth
+
+    Form --> CompDB
+    Form --> Scan
+    Scan --> Vault
     
-    CA -->|Session Routing| Router
-    OA -->|Session Routing| Router
+    OAuth --> OffDB
+    OAuth --> SupaDB
+    OPanel --> DecDB
+    OPanel --> SupaDB
     
-    Router -->|Renders| Form
-    Router -->|Renders| Tracking
-    Router -->|Renders| Laws
-    Router -->|Renders| OfficerPanel
-    Router -->|Renders| OfficerAuth
+    Tracking --> CompDB
+    Tracking --> DecDB
+    Tracking --> SupaDB
     
-    %% Engines to DB
-    Form -->|Writes JSON / Calls API| CompDB
-    Form -->|Saves evidence file| Malware
-    Malware -->|Sanitizes & Encrypts| Evidence
+    Form --> Groq
+    Groq --> Form
     
-    OfficerAuth -->|Authenticates| OffDB
-    OfficerAuth -->|Authenticates| FastAPI
-    OfficerPanel -->|Updates Status / Adds Notes| DecDB
-    OfficerPanel -->|Updates Status / Adds Notes| FastAPI
-    
-    Tracking -->|Queries Status| CompDB
-    Tracking -->|Queries Status| DecDB
-    Tracking -->|Queries Status| FastAPI
-    
-    FastAPI --> RLS
-    RLS --> Supa
-    
-    %% AI Flows
-    Form -->|Sends text for categorization| Groq
-    Groq -->|Auto-populates Law Categories| Form
-    
-    %% Security Flows
-    OfficerAuth -->|Bcrypt / JWT Token| Crypt
-    Form -->|AES-256 Encrypted Payload| Crypt
+    OAuth --> Crypt
+    Form --> Crypt
 ```
 
 ### 🧬 Citizen Complaint & Officer Lifecycle
@@ -175,39 +167,19 @@ The state machine below illustrates the lifecycle of a complaint, highlighting t
 
 ```mermaid
 stateDiagram-v2
-    [*] --> Draft : Citizen opens Complaint Form
-    Draft --> Validation : Enter CNIC, Description, Details
-    Validation --> MalwareScan : Form validated & evidence uploaded
-    
-    state MalwareScan {
-        [*] --> checkMIME : Check File Extension & MIME
-        checkMIME --> scanVirus : Optional ClamAV scan
-        scanVirus --> Encrypt : AES-256 Payload Encryption
-    }
-    
-    MalwareScan --> Submitted : Generate Tracking ID (TRK-XXXXXX)
-    
-    state "Pending Officer Review" as Submitted
-    
-    Submitted --> Assigned : Officer logs in & claims case
-    
-    state Assigned {
-        [*] --> UnderInvestigation : Officer reviews evidence & AI summary
-        UnderInvestigation --> ReviewingLaws : Cross-reference PECA 2016
-    }
-    
-    ReviewingLaws --> Decided : Add investigation notes
-    
-    state Decided {
-        [*] --> DecisionMaking
-        DecisionMaking --> Approved : Case validated -> Mark Approved
-        DecisionMaking --> Rejected : Case invalid/spam -> Mark Rejected
-    }
-    
-    Approved --> OfficialAction : Official investigation notes sent to Citizen
-    Rejected --> OfficialAction : Rejection notes sent to Citizen
-    
-    OfficialAction --> [*] : Case Closed / Archived
+    [*] --> Draft : Citizen Opens Form
+    Draft --> Validation : Input CNIC & Details
+    Validation --> MIMECheck : Validate Evidence MIME
+    MIMECheck --> MalwareScan : Optional Virus Scan
+    MalwareScan --> Encryption : AES-256 Payload Encryption
+    Encryption --> Submitted : Generate Tracking ID
+    Submitted --> UnderReview : Officer Claims Case
+    UnderReview --> LegalReview : Cross-reference PECA Laws
+    LegalReview --> Approved : Valid Incident
+    LegalReview --> Rejected : Invalid / Spam
+    Approved --> OfficialAction : Log Investigation Notes
+    Rejected --> OfficialAction : Log Rejection Notes
+    OfficialAction --> [*] : Case Closed
 ```
 
 ---
