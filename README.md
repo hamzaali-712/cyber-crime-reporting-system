@@ -1,11 +1,11 @@
 # Cyber Crime Reporting System with Electronic Evidence Module
 - **Citizen Panel:** https://cyber-crime-reporting-system-sre.streamlit.app/
 - **Officier Panel** https://ccrs-officer-command.streamlit.app/
+- A secure, government-grade web platform for Pakistani citizens to report cybercrimes online, inspired by the official Pakistani cybercrime reporting system. Enhanced with modern cybersecurity, digital evidence management, AI assistance, and secure cloud deployment practices.
 ## Final Repo & Deployment Link
 - **Repo Link** https://github.com/FarukhMumtaz/CyberCrime-IS
 - **Officer Portal:** https://cybercrime-officerport.streamlit.app/
 - **User Portal:** https://cybercrme-userport.streamlit.app/
-- A secure, government-grade web platform for Pakistani citizens to report cybercrimes online, inspired by the official Pakistani cybercrime reporting system. Enhanced with modern cybersecurity, digital evidence management, AI assistance, and secure cloud deployment practices.
 
 ## Features
 
