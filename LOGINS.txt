@@ -1,0 +1,43 @@
+============================================================
+NCIA CYBER CRIME REPORTING SYSTEM - DEFAULT ACCESS CREDENTIALS
+============================================================
+
+NOTE: To use these credentials, you MUST first fix your 
+Supabase connection in .env.local as described in the 
+previous message. These accounts must exist in your 
+Supabase Auth and 'profiles' table.
+
+------------------------------------------------------------
+1. CITIZEN PORTAL
+------------------------------------------------------------
+URL: http://localhost:3000/citizen/auth/sign-in
+Email: citizen@example.com
+Password: password123
+Role: citizen
+
+------------------------------------------------------------
+2. OFFICER PORTAL (Law Enforcement)
+------------------------------------------------------------
+URL: http://localhost:3000/officer/auth/sign-in
+Officer ID: CYBER2024-OFF-001
+Password: password123
+Associated Email: officer@ncia.gov.pk
+Role: officer
+
+------------------------------------------------------------
+3. ADMIN ROOT (System Master Control)
+------------------------------------------------------------
+URL: http://localhost:3000/admin/auth/sign-in
+Root Email: admin@ncia.gov.pk
+Master Password: password123
+Security Token: NCIA-ROOT-ACCESS-2024
+Role: admin
+
+------------------------------------------------------------
+SYSTEM RECOVERY STEPS:
+------------------------------------------------------------
+1. Fix .env.local with valid Supabase URL & Anon Key.
+2. Ensure 'profiles' table has users with matching roles.
+3. If registration fails with "Failed to fetch", your network 
+   cannot reach the Supabase project URL.
+============================================================

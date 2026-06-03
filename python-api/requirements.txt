@@ -1,0 +1,11 @@
+fastapi
+uvicorn
+python-multipart
+supabase
+pydantic
+pydantic-settings
+python-dotenv
+httpx
+reportlab
+python-magic
+cryptography
