@@ -31,7 +31,7 @@ import { Select } from '@/components/ui/select';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { cn, formatFileSize } from '@/lib/utils';
-import { createClient } from '../../../../../lib/supabase/client';
+import { createClient } from '@/lib/supabase/client';
 
 export default function NewReportWizard() {
   const router = useRouter();
