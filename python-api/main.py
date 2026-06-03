@@ -12,10 +12,9 @@ load_dotenv()
 
 app = FastAPI(title="NCIA Strategic Microservice", version="1.0.0")
 
-# Security: CORS restricted to NCIA frontend
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000"],
+    allow_origins=["*"], 
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -118,4 +117,5 @@ async def deep_ai_analysis(complaint_id: str):
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+    port = int(os.environ.get("PORT", 7860))
+    uvicorn.run(app, host="0.0.0.0", port=port)
