@@ -26,8 +26,9 @@ import { redirect } from 'next/navigation';
 export default async function UserManagementPage({
   searchParams,
 }: {
-  searchParams: { role?: string; q?: string };
+  searchParams: Promise<{ role?: string; q?: string }>;
 }) {
+  const { role, q } = await searchParams;
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
 
@@ -53,12 +54,12 @@ export default async function UserManagementPage({
     `)
     .order('created_at', { ascending: false });
 
-  if (searchParams.role) {
-    query = query.eq('role', searchParams.role);
+  if (role) {
+    query = query.eq('role', role);
   }
 
-  if (searchParams.q) {
-    query = query.or(`full_name.ilike.%${searchParams.q}%,email.ilike.%${searchParams.q}%,cnic.ilike.%${searchParams.q}%`);
+  if (q) {
+    query = query.or(`full_name.ilike.%${q}%,email.ilike.%${q}%,cnic.ilike.%${q}%`);
   }
 
   const { data: users } = await query;
@@ -102,7 +103,7 @@ export default async function UserManagementPage({
                <Input 
                  placeholder="Search registry by name, email, or CNIC..." 
                  className="pl-10 h-11 bg-slate-950 border-slate-800 text-slate-300 rounded-xl focus:ring-blue-500/20"
-                 defaultValue={searchParams.q}
+                 defaultValue={q}
                />
             </div>
             <div className="flex gap-2">

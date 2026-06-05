@@ -1,0 +1,120 @@
+
+> web@0.1.0 build
+> next build
+
+   Γû▓ Next.js 15.1.0
+   - Environments: .env.local
+
+   Creating an optimized production build ...
+ Γ£ô Compiled successfully
+   Linting and checking validity of types ...
+
+./src/app/(citizen)/citizen/cases/page.tsx
+8:3  Warning: 'ChevronRight' is defined but never used.  @typescript-eslint/no-unused-vars
+10:3  Warning: 'Download' is defined but never used.  @typescript-eslint/no-unused-vars
+44:24  Warning: 'error' is assigned a value but never used.  @typescript-eslint/no-unused-vars
+
+./src/app/(citizen)/citizen/cases/[trackingId]/page.tsx
+12:3  Warning: 'MessageSquare' is defined but never used.  @typescript-eslint/no-unused-vars
+14:3  Warning: 'ExternalLink' is defined but never used.  @typescript-eslint/no-unused-vars
+15:3  Warning: 'History' is defined but never used.  @typescript-eslint/no-unused-vars
+21:39  Warning: 'CardDescription' is defined but never used.  @typescript-eslint/no-unused-vars
+24:22  Warning: 'formatDateTime' is defined but never used.  @typescript-eslint/no-unused-vars
+
+./src/app/(citizen)/citizen/chat/page.tsx
+7:3  Warning: 'Trash2' is defined but never used.  @typescript-eslint/no-unused-vars
+24:10  Warning: 'Card' is defined but never used.  @typescript-eslint/no-unused-vars
+24:16  Warning: 'CardContent' is defined but never used.  @typescript-eslint/no-unused-vars
+47:6  Warning: React Hook useEffect has a missing dependency: 'fetchSessions'. Either include it or remove the dependency array.  react-hooks/exhaustive-deps
+53:6  Warning: React Hook useEffect has a missing dependency: 'fetchMessages'. Either include it or remove the dependency array.  react-hooks/exhaustive-deps
+80:14  Warning: 'error' is defined but never used.  @typescript-eslint/no-unused-vars
+161:14  Warning: 'error' is defined but never used.  @typescript-eslint/no-unused-vars
+
+./src/app/(citizen)/citizen/dashboard/page.tsx
+18:39  Warning: 'CardDescription' is defined but never used.  @typescript-eslint/no-unused-vars
+
+./src/app/(citizen)/citizen/laws/page.tsx
+15:39  Warning: 'CardDescription' is defined but never used.  @typescript-eslint/no-unused-vars
+96:12  Warning: 'error' is defined but never used.  @typescript-eslint/no-unused-vars
+
+./src/app/(citizen)/citizen/profile/page.tsx
+6:3  Warning: 'Mail' is defined but never used.  @typescript-eslint/no-unused-vars
+7:3  Warning: 'Phone' is defined but never used.  @typescript-eslint/no-unused-vars
+9:3  Warning: 'MapPin' is defined but never used.  @typescript-eslint/no-unused-vars
+16:3  Warning: 'CheckCircle2' is defined but never used.  @typescript-eslint/no-unused-vars
+48:6  Warning: React Hook useEffect has a missing dependency: 'fetchProfile'. Either include it or remove the dependency array.  react-hooks/exhaustive-deps
+55:21  Warning: 'error' is assigned a value but never used.  @typescript-eslint/no-unused-vars
+70:14  Warning: 'error' is defined but never used.  @typescript-eslint/no-unused-vars
+
+./src/app/(citizen)/citizen/report/new/page.tsx
+8:3  Warning: 'ShieldAlert' is defined but never used.  @typescript-eslint/no-unused-vars
+21:3  Warning: 'complaintStep1Schema' is defined but never used.  @typescript-eslint/no-unused-vars
+23:8  Warning: 'ComplaintStep1Data' is defined but never used.  @typescript-eslint/no-unused-vars
+
+./src/app/(officer)/officer/cases/page.tsx
+9:3  Warning: 'MoreHorizontal' is defined but never used.  @typescript-eslint/no-unused-vars
+10:3  Warning: 'ArrowUpDown' is defined but never used.  @typescript-eslint/no-unused-vars
+12:3  Warning: 'FileText' is defined but never used.  @typescript-eslint/no-unused-vars
+13:3  Warning: 'User' is defined but never used.  @typescript-eslint/no-unused-vars
+14:3  Warning: 'AlertCircle' is defined but never used.  @typescript-eslint/no-unused-vars
+18:16  Warning: 'CardContent' is defined but never used.  @typescript-eslint/no-unused-vars
+22:22  Warning: 'formatDateTime' is defined but never used.  @typescript-eslint/no-unused-vars
+23:15  Warning: 'Complaint' is defined but never used.  @typescript-eslint/no-unused-vars
+69:24  Warning: 'error' is assigned a value but never used.  @typescript-eslint/no-unused-vars
+
+./src/app/(officer)/officer/cases/[trackingId]/AIAnalysisPanel.tsx
+4:34  Warning: 'ShieldAlert' is defined but never used.  @typescript-eslint/no-unused-vars
+4:47  Warning: 'Scale' is defined but never used.  @typescript-eslint/no-unused-vars
+4:67  Warning: 'CheckCircle2' is defined but never used.  @typescript-eslint/no-unused-vars
+16:9  Warning: 'supabase' is assigned a value but never used.  @typescript-eslint/no-unused-vars
+
+./src/app/(officer)/officer/cases/[trackingId]/CaseDecisionPanel.tsx
+7:23  Warning: 'MessageSquare' is defined but never used.  @typescript-eslint/no-unused-vars
+7:44  Warning: 'AlertCircle' is defined but never used.  @typescript-eslint/no-unused-vars
+7:57  Warning: 'Save' is defined but never used.  @typescript-eslint/no-unused-vars
+36:5  Warning: 'watch' is assigned a value but never used.  @typescript-eslint/no-unused-vars
+
+./src/app/(officer)/officer/cases/[trackingId]/EmailDispatchPanel.tsx
+4:32  Warning: 'Edit3' is defined but never used.  @typescript-eslint/no-unused-vars
+
+./src/app/(officer)/officer/cases/[trackingId]/page.tsx
+11:3  Warning: 'ExternalLink' is defined but never used.  @typescript-eslint/no-unused-vars
+12:3  Warning: 'Sparkles' is defined but never used.  @typescript-eslint/no-unused-vars
+14:3  Warning: 'Scale' is defined but never used.  @typescript-eslint/no-unused-vars
+16:3  Warning: 'CheckCircle2' is defined but never used.  @typescript-eslint/no-unused-vars
+18:3  Warning: 'Send' is defined but never used.  @typescript-eslint/no-unused-vars
+21:3  Warning: 'Star' is defined but never used.  @typescript-eslint/no-unused-vars
+25:39  Warning: 'CardDescription' is defined but never used.  @typescript-eslint/no-unused-vars
+28:38  Warning: 'formatFileSize' is defined but never used.  @typescript-eslint/no-unused-vars
+266:61  Warning: 'i' is defined but never used.  @typescript-eslint/no-unused-vars
+
+./src/app/(officer)/officer/dashboard/page.tsx
+17:16  Warning: 'CardHeader' is defined but never used.  @typescript-eslint/no-unused-vars
+17:28  Warning: 'CardTitle' is defined but never used.  @typescript-eslint/no-unused-vars
+
+./src/app/page.tsx
+6:3  Warning: 'Gavel' is defined but never used.  @typescript-eslint/no-unused-vars
+7:3  Warning: 'Search' is defined but never used.  @typescript-eslint/no-unused-vars
+8:3  Warning: 'FileCheck' is defined but never used.  @typescript-eslint/no-unused-vars
+12:3  Warning: 'ExternalLink' is defined but never used.  @typescript-eslint/no-unused-vars
+13:3  Warning: 'MessageSquare' is defined but never used.  @typescript-eslint/no-unused-vars
+
+./src/lib/supabase/proxy.ts
+63:12  Warning: 'error' is defined but never used.  @typescript-eslint/no-unused-vars
+102:12  Warning: 'error' is defined but never used.  @typescript-eslint/no-unused-vars
+
+info  - Need to disable some ESLint rules? Learn more here: https://nextjs.org/docs/app/api-reference/config/eslint#disabling-rules
+Failed to compile.
+
+.next/types/app/(admin)/admin/users/page.ts:34:29
+Type error: Type '{ searchParams: { role?: string | undefined; q?: string | undefined; }; }' does not satisfy the constraint 'PageProps'.
+  Types of property 'searchParams' are incompatible.
+    Type '{ role?: string | undefined; q?: string | undefined; }' is missing the following properties from type 'Promise<any>': then, catch, finally, [Symbol.toStringTag]
+
+  32 |
+  33 | // Check the prop type of the entry function
+> 34 | checkFields<Diff<PageProps, FirstArg<TEntry['default']>, 'default'>>()
+     |                             ^
+  35 |
+  36 | // Check the arguments and return type of the generateMetadata function
+  37 | if ('generateMetadata' in entry) {

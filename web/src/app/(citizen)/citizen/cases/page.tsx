@@ -21,8 +21,9 @@ import type { Complaint } from '@/lib/database.types';
 export default async function CitizenCasesPage({
   searchParams,
 }: {
-  searchParams: { status?: string; search?: string };
+  searchParams: Promise<{ status?: string; search?: string }>;
 }) {
+  const { status, search } = await searchParams;
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return null;
@@ -33,12 +34,12 @@ export default async function CitizenCasesPage({
     .eq('citizen_id', user.id)
     .order('created_at', { ascending: false });
 
-  if (searchParams.status) {
-    query = query.eq('status', searchParams.status);
+  if (status) {
+    query = query.eq('status', status);
   }
 
-  if (searchParams.search) {
-    query = query.ilike('category', `%${searchParams.search}%`);
+  if (search) {
+    query = query.ilike('category', `%${search}%`);
   }
 
   const { data: cases, error } = await query;
@@ -64,7 +65,7 @@ export default async function CitizenCasesPage({
             <Input 
               placeholder="Search by category..." 
               className="pl-10 h-11"
-              defaultValue={searchParams.search}
+              defaultValue={search}
             />
             <Search className="absolute left-3 top-3.5 h-4 w-4 text-gray-400" />
           </div>

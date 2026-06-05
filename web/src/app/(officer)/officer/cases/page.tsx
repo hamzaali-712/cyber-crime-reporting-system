@@ -27,8 +27,9 @@ import { redirect } from 'next/navigation';
 export default async function OfficerCasesPage({
   searchParams,
 }: {
-  searchParams: { status?: string; search?: string; category?: string };
+  searchParams: Promise<{ status?: string; search?: string; category?: string }>;
 }) {
+  const { status, search, category } = await searchParams;
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   
@@ -54,16 +55,16 @@ export default async function OfficerCasesPage({
     `)
     .order('created_at', { ascending: false });
 
-  if (searchParams.status) {
-    query = query.eq('status', searchParams.status);
+  if (status) {
+    query = query.eq('status', status);
   }
 
-  if (searchParams.search) {
-    query = query.or(`tracking_id.ilike.%${searchParams.search}%, description.ilike.%${searchParams.search}%`);
+  if (search) {
+    query = query.or(`tracking_id.ilike.%${search}%, description.ilike.%${search}%`);
   }
 
-  if (searchParams.category) {
-    query = query.eq('category', searchParams.category);
+  if (category) {
+    query = query.eq('category', category);
   }
 
   const { data: cases, error } = await query;
@@ -95,7 +96,7 @@ export default async function OfficerCasesPage({
                <Input 
                  placeholder="Search tracking ID or case details..." 
                  className="pl-10 h-12 bg-slate-50/50 border-slate-200 rounded-xl focus:ring-blue-500/20"
-                 defaultValue={searchParams.search}
+                 defaultValue={search}
                />
             </div>
             <div className="flex items-center gap-3 w-full lg:w-auto">

@@ -65,8 +65,9 @@ const FALLBACK_LAWS: Partial<Law>[] = [
 export default async function LegalGuidePage({
   searchParams,
 }: {
-  searchParams: { q?: string; category?: string };
+  searchParams: Promise<{ q?: string; category?: string }>;
 }) {
+  const { q, category } = await searchParams;
   let laws: any[] = [];
   let usingFallback = false;
 
@@ -79,7 +80,7 @@ export default async function LegalGuidePage({
       .eq('is_published', true)
       .order('sort_order', { ascending: true });
 
-    const q = (await searchParams).q;
+    // q and category are already awaited at the top
 
     if (q) {
       query = query.or(`title.ilike.%${q}%,short_description.ilike.%${q}%,section_number.ilike.%${q}%`);
