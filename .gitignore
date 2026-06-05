@@ -103,6 +103,7 @@ celerybeat.pid
 # Environments
 .env
 .env.local
+.env.local.bak
 .venv
 env/
 venv/
@@ -138,6 +139,7 @@ dmypy.json
 *.swp
 *.swo
 *~
+*.bak
 
 # OS
 .DS_Store
