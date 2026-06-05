@@ -9,8 +9,7 @@ export async function updateSession(request: NextRequest) {
 
   // GUARD: If env vars are missing or clearly invalid, skip all Supabase calls
   // This prevents the middleware from hanging on unreachable servers
-  if (!supabaseUrl || !supabaseKey || supabaseUrl === 'YOUR_SUPABASE_URL' || supabaseKey.length < 30) {
-    console.warn('[NCIA Middleware] Supabase credentials missing or invalid. Skipping auth check.');
+  if (!supabaseUrl || !supabaseKey || supabaseUrl.includes('placeholder')) {
     return supabaseResponse;
   }
 
@@ -50,19 +49,14 @@ export async function updateSession(request: NextRequest) {
     return supabaseResponse;
   }
 
-  // For protected paths, try to get the user with a timeout
+  // For protected paths, try to get the user
   let user = null;
   try {
-    // Use AbortController to add a 3-second timeout so pages don't hang
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 3000);
-    
     const { data } = await supabase.auth.getUser();
-    clearTimeout(timeoutId);
     user = data?.user ?? null;
   } catch (error) {
     // If Supabase is unreachable, redirect to login instead of hanging
-    console.warn('[NCIA Middleware] Could not reach Supabase auth. Redirecting to login.');
+    console.log('[NCIA Middleware] Session verification failed. Redirecting to login.');
     user = null;
   }
 
@@ -101,7 +95,7 @@ export async function updateSession(request: NextRequest) {
     }
   } catch (error) {
     // If profile check fails, allow access (auth already verified above)
-    console.warn('[NCIA Middleware] Profile check failed, allowing access.');
+    console.log('[NCIA Middleware] Profile check bypassed.');
   }
 
   return supabaseResponse;
