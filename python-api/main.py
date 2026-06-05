@@ -49,11 +49,48 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Supabase Client
-supabase: Client = create_client(
-    os.getenv("SUPABASE_URL", ""), 
-    os.getenv("SUPABASE_SERVICE_ROLE_KEY") or os.getenv("SUPABASE_KEY", "")
-)
+# Environment Validation & Fallback Logic
+def validate_supabase_config():
+    """
+    Validates and retrieves Supabase configuration with support for multiple naming conventions.
+    """
+    logger.info("Validating Supabase Environment Configuration...")
+    
+    # 1. Check Primary
+    url = os.getenv("SUPABASE_URL")
+    key = os.getenv("SUPABASE_SERVICE_ROLE_KEY") or os.getenv("SUPABASE_KEY")
+    
+    # 2. Check Fallback (Next.js naming)
+    if not url:
+        logger.info("SUPABASE_URL not found, checking NEXT_PUBLIC_SUPABASE_URL...")
+        url = os.getenv("NEXT_PUBLIC_SUPABASE_URL")
+    
+    if not key:
+        logger.info("SUPABASE_KEY / SERVICE_ROLE not found, checking NEXT_PUBLIC_SUPABASE_ANON_KEY...")
+        key = os.getenv("NEXT_PUBLIC_SUPABASE_ANON_KEY")
+
+    # 3. Final Validation
+    missing = []
+    if not url: missing.append("SUPABASE_URL (or NEXT_PUBLIC_SUPABASE_URL)")
+    if not key: missing.append("SUPABASE_KEY (or NEXT_PUBLIC_SUPABASE_ANON_KEY)")
+    
+    if missing:
+        critical_error = f"FATAL: Missing required environment variables: {', '.join(missing)}"
+        logger.critical(critical_error)
+        # In a real startup, we want to fail fast with a clear message
+        raise EnvironmentError(critical_error)
+
+    logger.info("Supabase configuration validated successfully.")
+    return url, key
+
+# Initialize Client safely
+try:
+    SB_URL, SB_KEY = validate_supabase_config()
+    supabase: Client = create_client(SB_URL, SB_KEY)
+except Exception as e:
+    logger.error(f"Failed to initialize Supabase client: {str(e)}")
+    # We allow the app to boot so the /health endpoint can report the failure
+    supabase = None 
 
 # Simple In-Memory Rate Limiting
 rate_limit_store: Dict[str, List[float]] = {}
@@ -93,11 +130,14 @@ def read_root():
 @app.get("/health")
 def health_check():
     # Simple check for supabase connectivity
-    try:
-        supabase.table("profiles").select("id", count="exact").limit(1).execute()
-        db_status = "connected"
-    except Exception:
-        db_status = "unreachable"
+    if not supabase:
+        db_status = "not_initialized"
+    else:
+        try:
+            supabase.table("profiles").select("id", count="exact").limit(1).execute()
+            db_status = "connected"
+        except Exception:
+            db_status = "unreachable"
         
     return {
         "status": "healthy" if db_status == "connected" else "degraded",
@@ -170,6 +210,9 @@ async def generate_dossier_pdf(request: PDFRequest):
     """
     Generates a real, signed PECA 2016 Compliant Case Dossier PDF.
     """
+    if not supabase:
+        raise HTTPException(status_code=503, detail="Database service not initialized")
+        
     try:
         # 1. Fetch complaint data
         res = supabase.table("complaints").select("*, profiles!citizen_id(*)").eq("id", request.complaint_id).single().execute()
