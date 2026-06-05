@@ -47,7 +47,12 @@ export default function AdminSignInPage() {
       });
 
       if (error) {
-        toast.error('Authentication Failed', { description: error.message });
+        if (error.message?.includes('Database error') || error.status === 500) {
+          setConnectionError(true);
+          toast.error('Database Error', { description: 'A server-side database error occurred. Please contact the administrator.', duration: 8000 });
+        } else {
+          toast.error('Authentication Failed', { description: error.message });
+        }
         return;
       }
 
@@ -68,11 +73,12 @@ export default function AdminSignInPage() {
       router.push('/admin/dashboard');
       router.refresh();
     } catch (error: any) {
-      if (error?.message?.includes('fetch') || error?.message?.includes('network') || error?.name === 'TypeError') {
+      const msg = error?.message || '';
+      if (msg.includes('fetch') || msg.includes('network') || error?.name === 'TypeError') {
         setConnectionError(true);
-        toast.error('Connection Error', {
-          description: 'Cannot connect to the authentication server. Check your Supabase configuration.',
-          duration: 8000,
+        toast.error('Server Error', {
+          description: 'The authentication server returned an error. This may be a database configuration issue.',
+          duration: 10000,
         });
       } else {
         toast.error('Secure Link Failure', { description: 'Connection to NCIA root servers interrupted.' });

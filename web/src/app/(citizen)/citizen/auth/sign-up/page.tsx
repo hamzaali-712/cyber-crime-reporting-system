@@ -34,7 +34,7 @@ export default function CitizenSignUpPage() {
     setIsLoading(true);
     setConnectionError(false);
     try {
-      const { error } = await supabase.auth.signUp({
+      const { data: authData, error } = await supabase.auth.signUp({
         email: data.email,
         password: data.password,
         options: {
@@ -48,9 +48,18 @@ export default function CitizenSignUpPage() {
       });
 
       if (error) {
-        toast.error('Registration Failed', {
-          description: error.message,
-        });
+        // Check for database trigger errors (shows as 500 from Supabase)
+        if (error.message?.includes('Database error') || error.status === 500) {
+          setConnectionError(true);
+          toast.error('Database Configuration Error', {
+            description: 'The user profile trigger failed. Please contact the administrator to fix the database trigger.',
+            duration: 8000,
+          });
+        } else {
+          toast.error('Registration Failed', {
+            description: error.message,
+          });
+        }
         return;
       }
 
@@ -59,16 +68,17 @@ export default function CitizenSignUpPage() {
       });
       router.push('/citizen/auth/sign-in');
     } catch (error: any) {
-      // Detect network/connection errors specifically
-      if (error?.message?.includes('fetch') || error?.message?.includes('network') || error?.name === 'TypeError') {
+      // "Failed to fetch" often means a 500 from Supabase Auth (database trigger crash)
+      const msg = error?.message || '';
+      if (msg.includes('fetch') || msg.includes('network') || error?.name === 'TypeError') {
         setConnectionError(true);
-        toast.error('Connection Error', {
-          description: 'Cannot connect to the authentication server. Please check your Supabase configuration in .env.local file.',
-          duration: 8000,
+        toast.error('Server Error', {
+          description: 'The authentication server returned an error. This is usually caused by a database trigger issue. Please run the fix SQL in Supabase SQL Editor.',
+          duration: 10000,
         });
       } else {
         toast.error('Something went wrong', {
-          description: error?.message || 'An unexpected error occurred.',
+          description: msg || 'An unexpected error occurred.',
         });
       }
     } finally {

@@ -40,9 +40,17 @@ export default function CitizenSignInPage() {
       });
 
       if (error) {
-        toast.error('Authentication Failed', {
-          description: error.message,
-        });
+        if (error.message?.includes('Database error') || error.status === 500) {
+          setConnectionError(true);
+          toast.error('Database Error', {
+            description: 'A server-side database error occurred. Please contact the administrator.',
+            duration: 8000,
+          });
+        } else {
+          toast.error('Authentication Failed', {
+            description: error.message,
+          });
+        }
         return;
       }
 
@@ -52,15 +60,16 @@ export default function CitizenSignInPage() {
       router.push('/citizen/dashboard');
       router.refresh();
     } catch (error: any) {
-      if (error?.message?.includes('fetch') || error?.message?.includes('network') || error?.name === 'TypeError') {
+      const msg = error?.message || '';
+      if (msg.includes('fetch') || msg.includes('network') || error?.name === 'TypeError') {
         setConnectionError(true);
-        toast.error('Connection Error', {
-          description: 'Cannot connect to the authentication server. Check your Supabase configuration.',
-          duration: 8000,
+        toast.error('Server Error', {
+          description: 'The authentication server returned an error. This may be a database configuration issue.',
+          duration: 10000,
         });
       } else {
         toast.error('Something went wrong', {
-          description: error?.message || 'An unexpected error occurred.',
+          description: msg || 'An unexpected error occurred.',
         });
       }
     } finally {
@@ -85,12 +94,11 @@ export default function CitizenSignInPage() {
           <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-xl flex items-start gap-3 animate-in fade-in duration-300">
             <AlertTriangle className="h-5 w-5 text-red-600 mt-0.5 shrink-0" />
             <div>
-              <p className="text-sm font-bold text-red-800">Server Connection Failed</p>
+              <p className="text-sm font-bold text-red-800">Authentication Server Error</p>
               <p className="text-xs text-red-600 mt-1 leading-relaxed">
-                Cannot reach the authentication server. Please verify your 
-                <code className="bg-red-100 px-1 rounded mx-1">NEXT_PUBLIC_SUPABASE_URL</code> and 
-                <code className="bg-red-100 px-1 rounded mx-1">NEXT_PUBLIC_SUPABASE_ANON_KEY</code> in 
-                <code className="bg-red-100 px-1 rounded ml-1">web/.env.local</code>.
+                The server returned a database error. This is usually caused by a failed 
+                <code className="bg-red-100 px-1 rounded mx-1">handle_new_user()</code> trigger in Supabase. 
+                Please run the fix SQL script in the Supabase SQL Editor to resolve this.
               </p>
             </div>
           </div>
