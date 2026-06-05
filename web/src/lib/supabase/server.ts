@@ -7,9 +7,10 @@ export async function createClient() {
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
-  if (!supabaseUrl || !supabaseKey || supabaseUrl === 'YOUR_SUPABASE_URL') {
-    // Return a dummy client or throw a clear error that can be caught
-    // For SSR, we return the client but calls will fail fast if the URL is invalid
+  if (!supabaseUrl || !supabaseKey) {
+    return createServerClient('https://placeholder.supabase.co', 'placeholder', {
+      cookies: { getAll: () => [], setAll: () => {} }
+    });
   }
 
   return createServerClient(
