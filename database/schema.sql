@@ -389,6 +389,32 @@ CREATE TRIGGER complaint_status_change AFTER UPDATE ON complaints
   FOR EACH ROW EXECUTE FUNCTION log_status_change();
 
 -- ============================================================
+-- SECURE INTERNAL AUDIT TRIGGER
+-- ============================================================
+
+CREATE OR REPLACE FUNCTION audit_log_internal()
+RETURNS TRIGGER AS $$
+BEGIN
+  INSERT INTO audit_logs (user_id, action, resource_type, resource_id, details)
+  VALUES (
+    auth.uid(),
+    TG_ARGV[0]::audit_action,
+    TG_TABLE_NAME,
+    NEW.id::text,
+    jsonb_build_object('op', TG_OP, 'timestamp', now())
+  );
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+-- Apply Audit Trail to Contentious Tables
+CREATE TRIGGER audit_complaint_insert AFTER INSERT ON complaints
+  FOR EACH ROW EXECUTE FUNCTION audit_log_internal('COMPLAINT_CREATED');
+
+CREATE TRIGGER audit_law_change AFTER INSERT OR UPDATE OR DELETE ON laws
+  FOR EACH ROW EXECUTE FUNCTION audit_log_internal('LAW_UPDATED');
+
+-- ============================================================
 -- ROW LEVEL SECURITY POLICIES
 -- ============================================================
 
@@ -426,6 +452,20 @@ CREATE POLICY "Admins can manage all profiles" ON profiles
 
 CREATE POLICY "New users can insert their profile" ON profiles
   FOR INSERT WITH CHECK (auth.uid() = id);
+
+-- ---- OFFICERS ----
+CREATE POLICY "Officers can view own officer record" ON officers
+  FOR SELECT USING (id = auth.uid());
+
+CREATE POLICY "Officers can view all profiles" ON profiles
+  FOR SELECT USING (
+    EXISTS (SELECT 1 FROM profiles WHERE id = auth.uid() AND role IN ('officer', 'admin'))
+  );
+
+CREATE POLICY "Admins can manage all officer records" ON officers
+  FOR ALL USING (
+    EXISTS (SELECT 1 FROM profiles WHERE id = auth.uid() AND role = 'admin')
+  );
 
 -- ---- COMPLAINTS ----
 CREATE POLICY "Citizens can view own complaints" ON complaints
@@ -522,8 +562,7 @@ CREATE POLICY "Admins can view audit logs" ON audit_logs
     EXISTS (SELECT 1 FROM profiles WHERE id = auth.uid() AND role = 'admin')
   );
 
-CREATE POLICY "System can insert audit logs" ON audit_logs
-  FOR INSERT WITH CHECK (true); -- Allows server-side inserts
+-- Note: No INSERT policy allowed for users; logs are managed via SECURITY DEFINER triggers.
 
 -- ---- NOTIFICATIONS ----
 CREATE POLICY "Users can view own notifications" ON notifications

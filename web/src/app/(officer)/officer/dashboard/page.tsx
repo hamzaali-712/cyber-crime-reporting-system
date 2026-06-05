@@ -20,10 +20,25 @@ import { StatusBadge, Badge } from '@/components/ui/badge';
 import { formatDate, cn } from '@/lib/utils';
 import type { Complaint } from '@/lib/database.types';
 
+import { redirect } from 'next/navigation';
+
 export default async function OfficerDashboardPage() {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return null;
+  
+  if (!user) {
+    redirect('/officer/auth/sign-in');
+  }
+
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('role')
+    .eq('id', user.id)
+    .single();
+
+  if (profile?.role !== 'officer' && profile?.role !== 'admin') {
+    redirect('/');
+  }
 
   // Fetch officer profile info
   const { data: officer } = await supabase

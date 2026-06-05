@@ -67,7 +67,6 @@ export async function updateSession(request: NextRequest) {
   }
 
   // Not logged in -> redirect to appropriate login page
-  /* AUTH DISABLED FOR DEPLOYMENT TESTING
   if (!user) {
     let loginUrl = '/citizen/auth/sign-in';
     if (pathname.startsWith('/officer')) {
@@ -79,7 +78,6 @@ export async function updateSession(request: NextRequest) {
     url.pathname = loginUrl;
     return NextResponse.redirect(url);
   }
-  */
 
   // Role-based access control
   if (!user) {

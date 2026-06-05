@@ -21,12 +21,29 @@ import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { formatDate, maskCNIC, cn } from '@/lib/utils';
 
+import { redirect } from 'next/navigation';
+
 export default async function UserManagementPage({
   searchParams,
 }: {
   searchParams: { role?: string; q?: string };
 }) {
   const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+
+  if (!user) {
+    redirect('/admin/auth/sign-in');
+  }
+
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('role')
+    .eq('id', user.id)
+    .single();
+
+  if (profile?.role !== 'admin') {
+    redirect('/');
+  }
   
   let query = supabase
     .from('profiles')

@@ -20,8 +20,25 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { formatDateTime, cn } from '@/lib/utils';
 
+import { redirect } from 'next/navigation';
+
 export default async function AdminDashboardPage() {
   const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  
+  if (!user) {
+    redirect('/admin/auth/sign-in');
+  }
+
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('role')
+    .eq('id', user.id)
+    .single();
+
+  if (profile?.role !== 'admin') {
+    redirect('/');
+  }
   
   // Fetch system-wide stats
   const { count: usersCount } = await supabase.from('profiles').select('*', { count: 'exact', head: true });
